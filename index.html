@@ -17,22 +17,18 @@
       <div class="sidebar-notes" id="sidebar2"></div>
       <div class="container">
         <textarea class="note" autocomplete="on"></textarea>
-        <button class="toggle-btn" onclick="collapse_sidebar()">
-          toggle collapse
-        </button>
-        <button class="add-btn" onclick="add_btn()">add note</button>
-        <button class="delete-btn" onclick="delete_btn()">delete note</button>
+        <button class="toggle-btn">toggle collapse</button>
+        <button class="add-btn">add note</button>
+        <button class="delete-btn">delete note</button>
         <select class="priorities">
           <option value="-">No priority</option>
           <option value="low">Priority: Low</option>
           <option value="medium">Priority: Medium</option>
           <option value="high">Priority: High</option>
         </select>
-        <button class="dark-mode-btn" onclick="toggle_lightmode()">
-          light / dark
-        </button>
+        <button class="dark-mode-btn">light / dark</button>
       </div>
     </div>
-    <script src="src/main.js"></script>
+    <script type="module" src="src/main.js"></script>
   </body>
 </html>
