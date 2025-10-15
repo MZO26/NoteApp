@@ -1,0 +1,225 @@
+body {
+  background-color: #1e1e1e;
+  overflow-x: hidden;
+  overflow-y: auto;
+  margin: 0;
+}
+
+body.light-mode {
+  background-color: white;
+}
+
+.parent-div {
+  display: flex;
+}
+
+.container {
+  flex: 1;
+}
+
+.note {
+  display: block;
+  margin-top: 200px;
+  height: 70vh;
+  width: 50vw;
+  transition: width 0.3s;
+  resize: none;
+  border-radius: 5px;
+  overflow: none;
+  font-size: 1.5rem;
+  background: #1e1e1e;
+  color: #eee;
+  margin-bottom: 10px;
+}
+
+.note.collapsed {
+  display: block;
+  margin-top: 200px;
+  height: 70vh;
+  width: 70vw;
+  resize: none;
+  border-radius: 5px;
+  overflow: none;
+  font-size: 1.5rem;
+  background: #1e1e1e;
+  color: #eee;
+  margin-bottom: 10px;
+}
+
+.note.light-mode {
+  background-color: white;
+  color: black;
+}
+
+.note.light-mode:focus {
+  border: 1px solid #1e1e1e;
+}
+
+.add-btn,
+.delete-btn,
+.priorities,
+.dark-mode-btn,
+.toggle-btn {
+  width: 10vw;
+  max-height: 8vh;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.add-btn:hover,
+.delete-btn:hover,
+.priorities:hover,
+.dark-mode-btn:hover,
+.toggle-btn:hover {
+  background-color: darkgray;
+  transition: 0.1s ease-in-out;
+}
+.sidebar-notes {
+  background-color: #252526;
+  height: 100vh;
+  width: 250px;
+  overflow: hidden;
+  border: 1px solid black;
+  transition: width 0.3s ease;
+  margin-right: 10px;
+}
+
+.sidebar-categories {
+  display: flex;
+  flex-direction: column;
+
+  height: 100vh;
+  width: 250px;
+  border: 1px solid black;
+  overflow: hidden;
+  transition: width 0.3s ease;
+}
+
+.sidebar-notes.collapsed {
+  width: 0;
+  padding: 0;
+  border: 1px solid black;
+}
+
+.sidebar-notes.light-mode {
+  background-color: lightgrey;
+  border-color: #1e1e1e;
+  border: 1px solid black;
+}
+
+#sidebarItem {
+  border: 1px solid black;
+  padding: 30px;
+  margin: 5px;
+  min-width: 175px;
+  background-color: lightgrey;
+  cursor: pointer;
+  position: relative;
+}
+
+#sidebarItem.collapsed {
+  transition: padding 0.3s ease-in-out;
+  min-width: 175px;
+}
+
+#sidebarItem.light-mode {
+  background-color: white;
+}
+
+#sidebarItem button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border-radius: 5px;
+}
+
+#sidebarItem p {
+  margin: 10px;
+  font-size: 1.2rem;
+  color: black;
+  overflow: hidden;
+}
+
+#sidebarItem:hover {
+  background-color: darkgray;
+  transition: 0.1s ease-in-out;
+}
+
+@media only screen and (max-width: 620px) {
+  .container {
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .note {
+    max-width: 80vw;
+    height: 50vh;
+  }
+
+  .add-btn,
+  .delete-btn,
+  .priorities,
+  .dark-mode-btn {
+    max-width: 50vw;
+  }
+}
+
+@media only screen and (max-width: 900px) {
+  .container {
+    max-width: 100%;
+    display: flex;
+    margin: 0;
+    padding: 10px;
+  }
+
+  .note {
+    width: 90vw;
+    height: 50vh;
+    display: block;
+    font-size: 1.1rem;
+  }
+
+  .add-btn,
+  .delete-btn,
+  .priorities,
+  .dark-mode-btn {
+    width: 100%;
+  }
+
+  .sidebar {
+    position: static;
+    width: 100vw;
+    height: auto;
+    min-height: 100px;
+    max-height: 160px;
+    margin: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    display: block;
+  }
+
+  #sidebarItem {
+    display: inline-block;
+    vertical-align: top;
+    width: 140px;
+    min-width: 100px;
+    max-width: 140px;
+    height: 90px;
+    margin: 8px;
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  #sidebarItem p {
+    font-size: 0.9rem;
+    margin: 6px;
+  }
+
+  #sidebarItem button {
+    top: 5px;
+    right: 5px;
+    padding: 5px;
+  }
+}
