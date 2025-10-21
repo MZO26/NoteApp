@@ -1,14 +1,3 @@
-const addTitle = (note_value) => {
-  let title = "";
-  if (note_value.length === 0) return "No Title";
-  else if (!note_value.includes("\n") && note_value.length > 20) {
-    title = note_value.slice(0, 20) + "...";
-  } else {
-    title = note_value.split("\n")[0];
-  }
-  return title;
-};
-
 const add_priorities = () => {
   const priorities = document.querySelector(".priorities");
   let color;
@@ -45,4 +34,4 @@ const formatDate = () => {
   return formattedDate;
 };
 
-export { addTitle, add_priorities, formatDate };
+export { add_priorities, formatDate };

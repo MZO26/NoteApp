@@ -1,0 +1,113 @@
+.sidebar-notes {
+  background-color: #252526;
+  height: 100vh;
+  width: 250px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 1px solid black;
+  transition: width 0.3s ease;
+  margin-right: 10px;
+}
+
+.sidebar-notes.collapsed {
+  width: 0;
+  padding: 0;
+}
+
+.notes-list {
+  margin-top: 10px;
+  margin-left: 3px;
+}
+
+.sidebar-categories {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 250px;
+  padding-right: 8px;
+  transition: width 0.3s ease;
+  border: 1px solid black;
+}
+
+.upper-sidebar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.category-btn {
+  display: flex;
+  margin-left: 5px;
+  justify-content: center;
+  align-items: center;
+}
+
+#category-list {
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.3s ease;
+}
+
+.default-category {
+  font-size: 1.2rem;
+}
+
+#sidebarItem {
+  border: 1px solid black;
+  padding: 30px;
+  margin: 5px;
+  min-width: 170px;
+  background-color: white;
+  cursor: pointer;
+  position: relative;
+}
+
+#categoryItem {
+  overflow-y: scroll;
+  text-overflow: ellipsis;
+  border: 1px solid black;
+  padding: 30px;
+  margin: 5px;
+  min-width: 170px;
+  height: 30px;
+  background-color: white;
+  cursor: pointer;
+  position: relative;
+}
+
+#sidebarItem.collapsed {
+  transition: padding 0.3s ease-in-out;
+  min-width: 170px;
+}
+
+#sidebarItem button,
+#categoryItem button {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 10px;
+  right: 10px;
+  height: 30px;
+  width: 30px;
+  border-radius: 15px;
+}
+
+#sidebarItem p,
+#categoryItem p {
+  margin: 10px;
+  font-size: 1.2rem;
+  color: black;
+  overflow: hidden;
+}
+
+#sidebarItem:hover,
+#categoryItem:hover,
+.default-category:hover {
+  background-color: grey;
+  transition: background-color 0.1s ease-in-out;
+}
+
+#sidebarItem > button:hover {
+  background-color: white;
+}

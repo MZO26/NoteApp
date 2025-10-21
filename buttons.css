@@ -1,0 +1,64 @@
+button {
+  cursor: pointer;
+}
+
+.button-collection {
+  display: flex;
+  align-items: center;
+}
+
+.toggle-btn {
+  display: flex;
+  margin: auto;
+  border-radius: 18px;
+  max-width: 35px;
+  max-height: 35px;
+  padding: 8px;
+  margin: 5px;
+}
+
+.category-btn {
+  background-color: white;
+  border: 1px solid;
+  width: 100%;
+  border-radius: 5px;
+}
+
+#category-input {
+  margin-left: 5px;
+  width: 200px;
+}
+
+.dark-mode-btn {
+  border-radius: 18px;
+  max-width: 35px;
+  max-height: 35px;
+  padding: 8px;
+  margin-right: 20px;
+}
+
+.add-btn,
+.delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  max-width: 50px;
+  max-height: 50px;
+  padding: 8px;
+  margin-right: 10px;
+}
+
+.priorities {
+  max-width: 140px;
+  max-height: 80px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #1e1e1e;
+}
+
+button:hover,
+.priorities:hover {
+  background-color: darkgray;
+  transition: 0.1s ease-in-out;
+}
