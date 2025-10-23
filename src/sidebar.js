@@ -1,62 +1,62 @@
 import { add_priorities, formatDate } from "./data.js";
-import { showToast } from "./buttons.js";
 import { syncLightDarkMode } from "./main.js";
+import { Category, Note } from "./classes.js";
+import {
+  sidebarItemTemplate,
+  activeCategoryItemTemplate,
+  categoryItemTemplate,
+  defaultCategoryItemTemplate,
+} from "./templates.js";
+import { showToast } from "./events.js";
 
-export let active_category = "Ohne Kategorie";
+const default_category = "Ohne Kategorie";
+export let globalId;
+let active_category = default_category;
 
 const syncCategoriesWithNotes = () => {
   let categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
   let sidebarNotesArr = JSON.parse(
     localStorage.getItem("sidebarNotesArr") || "[]"
   );
-  if (active_category == "Ohne Kategorie") return;
   categoryArr = categoryArr.map((category) => {
     category.items = sidebarNotesArr.filter(
-      (note) => note.category === category.category
+      (note) => note.category == category.name
     );
     return category;
   });
   localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
 };
 
-const add_to_sidebar = (note_value) => {
+//NOTES
+
+//note items to be added to sidebar with html rendering
+const notesToSidebar = (note_value) => {
   let sidebarNotesArr = JSON.parse(
     localStorage.getItem("sidebarNotesArr") || "[]"
   );
   const sidebar = document.querySelector(".notes-list");
   const sidebarItem = document.createElement("div");
   sidebarItem.id = "sidebarItem";
-  const itemData = {
-    id: Date.now() + Math.random(),
-    category: active_category,
-    data: note_value ? note_value : "",
-    priority: add_priorities() || "Ohne Priorität",
-    title: note_value.length == 0 ? "Kein Titel" : note_value.slice(0, 15),
-    formattedDate: formatDate(),
-  };
-  sidebarItem.setAttribute("data-id", itemData.id);
-  sidebarItem.style.backgroundColor = `${itemData.priority}`;
-  sidebarItem.innerHTML = `<button class="btn">       <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="currentColor"
-              class="bi bi-trash3-fill"
-              viewBox="0 0 16 16"
-            >
-              <path
-                d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"
-              />
-            </svg></button><p>${itemData.title}</p><p>${itemData.formattedDate}</p>`;
-  sidebarNotesArr.push(itemData);
+  const noteData = new Note(
+    Date.now() + Math.random(),
+    active_category,
+    note_value || "",
+    add_priorities() || "Ohne Priorität",
+    note_value.length == 0 ? "Kein Titel" : note_value.slice(0, 15),
+    formatDate()
+  );
+  sidebarItem.setAttribute("data-id", noteData.id);
+  sidebarItem.style.backgroundColor = `${noteData.priority}`;
+  sidebarItem.innerHTML = sidebarItemTemplate(noteData);
+  sidebarNotesArr.push(noteData);
   localStorage.setItem("sidebarNotesArr", JSON.stringify(sidebarNotesArr));
   sidebar.appendChild(sidebarItem);
   syncLightDarkMode(sidebarItem);
-  console.log(sidebarNotesArr);
-  sidebarItem_handler(sidebarItem, itemData);
+  sidebarItem_handler(sidebarItem, noteData);
   syncCategoriesWithNotes();
 };
 
+//note items event handling
 const sidebarItem_handler = (sidebarItem, notes) => {
   const sidebarItem_btn = sidebarItem.querySelector("button");
   let sidebarNotesArr = JSON.parse(
@@ -73,171 +73,175 @@ const sidebarItem_handler = (sidebarItem, notes) => {
       localStorage.setItem("sidebarNotesArr", JSON.stringify(sidebarNotesArr));
     }
     this.parentElement.remove();
-    console.log(sidebarNotesArr);
+    syncCategoriesWithNotes();
   };
   sidebarItem.onclick = () => {
     if (!confirm("Möchtest du deine aktuelle Notiz überschreiben?")) return;
     document.querySelector(".note").value = notes.data;
+    globalId = sidebarItem.getAttribute("data-id") || defaultId;
   };
-  syncCategoriesWithNotes();
 };
 
-const reload_notes_sidebar = (arr) => {
+//notes sidebar reload
+const reloadNotesSidebar = (arr) => {
   const sidebar = document.querySelector(".notes-list");
   const sidebarNotesArr = arr
     ? arr
     : JSON.parse(localStorage.getItem("sidebarNotesArr") || "[]");
-  console.log(sidebarNotesArr);
+  const active_categoryItems = sidebarNotesArr.filter(
+    (items) => items.category == active_category
+  );
   sidebar.innerHTML = "";
-  for (let i = 0; i < sidebarNotesArr.length; i++) {
+  if (active_categoryItems.length == 0) return;
+  for (let i = 0; i < active_categoryItems.length; i++) {
     const sidebarItem = document.createElement("div");
     sidebarItem.id = "sidebarItem";
-    sidebarItem.setAttribute("data-id", sidebarNotesArr[i].id);
-    sidebarItem.style.backgroundColor = `${sidebarNotesArr[i].priority}`;
-    sidebarItem.innerHTML = `<button class="btn">       <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="currentColor"
-              class="bi bi-trash3-fill"
-              viewBox="0 0 16 16"
-            >
-              <path
-                d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"
-              />
-            </svg></button><p>${sidebarNotesArr[i].title}</p><p>${sidebarNotesArr[i].formattedDate}</p>`;
+    sidebarItem.setAttribute("data-id", active_categoryItems[i].id);
+    sidebarItem.style.backgroundColor = `${active_categoryItems[i].priority}`;
+    sidebarItem.innerHTML = activeCategoryItemTemplate(active_categoryItems[i]);
     sidebar.appendChild(sidebarItem);
     syncLightDarkMode(sidebarItem);
-    sidebarItem_handler(sidebarItem, sidebarNotesArr[i]);
+    sidebarItem_handler(sidebarItem, active_categoryItems[i]);
   }
   syncCategoriesWithNotes();
 };
 
-const category_handler = (category_item) => {
-  if (!category_item.classList.contains("default-category")) {
+//CATEGORIES
+
+//category items event handling
+const categoryItem_handler = (category_item) => {
+  if (!category_item.getAttribute("default-category-id")) {
+    //default category cant be deleted
     const sidebarItem_btn = category_item.querySelector("button");
     sidebarItem_btn.onclick = function (event) {
       event.stopPropagation();
       let categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
+      const sidebarNotesArr = JSON.parse(
+        localStorage.getItem("sidebarNotesArr") || "[]"
+      );
       const id = this.parentElement.getAttribute("category-id");
       const index = categoryArr.findIndex(
         (category) => String(category.id) == String(id)
       );
       if (index > -1) {
+        //item exists if index > -1 / -1 if it doesnt exist
+        let toBeDeleted = categoryArr.find((categories) => categories.id == id);
+        if (toBeDeleted && toBeDeleted.items.length > 0) {
+          toBeDeleted.items.forEach((item) => {
+            const old_category = item.category;
+            item.category = default_category;
+            if (sidebarNotesArr.length > 0) {
+              sidebarNotesArr.forEach((note) => {
+                if (note.category == old_category) {
+                  note.category = default_category;
+                }
+              });
+            }
+          });
+        }
         categoryArr.splice(index, 1);
-        localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
       }
       this.parentElement.remove();
+      localStorage.setItem("sidebarNotesArr", JSON.stringify(sidebarNotesArr));
+      localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
+      syncCategoriesWithNotes();
+      reloadCategorySidebar();
+      reloadNotesSidebar();
     };
   }
   category_item.onclick = () => {
-    syncCategoriesWithNotes();
-    const defaultId = category_item.getAttribute("default-category-id");
-    const id = category_item.classList.contains("default-category")
-      ? defaultId
-      : category_item.getAttribute("category-id");
-    let sidebarNotesArr = JSON.parse(
-      localStorage.getItem("sidebarNotesArr") || "[]"
-    );
-    const arr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
-    let category;
-    if (id == defaultId) {
-      const category_name = "Ohne Kategorie";
-      category = {
-        id: defaultId,
-        category: "Ohne Kategorie",
-        items: sidebarNotesArr.filter((item) => item.category == category_name),
-      };
+    const categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
+    let id;
+    if (category_item.getAttribute("default-category-id")) {
+      id = category_item.getAttribute("default-category-id");
     } else {
-      category = arr.find((category) => String(category.id) == String(id));
+      id = category_item.getAttribute("category-id");
     }
-    active_category = category.category;
+    const category = categoryArr.find((c) => c.id == id);
+    active_category = category.name;
     showToast(active_category);
-    reload_notes_sidebar(category.items);
-    console.log(active_category);
+    syncCategoriesWithNotes();
+    reloadNotesSidebar();
   };
 };
 
-const categories = (category_value) => {
-  let categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
+//category items to be added to sidebar with html rendering
+const createNewCategory = (categoryName, sidebarNotesArr) => {
+  const categoryItems =
+    sidebarNotesArr.filter((notes) => notes.category == categoryName) || [];
+  return new Category(
+    Date.now() + Math.random(),
+    categoryItems,
+    categoryName,
+    false
+  );
+};
+
+//category items to be added to sidebar with html rendering
+const categoriesToSidebar = (categoryName) => {
   let sidebarNotesArr = JSON.parse(
     localStorage.getItem("sidebarNotesArr") || "[]"
   );
-  const categoryData = {
-    id: Date.now() + Math.random(),
-    category: category_value,
-    items:
-      sidebarNotesArr.filter((notes) => notes.category === category_value) ||
-      [],
-  };
+  let categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
+  const newCategory = createNewCategory(categoryName, sidebarNotesArr);
   let category_item;
   const sidebar_categories = document.querySelector(".category-list");
-  if (category_value == "Ohne Kategorie") {
-    category_item = document.querySelector(".default-category");
-    category_item.setAttribute("default-category-id", categoryData.id);
-    category_handler(category_item);
-  } else {
-    category_item = document.createElement("div");
+  const doesDefaultExist = categoryArr.find((c) => c.name == default_category);
+  category_item = document.createElement("div");
+
+  if (newCategory.name == default_category && doesDefaultExist == undefined) {
+    newCategory.isDefault = true;
+    category_item.setAttribute("default-category-id", newCategory.id);
+  } else if (newCategory.name != default_category && doesDefaultExist) {
     category_item.id = "categoryItem";
-    category_item.setAttribute("category-id", categoryData.id);
-  }
+    category_item.setAttribute("category-id", newCategory.id);
+  } else return;
   syncLightDarkMode(category_item);
-  if (category_item.classList.contains("default-category")) return;
-  category_item.innerHTML = `<button class="btn">       <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="currentColor"
-              class="bi bi-trash3-fill"
-              viewBox="0 0 16 16"
-            >
-              <path
-                d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"
-              />
-            </svg></button><p>${category_value}</p>`;
-  sidebar_categories.appendChild(category_item);
-  categoryArr.push(categoryData);
+  categoryArr.push(newCategory);
   localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
-  category_handler(category_item);
+  if (newCategory.isDefault) {
+    category_item.innerHTML = defaultCategoryItemTemplate(newCategory.name);
+  } else {
+    category_item.innerHTML = categoryItemTemplate(newCategory.name);
+  }
+  sidebar_categories.appendChild(category_item);
+  categoryItem_handler(category_item);
   syncCategoriesWithNotes();
 };
 
-const reload_category_sidebar = () => {
+//category sidebar reload
+const reloadCategorySidebar = () => {
   const category_sidebar = document.querySelector(".category-list");
   const categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
   if (!categoryArr.length) {
     console.log("Keine Kategorie verfügbar");
     return;
   }
-  console.log(categoryArr);
-  category_sidebar.innerHTML = `<div class="default-category" id="categoryItem">Ohne Kategorie</div>`;
+  category_sidebar.innerHTML = "";
   for (let i = 0; i < categoryArr.length; i++) {
     const category_item = document.createElement("div");
-    category_item.id = "categoryItem";
-    category_item.setAttribute("category-id", categoryArr[i].id);
-    category_item.innerHTML = `<button class="btn">       <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="currentColor"
-              class="bi bi-trash3-fill"
-              viewBox="0 0 16 16"
-            >
-              <path
-                d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"
-              />
-            </svg></button><p>${categoryArr[i].category}</p>`;
+    if (categoryArr[i].isDefault) {
+      category_item.setAttribute("default-category-id", categoryArr[i].id);
+      category_item.innerHTML = defaultCategoryItemTemplate(
+        categoryArr[i].name
+      );
+    } else {
+      category_item.id = "categoryItem";
+      category_item.setAttribute("category-id", categoryArr[i].id);
+      category_item.innerHTML = categoryItemTemplate(categoryArr[i].name);
+    }
     category_sidebar.appendChild(category_item);
-    category_handler(category_item);
+    categoryItem_handler(category_item);
   }
 };
 
 export {
-  reload_notes_sidebar,
-  reload_category_sidebar,
-  add_to_sidebar,
+  default_category,
+  reloadNotesSidebar,
+  reloadCategorySidebar,
+  notesToSidebar,
   sidebarItem_handler,
-  categories,
-  category_handler,
+  categoriesToSidebar,
+  categoryItem_handler,
   syncCategoriesWithNotes,
 };

@@ -1,11 +1,10 @@
 import {
-  reload_category_sidebar,
-  reload_notes_sidebar,
-  categories,
+  reloadCategorySidebar,
+  reloadNotesSidebar,
+  categoriesToSidebar,
+  default_category,
 } from "./sidebar.js";
 import { toggle_lightmode_handler } from "./buttons.js";
-
-const default_category = document.querySelector(".default-category");
 
 export const syncLightDarkMode = (item) => {
   if (
@@ -17,15 +16,14 @@ export const syncLightDarkMode = (item) => {
 };
 
 window.onload = () => {
-  reload_category_sidebar();
-  reload_notes_sidebar();
-  categories(default_category.textContent);
+  reloadCategorySidebar();
+  reloadNotesSidebar();
+  categoriesToSidebar(default_category);
   const mode = localStorage.getItem("mode");
   if (mode == "light") {
     toggle_lightmode_handler();
   }
   const note = document.querySelector(".note");
   const savedData = localStorage.getItem("note_value") || "";
-  if (note.value == "") return;
-  else note.value = savedData;
+  if (note.value != "") note.value = savedData;
 };

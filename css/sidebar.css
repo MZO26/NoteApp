@@ -94,7 +94,8 @@
 }
 
 #sidebarItem p,
-#categoryItem p {
+#categoryItem p,
+.default-category p {
   margin: 10px;
   font-size: 1.2rem;
   color: black;

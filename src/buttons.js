@@ -1,32 +1,17 @@
-import { add_to_sidebar, categories } from "./sidebar.js";
+import {
+  notesToSidebar,
+  categoriesToSidebar,
+  reloadNotesSidebar,
+  sidebarItem_handler,
+} from "./sidebar.js";
+import { inputListener } from "./events.js";
+import { globalId } from "./sidebar.js";
+
 const dark_mode_btn = document.querySelector(".dark-mode-btn");
 const delete_btn = document.querySelector(".delete-btn");
 const add_btn = document.querySelector(".add-btn");
 const toggle_btn = document.querySelector(".toggle-btn");
 const category_btn = document.querySelector(".category-btn");
-
-const showToast = (category, duration = 4000) => {
-  const container = document.getElementById("toast-container");
-  const toast = document.createElement("div");
-  toast.className = "toast";
-  if (category.length > 15) {
-    category = category.slice(0, 15);
-  }
-  toast.textContent = `${category} wurde ausgewählt`;
-  container.appendChild(toast);
-
-  setTimeout(() => {
-    toast.classList.add("show");
-  }, 1000);
-
-  setTimeout(() => {
-    toast.classList.remove("show");
-    toast.classList.add("hide");
-    toast.addEventListener("transitionend", () => {
-      toast.remove();
-    });
-  }, duration);
-};
 
 const collapse_sidebar = () => {
   const note = document.querySelector(".note");
@@ -41,10 +26,32 @@ const collapse_sidebar = () => {
 };
 toggle_btn.addEventListener("click", collapse_sidebar);
 
-const add_btn_handler = () => {
+const add_btn_handler = function () {
+  let sidebarNotesArr =
+    JSON.parse(localStorage.getItem("sidebarNotesArr")) || "[]";
   const note = document.querySelector(".note");
-  alert("Task saved");
-  note ? add_to_sidebar(note.value) : null;
+  const note_list = document.querySelector(".notes-list");
+  const confirmation = confirm(
+    "Möchtest du deine aktuelle Notiz überschreiben?"
+  );
+  if (!note_list.hasChildNodes) {
+    note ? notesToSidebar(note.value) : null;
+    alert("Neue Notiz angelegt");
+  }
+  if (sidebarNotesArr.length > 0 && confirmation && globalId) {
+    let item = sidebarNotesArr.find((notes) => notes.id == globalId);
+    console.log(item);
+    item.data = note.value;
+    item.title =
+      note.value.length == 0 ? "Kein Titel" : note.value.slice(0, 15);
+    localStorage.setItem("sidebarNotesArr", JSON.stringify(sidebarNotesArr));
+    const sidebarItem = note_list.querySelector(`[data-id="${globalId}"]`);
+    sidebarItem_handler(sidebarItem);
+    reloadNotesSidebar();
+  } else if (!confirmation) {
+    note ? notesToSidebar(note.value) : null;
+    alert("Neue Notiz angelegt");
+  }
   localStorage.setItem("note_value", JSON.stringify(note.value));
 };
 add_btn.addEventListener("click", add_btn_handler);
@@ -65,6 +72,7 @@ const toggle_lightmode_handler = () => {
   const notes_list = document.querySelector(".notes-list");
   const sidebar_notes = document.querySelector(".sidebar-notes");
   const category_list = document.querySelector(".category-list");
+  const default_category = document.querySelector(".default-category");
   const priorities = document.querySelector(".priorities");
   const singleElements = document.querySelectorAll("p, button, span");
   const note = document.querySelector(".note");
@@ -81,6 +89,7 @@ const toggle_lightmode_handler = () => {
   }
   const allElements = [
     ...[
+      default_category,
       priorities,
       notes_list,
       sidebar_notes,
@@ -99,32 +108,6 @@ const toggle_lightmode_handler = () => {
 };
 dark_mode_btn.addEventListener("click", toggle_lightmode_handler);
 
-const inputListener = (input) => {
-  return new Promise((resolve) => {
-    const clickOutside = (e) => {
-      if (!document.body.contains(input)) return;
-      if (e.target !== input) {
-        cleanup();
-        input.value = "";
-        resolve(input.value);
-      }
-    };
-    const onKeyDown = (e) => {
-      if (e.key === "Enter") {
-        cleanup();
-        resolve(input.value);
-      }
-    };
-    const cleanup = () => {
-      document.removeEventListener("click", clickOutside);
-      input.removeEventListener("keydown", onKeyDown);
-    };
-    input.focus();
-    document.addEventListener("click", clickOutside);
-    input.addEventListener("keydown", onKeyDown);
-  });
-};
-
 const categoryInput_btn = async () => {
   const category_btn = document.querySelector(".category-btn");
   const input = document.createElement("input");
@@ -134,7 +117,7 @@ const categoryInput_btn = async () => {
   category_btn.replaceWith(input);
   const value = await inputListener(input);
   input.replaceWith(category_btn);
-  if (value) categories(value);
+  if (value) categoriesToSidebar(value);
 };
 
 category_btn.addEventListener("click", (e) => {
@@ -147,7 +130,5 @@ export {
   add_btn_handler,
   delete_btn_handler,
   collapse_sidebar,
-  inputListener,
   categoryInput_btn,
-  showToast,
 };

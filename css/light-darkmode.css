@@ -38,12 +38,14 @@ button.light-mode:hover {
 }
 
 #sidebarItem.light-mode,
-#categoryItem.light-mode {
+#categoryItem.light-mode,
+.default-category.light-mode {
   background-color: white;
 }
 
 #sidebarItem.light-mode:hover,
-#categoryItem.light-mode:hover {
+#categoryItem.light-mode:hover,
+.default-category.light-mode:hover {
   background-color: burlywood;
 }
 
