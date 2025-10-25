@@ -21,6 +21,16 @@ p {
   justify-content: flex-end;
 }
 
+.nav-right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.search-input {
+  margin-right: 16px;
+}
+
 .signature {
   margin-right: auto;
 }
@@ -36,8 +46,28 @@ p {
   padding: 0 0.5rem;
 }
 
-.search-input {
-  margin-right: 15px;
+.dropdown {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  width: 170px;
+  height: 50px;
+  overflow-y: auto;
+  z-index: 100;
+  display: none;
+}
+
+.dropdown-item {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: #f0f0f0;
+}
+
+.input-wrapper {
+  position: relative;
 }
 
 .parent-div {
@@ -69,6 +99,7 @@ p {
 .toast {
   display: flex;
   text-align: center;
+  justify-content: center;
   will-change: transform, opacity;
   position: absolute;
   top: 10px;
@@ -136,6 +167,15 @@ p {
     right: 35%;
   }
 
+  .note.collapsed {
+    max-height: 50vh;
+  }
+
+  .note {
+    max-height: 35vh;
+    transition: max-height 0.3s;
+  }
+
   #sidebar1 {
     height: 160px;
     width: 100%;
@@ -143,6 +183,7 @@ p {
     display: flex;
     justify-content: center;
     align-items: center;
+    border-bottom: 1px solid;
   }
 
   #sidebar2 {
@@ -198,9 +239,13 @@ p {
 }
 
 @media screen and (max-width: 430px) {
+  #sidebarItem {
+    max-height: 60px;
+  }
+
   .toast {
-    left: 10%;
-    right: 10%;
+    left: 20%;
+    right: 20%;
   }
 
   .navbar {
@@ -226,6 +271,10 @@ p {
   }
 
   .note {
-    max-height: 60vh;
+    max-height: 45vh;
+  }
+
+  .note.collapsed {
+    max-height: 50vh;
   }
 }

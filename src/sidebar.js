@@ -1,5 +1,5 @@
 import { add_priorities, formatDate } from "./data.js";
-import { syncLightDarkMode } from "./main.js";
+import { syncLightDarkMode } from "./events.js";
 import { Category, Note } from "./classes.js";
 import {
   sidebarItemTemplate,
@@ -7,11 +7,15 @@ import {
   categoryItemTemplate,
   defaultCategoryItemTemplate,
 } from "./templates.js";
-import { showToast } from "./events.js";
+import { showToast, isActive } from "./events.js";
+import { filter } from "./filter.js";
+import { collapse_sidebar } from "./buttons.js";
 
 const default_category = "Ohne Kategorie";
-export let globalId;
 let active_category = default_category;
+
+const filterInput = document.querySelector(".search-input");
+filterInput.addEventListener("click", filter);
 
 const syncCategoriesWithNotes = () => {
   let categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
@@ -42,7 +46,9 @@ const notesToSidebar = (note_value) => {
     active_category,
     note_value || "",
     add_priorities() || "Ohne Priorität",
-    note_value.length == 0 ? "Kein Titel" : note_value.slice(0, 15),
+    note_value.length == 0
+      ? "Kein Titel"
+      : note_value.split("\n")[0].substring(0, 15),
     formatDate()
   );
   sidebarItem.setAttribute("data-id", noteData.id);
@@ -76,9 +82,14 @@ const sidebarItem_handler = (sidebarItem, notes) => {
     syncCategoriesWithNotes();
   };
   sidebarItem.onclick = () => {
-    if (!confirm("Möchtest du deine aktuelle Notiz überschreiben?")) return;
+    const notesSidebar = document.querySelector(".sidebar-notes");
     document.querySelector(".note").value = notes.data;
-    globalId = sidebarItem.getAttribute("data-id") || defaultId;
+    isActive(sidebarItem, "#sidebarItem", notesSidebar);
+    showToast("Notiz ausgewählt");
+    localStorage.setItem(
+      "noteId",
+      JSON.stringify(sidebarItem.getAttribute("data-id"))
+    );
   };
 };
 
@@ -88,6 +99,7 @@ const reloadNotesSidebar = (arr) => {
   const sidebarNotesArr = arr
     ? arr
     : JSON.parse(localStorage.getItem("sidebarNotesArr") || "[]");
+  const savedNoteId = JSON.parse(localStorage.getItem("noteId") || "null");
   const active_categoryItems = sidebarNotesArr.filter(
     (items) => items.category == active_category
   );
@@ -101,6 +113,10 @@ const reloadNotesSidebar = (arr) => {
     sidebarItem.innerHTML = activeCategoryItemTemplate(active_categoryItems[i]);
     sidebar.appendChild(sidebarItem);
     syncLightDarkMode(sidebarItem);
+    if (savedNoteId && savedNoteId == active_categoryItems[i].id) {
+      const notesSidebar = document.querySelector(".sidebar-notes");
+      isActive(sidebarItem, "#sidebarItem", notesSidebar);
+    }
     sidebarItem_handler(sidebarItem, active_categoryItems[i]);
   }
   syncCategoriesWithNotes();
@@ -159,13 +175,19 @@ const categoryItem_handler = (category_item) => {
     }
     const category = categoryArr.find((c) => c.id == id);
     active_category = category.name;
-    showToast(active_category);
+    const categorySidebar = document.querySelector(".sidebar-categories");
+    showToast(`${active_category} wurde ausgewählt`);
+    isActive(category_item, "#categoryItem", categorySidebar);
+    const notesSidebar = document.querySelector(".sidebar-notes");
+    if (notesSidebar.classList.contains("collapsed")) {
+      collapse_sidebar();
+    }
     syncCategoriesWithNotes();
     reloadNotesSidebar();
   };
 };
 
-//category items to be added to sidebar with html rendering
+//create new categories
 const createNewCategory = (categoryName, sidebarNotesArr) => {
   const categoryItems =
     sidebarNotesArr.filter((notes) => notes.category == categoryName) || [];
@@ -188,12 +210,11 @@ const categoriesToSidebar = (categoryName) => {
   const sidebar_categories = document.querySelector(".category-list");
   const doesDefaultExist = categoryArr.find((c) => c.name == default_category);
   category_item = document.createElement("div");
-
+  category_item.id = "categoryItem";
   if (newCategory.name == default_category && doesDefaultExist == undefined) {
     newCategory.isDefault = true;
     category_item.setAttribute("default-category-id", newCategory.id);
   } else if (newCategory.name != default_category && doesDefaultExist) {
-    category_item.id = "categoryItem";
     category_item.setAttribute("category-id", newCategory.id);
   } else return;
   syncLightDarkMode(category_item);
@@ -218,15 +239,17 @@ const reloadCategorySidebar = () => {
     return;
   }
   category_sidebar.innerHTML = "";
+
   for (let i = 0; i < categoryArr.length; i++) {
     const category_item = document.createElement("div");
+    syncLightDarkMode(category_item);
+    category_item.id = "categoryItem";
     if (categoryArr[i].isDefault) {
       category_item.setAttribute("default-category-id", categoryArr[i].id);
       category_item.innerHTML = defaultCategoryItemTemplate(
         categoryArr[i].name
       );
     } else {
-      category_item.id = "categoryItem";
       category_item.setAttribute("category-id", categoryArr[i].id);
       category_item.innerHTML = categoryItemTemplate(categoryArr[i].name);
     }

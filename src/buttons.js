@@ -4,8 +4,7 @@ import {
   reloadNotesSidebar,
   sidebarItem_handler,
 } from "./sidebar.js";
-import { inputListener } from "./events.js";
-import { globalId } from "./sidebar.js";
+import { inputListener, showToast } from "./events.js";
 
 const dark_mode_btn = document.querySelector(".dark-mode-btn");
 const delete_btn = document.querySelector(".delete-btn");
@@ -26,45 +25,38 @@ const collapse_sidebar = () => {
 };
 toggle_btn.addEventListener("click", collapse_sidebar);
 
-const add_btn_handler = function () {
-  let sidebarNotesArr =
-    JSON.parse(localStorage.getItem("sidebarNotesArr")) || "[]";
-  const note = document.querySelector(".note");
-  const note_list = document.querySelector(".notes-list");
-  const confirmation = confirm(
-    "Möchtest du deine aktuelle Notiz überschreiben?"
+const save_btn_handler = () => {
+  let sidebarNotesArr = JSON.parse(
+    localStorage.getItem("sidebarNotesArr") || "[]"
   );
-  if (!note_list.hasChildNodes) {
-    note ? notesToSidebar(note.value) : null;
-    alert("Neue Notiz angelegt");
-  }
-  if (sidebarNotesArr.length > 0 && confirmation && globalId) {
-    let item = sidebarNotesArr.find((notes) => notes.id == globalId);
-    console.log(item);
-    item.data = note.value;
-    item.title =
-      note.value.length == 0 ? "Kein Titel" : note.value.slice(0, 15);
+  const note = document.querySelector(".note");
+  const notesList = document.querySelector(".notes-list");
+  const savedNoteId = JSON.parse(localStorage.getItem("noteId"));
+  if (!notesList.hasChildNodes() || !savedNoteId) {
+    note.value ? notesToSidebar(note.value) : null;
+  } else {
+    let savedNote = sidebarNotesArr.find((notes) => notes.id == savedNoteId);
+    savedNote.data = note.value;
+    savedNote.title =
+      note.value.length == 0
+        ? "Kein Titel"
+        : note.value.split("\n")[0].substring(0, 15);
     localStorage.setItem("sidebarNotesArr", JSON.stringify(sidebarNotesArr));
-    const sidebarItem = note_list.querySelector(`[data-id="${globalId}"]`);
+    const sidebarItem = notesList.querySelector(`[data-id="${savedNoteId}"]`);
+    showToast("Notiz wurde gespeichert");
     sidebarItem_handler(sidebarItem);
     reloadNotesSidebar();
-  } else if (!confirmation) {
-    note ? notesToSidebar(note.value) : null;
-    alert("Neue Notiz angelegt");
   }
-  localStorage.setItem("note_value", JSON.stringify(note.value));
 };
-add_btn.addEventListener("click", add_btn_handler);
+
+add_btn.addEventListener("click", save_btn_handler);
 
 const delete_btn_handler = () => {
   const note = document.querySelector(".note");
   if (note.value.length > 0) {
     note.value = "";
-    localStorage.removeItem("note_value");
-    alert("Task deleted");
     return;
   }
-  alert("No task available");
 };
 delete_btn.addEventListener("click", delete_btn_handler);
 
@@ -72,7 +64,6 @@ const toggle_lightmode_handler = () => {
   const notes_list = document.querySelector(".notes-list");
   const sidebar_notes = document.querySelector(".sidebar-notes");
   const category_list = document.querySelector(".category-list");
-  const default_category = document.querySelector(".default-category");
   const priorities = document.querySelector(".priorities");
   const singleElements = document.querySelectorAll("p, button, span");
   const note = document.querySelector(".note");
@@ -89,7 +80,6 @@ const toggle_lightmode_handler = () => {
   }
   const allElements = [
     ...[
-      default_category,
       priorities,
       notes_list,
       sidebar_notes,
@@ -127,7 +117,7 @@ category_btn.addEventListener("click", (e) => {
 
 export {
   toggle_lightmode_handler,
-  add_btn_handler,
+  save_btn_handler,
   delete_btn_handler,
   collapse_sidebar,
   categoryInput_btn,

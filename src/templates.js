@@ -44,7 +44,7 @@ const categoryItemTemplate = (value) => {
 };
 
 const defaultCategoryItemTemplate = (value) => {
-  return `<div class="default-category" id="categoryItem">${value}</div>`;
+  return `<p>${value}</p>`;
 };
 
 export {

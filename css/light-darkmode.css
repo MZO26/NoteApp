@@ -52,3 +52,8 @@ button.light-mode:hover {
 #sidebarItem.light-mode > button.light-mode:hover {
   background-color: white;
 }
+
+#sidebarItem.light-mode.active,
+#categoryItem.light-mode.active {
+  background-color: burlywood !important;
+}

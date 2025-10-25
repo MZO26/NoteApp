@@ -1,11 +1,11 @@
-const showToast = (category, duration = 4000) => {
+const showToast = (value, duration = 4000) => {
   const container = document.getElementById("toast-container");
   const toast = document.createElement("div");
   toast.className = "toast";
-  if (category.length > 15) {
-    category = category.slice(0, 15);
+  if (value.length > 15) {
+    value.slice(0, 15);
   }
-  toast.textContent = `${category} wurde ausgewählt`;
+  toast.textContent = value;
   container.appendChild(toast);
 
   setTimeout(() => {
@@ -47,4 +47,41 @@ const inputListener = (input) => {
   });
 };
 
-export { showToast, inputListener };
+function isActive(item, classList, parentElement = null) {
+  const targetParent = parentElement || document.body;
+  if (localStorage.getItem("mode") == "light") {
+    document
+      .querySelectorAll(`${classList}.light-mode.active`)
+      .forEach((el) => {
+        el.classList.remove("active");
+      });
+  } else {
+    document.querySelectorAll(`${classList}.active`).forEach((el) => {
+      el.classList.remove("active");
+    });
+  }
+  item.classList.add("active");
+  if (item._listener) document.removeEventListener("click", item._listener);
+  //no const declaration because own declaration of object property
+  //dom objects also seen as objects / _ only for convention to see its declared internally
+  item._listener = (e) => {
+    if (targetParent.contains(e.target) && e.target != item) {
+      item.classList.remove("active");
+      localStorage.setItem("noteId", "null");
+      document.removeEventListener("click", item._listener);
+      item._listener = null;
+    }
+  };
+  setTimeout(() => document.addEventListener("click", item._listener), 0);
+}
+
+const syncLightDarkMode = (item) => {
+  if (
+    !item.classList.contains("light-mode") &&
+    document.body.classList.contains("light-mode")
+  ) {
+    item.classList.toggle("light-mode");
+  }
+};
+
+export { showToast, inputListener, isActive, syncLightDarkMode };
