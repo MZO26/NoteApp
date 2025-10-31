@@ -1,31 +1,27 @@
-import { add_priorities, formatDate } from "./data.js";
-import { syncLightDarkMode } from "./events.js";
+import { formatDate } from "./data.js";
 import { Category, Note } from "./classes.js";
 import {
-  sidebarItemTemplate,
-  activeCategoryItemTemplate,
+  noteItemTemplate,
   categoryItemTemplate,
   defaultCategoryItemTemplate,
 } from "./templates.js";
 import { showToast, isActive } from "./events.js";
 import { filter } from "./filter.js";
-import { collapse_sidebar } from "./buttons.js";
+import { showBtn, updateCategorySelect } from "./buttons.js";
 
-const default_category = "Ohne Kategorie";
-let active_category = default_category;
+let default_category = "Ohne Kategorie";
+let state = { active_category: default_category };
+let savedNoteIdState = { savedNoteId: null };
 
 const filterInput = document.querySelector(".search-input");
 filterInput.addEventListener("click", filter);
 
+//sync categories with notes in localStorage
 const syncCategoriesWithNotes = () => {
   let categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
-  let sidebarNotesArr = JSON.parse(
-    localStorage.getItem("sidebarNotesArr") || "[]"
-  );
+  let notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
   categoryArr = categoryArr.map((category) => {
-    category.items = sidebarNotesArr.filter(
-      (note) => note.category == category.name
-    );
+    category.items = notesArr.filter((note) => note.category == category.name);
     return category;
   });
   localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
@@ -33,91 +29,92 @@ const syncCategoriesWithNotes = () => {
 
 //NOTES
 
-//note items to be added to sidebar with html rendering
-const notesToSidebar = (note_value) => {
-  let sidebarNotesArr = JSON.parse(
-    localStorage.getItem("sidebarNotesArr") || "[]"
-  );
-  const sidebar = document.querySelector(".notes-list");
-  const sidebarItem = document.createElement("div");
-  sidebarItem.id = "sidebarItem";
-  const noteData = new Note(
+//create new notes
+const createNewNote = (note_value, note_title, category = null) => {
+  return new Note(
     Date.now() + Math.random(),
-    active_category,
-    note_value || "",
-    add_priorities() || "Ohne Priorität",
-    note_value.length == 0
-      ? "Kein Titel"
-      : note_value.split("\n")[0].substring(0, 15),
+    category || state.active_category,
+    note_value,
+    note_title,
     formatDate()
   );
-  sidebarItem.setAttribute("data-id", noteData.id);
-  sidebarItem.style.backgroundColor = `${noteData.priority}`;
-  sidebarItem.innerHTML = sidebarItemTemplate(noteData);
-  sidebarNotesArr.push(noteData);
-  localStorage.setItem("sidebarNotesArr", JSON.stringify(sidebarNotesArr));
-  sidebar.appendChild(sidebarItem);
-  syncLightDarkMode(sidebarItem);
-  sidebarItem_handler(sidebarItem, noteData);
+};
+
+//note items to be added to sidebar with html rendering
+const noteToBeRendered = (note_value, note_title, category = null) => {
+  const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
+  const notesContainer = document.querySelector(".notes-container");
+  const noteItem = document.createElement("div");
+  noteItem.className = "noteItem";
+  const newNote = createNewNote(note_value, note_title, category);
+  noteItem.setAttribute("data-id", newNote.id);
+  noteItem.innerHTML = noteItemTemplate(newNote);
+  notesArr.push(newNote);
+  localStorage.setItem("notesArr", JSON.stringify(notesArr));
+  notesContainer.appendChild(noteItem);
+  noteItemHandler(noteItem, newNote);
   syncCategoriesWithNotes();
 };
 
 //note items event handling
-const sidebarItem_handler = (sidebarItem, notes) => {
-  const sidebarItem_btn = sidebarItem.querySelector("button");
-  let sidebarNotesArr = JSON.parse(
-    localStorage.getItem("sidebarNotesArr") || "[]"
-  );
-  sidebarItem_btn.onclick = function (event) {
+const noteItemHandler = (noteItem, notes) => {
+  const noteItem_btn = noteItem.querySelector("button");
+  let notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
+  noteItem_btn.onclick = function (event) {
     event.stopPropagation();
     const id = this.parentElement.getAttribute("data-id");
-    const index = sidebarNotesArr.findIndex(
-      (sidebarNote) => sidebarNote.id == id
-    );
+    const index = notesArr.findIndex((sidebarNote) => sidebarNote.id == id);
     if (index > -1) {
-      sidebarNotesArr.splice(index, 1);
-      localStorage.setItem("sidebarNotesArr", JSON.stringify(sidebarNotesArr));
+      notesArr.splice(index, 1);
+      localStorage.setItem("notesArr", JSON.stringify(notesArr));
     }
     this.parentElement.remove();
     syncCategoriesWithNotes();
   };
-  sidebarItem.onclick = () => {
-    const notesSidebar = document.querySelector(".sidebar-notes");
+  noteItem.onclick = () => {
+    const notesContainer = document.querySelector(".notes-container");
+    document.querySelector(".title").value = notes.title;
     document.querySelector(".note").value = notes.data;
-    isActive(sidebarItem, "#sidebarItem", notesSidebar);
+    isActive(noteItem, notesContainer);
+    savedNoteIdState.savedNoteId = noteItem.getAttribute("data-id");
     showToast("Notiz ausgewählt");
-    localStorage.setItem(
-      "noteId",
-      JSON.stringify(sidebarItem.getAttribute("data-id"))
-    );
+    showBtn.click();
   };
 };
 
 //notes sidebar reload
-const reloadNotesSidebar = (arr) => {
-  const sidebar = document.querySelector(".notes-list");
-  const sidebarNotesArr = arr
+const reloadNoteList = (arr) => {
+  const notesContainer = document.querySelector(".notes-container");
+  const notesArr = arr
     ? arr
-    : JSON.parse(localStorage.getItem("sidebarNotesArr") || "[]");
-  const savedNoteId = JSON.parse(localStorage.getItem("noteId") || "null");
-  const active_categoryItems = sidebarNotesArr.filter(
-    (items) => items.category == active_category
+    : JSON.parse(localStorage.getItem("notesArr") || "[]");
+
+  const active_categoryItems = notesArr.filter(
+    (items) => items.category == state.active_category
   );
-  sidebar.innerHTML = "";
+  notesContainer.innerHTML = "";
+  if (notesArr.length === 0 || active_categoryItems.length === 0) {
+    noteToBeRendered(
+      "Willkommen zu meiner Notiz App!",
+      "Erste Notiz",
+      state.active_category || default_category
+    );
+    return;
+  }
   if (active_categoryItems.length == 0) return;
+  const savedNoteId = savedNoteIdState.savedNoteId;
   for (let i = 0; i < active_categoryItems.length; i++) {
-    const sidebarItem = document.createElement("div");
-    sidebarItem.id = "sidebarItem";
-    sidebarItem.setAttribute("data-id", active_categoryItems[i].id);
-    sidebarItem.style.backgroundColor = `${active_categoryItems[i].priority}`;
-    sidebarItem.innerHTML = activeCategoryItemTemplate(active_categoryItems[i]);
-    sidebar.appendChild(sidebarItem);
-    syncLightDarkMode(sidebarItem);
+    const noteItem = document.createElement("div");
+    noteItem.className = "noteItem";
+    noteItem.setAttribute("data-id", active_categoryItems[i].id);
+    noteItem.innerHTML = noteItemTemplate(active_categoryItems[i]);
+    notesContainer.appendChild(noteItem);
     if (savedNoteId && savedNoteId == active_categoryItems[i].id) {
-      const notesSidebar = document.querySelector(".sidebar-notes");
-      isActive(sidebarItem, "#sidebarItem", notesSidebar);
+      const notesContainer = document.querySelector(".notes-container");
+      savedNoteIdState.savedNoteId = noteItem.getAttribute("data-id");
+      isActive(noteItem, notesContainer);
     }
-    sidebarItem_handler(sidebarItem, active_categoryItems[i]);
+    noteItemHandler(noteItem, active_categoryItems[i]);
   }
   syncCategoriesWithNotes();
 };
@@ -125,16 +122,14 @@ const reloadNotesSidebar = (arr) => {
 //CATEGORIES
 
 //category items event handling
-const categoryItem_handler = (category_item) => {
+const categoryItemHandler = (category_item) => {
   if (!category_item.getAttribute("default-category-id")) {
     //default category cant be deleted
-    const sidebarItem_btn = category_item.querySelector("button");
-    sidebarItem_btn.onclick = function (event) {
+    const noteItem_btn = category_item.querySelector("button");
+    noteItem_btn.onclick = function (event) {
       event.stopPropagation();
       let categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
-      const sidebarNotesArr = JSON.parse(
-        localStorage.getItem("sidebarNotesArr") || "[]"
-      );
+      const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
       const id = this.parentElement.getAttribute("category-id");
       const index = categoryArr.findIndex(
         (category) => String(category.id) == String(id)
@@ -146,8 +141,8 @@ const categoryItem_handler = (category_item) => {
           toBeDeleted.items.forEach((item) => {
             const old_category = item.category;
             item.category = default_category;
-            if (sidebarNotesArr.length > 0) {
-              sidebarNotesArr.forEach((note) => {
+            if (notesArr.length > 0) {
+              notesArr.forEach((note) => {
                 if (note.category == old_category) {
                   note.category = default_category;
                 }
@@ -158,11 +153,12 @@ const categoryItem_handler = (category_item) => {
         categoryArr.splice(index, 1);
       }
       this.parentElement.remove();
-      localStorage.setItem("sidebarNotesArr", JSON.stringify(sidebarNotesArr));
+      localStorage.setItem("notesArr", JSON.stringify(notesArr));
       localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
+      updateCategorySelect(categoryArr);
       syncCategoriesWithNotes();
-      reloadCategorySidebar();
-      reloadNotesSidebar();
+      reloadCategoryList();
+      reloadNoteList();
     };
   }
   category_item.onclick = () => {
@@ -174,23 +170,20 @@ const categoryItem_handler = (category_item) => {
       id = category_item.getAttribute("category-id");
     }
     const category = categoryArr.find((c) => c.id == id);
-    active_category = category.name;
-    const categorySidebar = document.querySelector(".sidebar-categories");
-    showToast(`${active_category} wurde ausgewählt`);
-    isActive(category_item, "#categoryItem", categorySidebar);
-    const notesSidebar = document.querySelector(".sidebar-notes");
-    if (notesSidebar.classList.contains("collapsed")) {
-      collapse_sidebar();
-    }
+    if (!category) state.active_category = default_category;
+    else state.active_category = category.name;
+    const categoryList = document.querySelector(".category-list");
+    isActive(category_item, categoryList);
     syncCategoriesWithNotes();
-    reloadNotesSidebar();
+    reloadNoteList();
+    updateCategorySelect(categoryArr, state.active_category);
   };
 };
 
 //create new categories
-const createNewCategory = (categoryName, sidebarNotesArr) => {
+const createNewCategory = (categoryName, notesArr) => {
   const categoryItems =
-    sidebarNotesArr.filter((notes) => notes.category == categoryName) || [];
+    notesArr.filter((notes) => notes.category == categoryName) || [];
   return new Category(
     Date.now() + Math.random(),
     categoryItems,
@@ -200,12 +193,17 @@ const createNewCategory = (categoryName, sidebarNotesArr) => {
 };
 
 //category items to be added to sidebar with html rendering
-const categoriesToSidebar = (categoryName) => {
-  let sidebarNotesArr = JSON.parse(
-    localStorage.getItem("sidebarNotesArr") || "[]"
-  );
+const categoryToBeRendered = (categoryName) => {
+  let notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
   let categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
-  const newCategory = createNewCategory(categoryName, sidebarNotesArr);
+  const doesCategoryExist = categoryArr.find(
+    (category) => category.name == categoryName
+  );
+  if (doesCategoryExist) {
+    showToast("Kategorie existiert bereits");
+    return;
+  }
+  const newCategory = createNewCategory(categoryName, notesArr);
   let category_item;
   const sidebar_categories = document.querySelector(".category-list");
   const doesDefaultExist = categoryArr.find((c) => c.name == default_category);
@@ -217,7 +215,6 @@ const categoriesToSidebar = (categoryName) => {
   } else if (newCategory.name != default_category && doesDefaultExist) {
     category_item.setAttribute("category-id", newCategory.id);
   } else return;
-  syncLightDarkMode(category_item);
   categoryArr.push(newCategory);
   localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
   if (newCategory.isDefault) {
@@ -226,23 +223,21 @@ const categoriesToSidebar = (categoryName) => {
     category_item.innerHTML = categoryItemTemplate(newCategory.name);
   }
   sidebar_categories.appendChild(category_item);
-  categoryItem_handler(category_item);
+  showToast(`Kategorie "${categoryName}" hinzugefügt`);
+  isActive(category_item, sidebar_categories);
+  updateCategorySelect(categoryArr);
+  categoryItemHandler(category_item);
   syncCategoriesWithNotes();
 };
 
-//category sidebar reload
-const reloadCategorySidebar = () => {
+//category reload
+const reloadCategoryList = () => {
   const category_sidebar = document.querySelector(".category-list");
   const categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
-  if (!categoryArr.length) {
-    console.log("Keine Kategorie verfügbar");
-    return;
-  }
+  if (!categoryArr.length) return;
   category_sidebar.innerHTML = "";
-
   for (let i = 0; i < categoryArr.length; i++) {
     const category_item = document.createElement("div");
-    syncLightDarkMode(category_item);
     category_item.id = "categoryItem";
     if (categoryArr[i].isDefault) {
       category_item.setAttribute("default-category-id", categoryArr[i].id);
@@ -254,17 +249,18 @@ const reloadCategorySidebar = () => {
       category_item.innerHTML = categoryItemTemplate(categoryArr[i].name);
     }
     category_sidebar.appendChild(category_item);
-    categoryItem_handler(category_item);
+    categoryItemHandler(category_item);
   }
 };
 
 export {
-  default_category,
-  reloadNotesSidebar,
-  reloadCategorySidebar,
-  notesToSidebar,
-  sidebarItem_handler,
-  categoriesToSidebar,
-  categoryItem_handler,
+  savedNoteIdState,
+  state,
+  reloadNoteList,
+  reloadCategoryList,
+  noteToBeRendered,
+  noteItemHandler,
+  categoryToBeRendered,
+  categoryItemHandler,
   syncCategoriesWithNotes,
 };

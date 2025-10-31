@@ -1,12 +1,9 @@
 import { inputListener, isActive } from "./events.js";
-import { collapse_sidebar } from "./buttons.js";
 
 const filter = () => {
   const searchInput = document.querySelector(".search-input");
   const dropdown = document.querySelector(".dropdown");
-  const sidebarNotesArr = JSON.parse(
-    localStorage.getItem("sidebarNotesArr") || "[]"
-  );
+  const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
   const categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
   const processInput = async () => {
     if (document.activeElement !== searchInput) {
@@ -19,11 +16,11 @@ const filter = () => {
     const div = document.createElement("div");
     const re = new RegExp(value, "i");
     const start = performance.now();
-    let result = sidebarNotesArr.find((item) => re.test(item.data));
+    let result = notesArr.find((item) => re.test(item.title));
     let category, id;
     if (result) {
-      sidebarNotesArr.find((item) => {
-        if (item.data == result.data) {
+      notesArr.find((item) => {
+        if (item.title == result.title) {
           category = item.category;
           id = item.id;
         }
@@ -37,19 +34,18 @@ const filter = () => {
         for (const div of categoryDivs) {
           if (div.textContent.trim() == trimmedName) {
             div.click();
-            isActive(div, "#categoryItem");
+            isActive(div, categoryList);
             break;
           }
         }
-        const notesList = document.querySelector(".notes-list");
-        const targetItem = notesList.querySelector(`div[data-id="${item.id}"]`);
-        isActive(targetItem);
-        if (notesList.parentElement.classList.contains("collapsed")) {
-          collapse_sidebar();
-        }
+        const notesContainer = document.querySelector(".notes-container");
+        const targetItem = notesContainer.querySelector(
+          `div[data-id="${item.id}"]`
+        );
+        isActive(targetItem, notesContainer);
         const end = performance.now();
         const duration = end - start;
-        div.innerHTML = `Titel: ${result.data}<br>Dauer: ${duration.toFixed(
+        div.innerHTML = `Titel: ${result.title}<br>Dauer: ${duration.toFixed(
           3
         )} ms`;
       }

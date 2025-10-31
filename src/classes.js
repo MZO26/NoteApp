@@ -8,11 +8,10 @@ class Category {
 }
 
 class Note {
-  constructor(id, category, data, priority, title, formattedDate) {
+  constructor(id, category, data, title, formattedDate) {
     (this.id = id),
       (this.category = category),
       (this.data = data),
-      (this.priority = priority),
       (this.title = title),
       (this.formattedDate = formattedDate);
   }

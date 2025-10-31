@@ -1,22 +1,3 @@
-const add_priorities = () => {
-  const priorities = document.querySelector(".priorities");
-  let color;
-  switch (priorities.value) {
-    case "-":
-      break;
-    case "low":
-      color = "rgb(0,255,0)";
-      break;
-    case "medium":
-      color = "rgb(255,255,0)";
-      break;
-    case "high":
-      color = "rgb(255,0,0)";
-      break;
-  }
-  return color;
-};
-
 const formatDate = () => {
   const now = new Date();
   const day = now.getDate();
@@ -34,4 +15,4 @@ const formatDate = () => {
   return formattedDate;
 };
 
-export { add_priorities, formatDate };
+export { formatDate };

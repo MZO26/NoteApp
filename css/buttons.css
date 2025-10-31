@@ -1,15 +1,44 @@
+/*
+  --bg: hsl(220 10% 12%); page background
+  --bg-light: hsl(220 10% 16%); slightly lighter panels
+  --bg-dark: hsl(0 0% 96%); text color on dark bg
+  --note: hsl(220 8% 18%); note background (dark but readable)
+  --hover-color: hsl(220 8% 25%); hover highlight for items
+  --text: hsl(0 0% 96%); general text color
+  --text-muted: hsl(0 0% 72%); muted text (for subtle elements)
+  --btn-bg: hsl(220 10% 18%); button background
+  --btn-text: hsl(0 0% 96%); button text
+  --btn-border: rgba(255, 255, 255, 0.06); button border
+  --btn-hover: hsl(220 10% 22%); button hover
+  --btn-outline: rgba(255, 255, 255, 0.12); button outline
+ */
 button {
   cursor: pointer;
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border: 1px solid var(--btn-border);
+  transition: background-color 0.1s ease, box-shadow 0.1s ease;
+  font: inherit;
 }
 
-.button-collection {
+button:hover {
+  background-color: var(--btn-hover);
+  transition: 0.1s ease-in-out;
+}
+
+button:focus {
+  box-shadow: 0 0 0 3px var(--btn-outline);
+}
+
+.button-collection-modal {
   display: flex;
   align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .toggle-btn {
-  display: flex;
-  margin: auto;
+  /* for toggling category-sidebar */
   border-radius: 18px;
   max-width: 35px;
   max-height: 35px;
@@ -17,16 +46,26 @@ button {
   margin: 5px;
 }
 
-.category-btn {
-  background-color: white;
-  border: 1px solid;
-  width: 100%;
-  border-radius: 5px;
+.input-wrapper {
+  position: relative;
 }
 
-#category-input {
-  margin-left: 5px;
-  width: 200px;
+.input-wrapper .search-input {
+  width: 220px;
+  height: 36px;
+  padding: 6px 40px 6px 12px;
+  border-radius: 10px;
+  box-sizing: border-box;
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border: 1px solid var(--btn-border);
+  transition: background-color 0.12s ease, box-shadow 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.input-wrapper .search-input::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
 }
 
 .dark-mode-btn {
@@ -37,28 +76,75 @@ button {
   margin-right: 20px;
 }
 
+/* Modal start */
+.showModal-btn,
+.closeModal-btn {
+  width: 150px;
+  height: 35px;
+  border-radius: 10px;
+  margin: 10px;
+}
+
+#category-select {
+  width: 150px;
+  height: 35px;
+  border-radius: 10px;
+  margin: 10px;
+  background-color: var(--btn-bg);
+  color: var(--btn-text);
+}
+
+#category-select:hover {
+  background-color: var(--btn-hover);
+  transition: 0.1s ease-in-out;
+}
+
+.category-btn {
+  display: flex;
+  margin-left: 5px;
+  justify-content: center;
+  align-items: center;
+}
+
+.category-btn,
+#category-input {
+  border-radius: 10px;
+  height: 35px;
+  padding: 6px 12px;
+  box-sizing: border-box;
+}
+
 .add-btn,
 .delete-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 18px;
-  max-width: 50px;
-  max-height: 50px;
-  padding: 8px;
+  height: 35px;
+  width: 35px;
   margin-right: 10px;
+  border-radius: 18px;
 }
+/* Modal end */
 
-.priorities {
-  max-width: 140px;
-  max-height: 80px;
-  padding: 10px;
+.category-btn,
+#category-input {
+  text-align: left;
+  margin-left: 1.6rem;
+  background-color: var(--btn-bg);
+  color: var(--btn-text);
+  width: 180px;
   border-radius: 5px;
-  border: 1px solid #1e1e1e;
+  box-sizing: border-box;
+  display: inline-block;
+  height: 60px;
+  transition: padding 0.2s ease-in-out;
 }
 
-button:hover,
-.priorities:hover {
-  background-color: darkgray;
-  transition: 0.1s ease-in-out;
+#category-input:hover {
+  background: var(--btn-hover);
+}
+
+#category-input::placeholder {
+  color: var(--text-muted);
+  transition: padding 0.2s ease-in-out;
 }

@@ -1,8 +1,9 @@
 import {
-  notesToSidebar,
-  categoriesToSidebar,
-  reloadNotesSidebar,
-  sidebarItem_handler,
+  noteToBeRendered,
+  categoryToBeRendered,
+  reloadNoteList,
+  state,
+  savedNoteIdState,
 } from "./sidebar.js";
 import { inputListener, showToast } from "./events.js";
 
@@ -11,94 +12,142 @@ const delete_btn = document.querySelector(".delete-btn");
 const add_btn = document.querySelector(".add-btn");
 const toggle_btn = document.querySelector(".toggle-btn");
 const category_btn = document.querySelector(".category-btn");
+const showBtn = document.querySelector(".showModal-btn");
+const closeBtn = document.querySelector(".closeModal-btn");
+const overlay = document.getElementById("overlay");
+const modal = document.getElementById("modal");
 
-const collapse_sidebar = () => {
+let tempSelectedCategory = null;
+
+showBtn.addEventListener("click", () => {
+  const title = document.querySelector(".title");
   const note = document.querySelector(".note");
+  const notes = document.querySelector(".notes-container").children;
+  Array.from(notes).forEach((element) => {
+    if (element.classList.contains("active"))
+      element.classList.remove("active");
+  });
+  if (!savedNoteIdState.savedNoteId) {
+    title.value = "";
+    note.value = "";
+  }
+
+  overlay.classList.add("show");
+  modal.classList.add("show");
+});
+
+closeBtn.addEventListener("click", () => {
+  overlay.classList.remove("show");
+  modal.classList.remove("show");
+  savedNoteIdState.savedNoteId = null;
+});
+
+const collapseCategories = () => {
+  const sidebar_categories = document.querySelector(".category-list");
   const sidebar_notes = document.getElementById("sidebar2");
   sidebar_notes.classList.toggle("collapsed");
-  note.classList.toggle("collapsed");
-  if (sidebar_notes.hasChildNodes()) {
-    [...sidebar_notes.children].forEach((child) =>
+  sidebar_categories.classList.toggle("collapsed");
+  if (sidebar_categories.hasChildNodes()) {
+    [...sidebar_categories.children].forEach((child) =>
       child.classList.toggle("collapsed")
     );
   }
 };
-toggle_btn.addEventListener("click", collapse_sidebar);
+toggle_btn.addEventListener("click", collapseCategories);
 
-const save_btn_handler = () => {
-  let sidebarNotesArr = JSON.parse(
-    localStorage.getItem("sidebarNotesArr") || "[]"
-  );
-  const note = document.querySelector(".note");
-  const notesList = document.querySelector(".notes-list");
-  const savedNoteId = JSON.parse(localStorage.getItem("noteId"));
-  if (!notesList.hasChildNodes() || !savedNoteId) {
-    note.value ? notesToSidebar(note.value) : null;
-  } else {
-    let savedNote = sidebarNotesArr.find((notes) => notes.id == savedNoteId);
-    savedNote.data = note.value;
-    savedNote.title =
-      note.value.length == 0
-        ? "Kein Titel"
-        : note.value.split("\n")[0].substring(0, 15);
-    localStorage.setItem("sidebarNotesArr", JSON.stringify(sidebarNotesArr));
-    const sidebarItem = notesList.querySelector(`[data-id="${savedNoteId}"]`);
-    showToast("Notiz wurde gespeichert");
-    sidebarItem_handler(sidebarItem);
-    reloadNotesSidebar();
-  }
+const updateCategorySelect = (categoryArr, activeCategory = null) => {
+  const select = document.getElementById("category-select");
+  if (!select) return;
+  select.innerHTML = "";
+  categoryArr.forEach((category) => {
+    const option = document.createElement("option");
+    option.value = category.id;
+    option.textContent = category.name;
+    if (activeCategory) {
+      option.selected = true;
+    }
+    select.appendChild(option);
+  });
 };
 
-add_btn.addEventListener("click", save_btn_handler);
+const optionHandler = () => {
+  const select = document.getElementById("category-select");
+  if (!select) return;
+  tempSelectedCategory = select.options[select.selectedIndex].textContent;
+  return;
+};
 
-const delete_btn_handler = () => {
+const saveButton = () => {
+  const cleanup = () => {
+    const title = document.querySelector(".title");
+    const note = document.querySelector(".note");
+    if (title) title.value = "";
+    if (note) note.value = "";
+  };
+  const title = document.querySelector(".title");
   const note = document.querySelector(".note");
-  if (note.value.length > 0) {
+  const savedNoteId = savedNoteIdState.savedNoteId;
+  state.active_category = tempSelectedCategory || state.active_category;
+  if (!savedNoteId) {
+    noteToBeRendered(note.value, title.value, state.active_category);
+    cleanup();
+    if (note.value == "Hello there") {
+      showToast("General Kenobi");
+    } else {
+      showToast("Neue Notiz angelegt");
+    }
+  } else {
+    let notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
+    const savedNote = notesArr.find((notes) => notes.id == savedNoteId);
+    savedNote.title = title.value.length == 0 ? "Kein Titel" : title.value;
+    savedNote.data = note.value;
+    savedNote.category = state.active_category;
+    localStorage.setItem("notesArr", JSON.stringify(notesArr));
+    savedNoteIdState.savedNoteId = null;
+    cleanup();
+    showToast("Notiz wurde gespeichert");
+    reloadNoteList();
+  }
+  tempSelectedCategory = null;
+};
+
+add_btn.addEventListener("click", () => {
+  saveButton();
+  closeBtn.click();
+});
+
+const deleteButton = () => {
+  const note = document.querySelector(".note");
+  if (note.value.length) {
     note.value = "";
     return;
   }
 };
-delete_btn.addEventListener("click", delete_btn_handler);
+delete_btn.addEventListener("click", deleteButton);
 
-const toggle_lightmode_handler = () => {
-  const notes_list = document.querySelector(".notes-list");
-  const sidebar_notes = document.querySelector(".sidebar-notes");
-  const category_list = document.querySelector(".category-list");
-  const priorities = document.querySelector(".priorities");
-  const singleElements = document.querySelectorAll("p, button, span");
-  const note = document.querySelector(".note");
-  const navbar = document.querySelector(".navbar");
-  if (notes_list.hasChildNodes()) {
-    [...notes_list.children].forEach((child) =>
-      child.classList.toggle("light-mode")
-    );
+function toggleDarkMode(className = "dark") {
+  const savedMode = localStorage.getItem("mode") || "dark";
+  if (savedMode === "dark") {
+    document.body.classList.add(className);
+    document.body.classList.remove("light");
+  } else {
+    document.body.classList.remove(className);
+    document.body.classList.add("light");
   }
-  if (category_list.hasChildNodes()) {
-    [...category_list.children].forEach((child) => {
-      child.classList.toggle("light-mode");
-    });
-  }
-  const allElements = [
-    ...[
-      priorities,
-      notes_list,
-      sidebar_notes,
-      category_list,
-      note,
-      document.body,
-      navbar,
-    ],
-    ...singleElements,
-  ];
-  allElements.forEach((entry) => entry.classList.toggle("light-mode"));
-  const currentMode = document.body.classList.contains("light-mode")
-    ? "light"
-    : "dark";
-  localStorage.setItem("mode", currentMode);
-};
-dark_mode_btn.addEventListener("click", toggle_lightmode_handler);
+}
 
-const categoryInput_btn = async () => {
+dark_mode_btn.addEventListener("click", () => {
+  const isDark = document.body.classList.toggle("dark"); // toggle 'dark' class
+  if (isDark) {
+    document.body.classList.remove("light");
+    localStorage.setItem("mode", "dark");
+  } else {
+    document.body.classList.add("light");
+    localStorage.setItem("mode", "light");
+  }
+});
+
+const categoryInputButton = async () => {
   const category_btn = document.querySelector(".category-btn");
   const input = document.createElement("input");
   input.type = "text";
@@ -107,18 +156,20 @@ const categoryInput_btn = async () => {
   category_btn.replaceWith(input);
   const value = await inputListener(input);
   input.replaceWith(category_btn);
-  if (value) categoriesToSidebar(value);
+  if (value) categoryToBeRendered(value);
 };
-
 category_btn.addEventListener("click", (e) => {
   e.stopPropagation();
-  categoryInput_btn();
+  categoryInputButton();
 });
 
 export {
-  toggle_lightmode_handler,
-  save_btn_handler,
-  delete_btn_handler,
-  collapse_sidebar,
-  categoryInput_btn,
+  toggleDarkMode,
+  updateCategorySelect,
+  saveButton,
+  deleteButton,
+  collapseCategories,
+  categoryInputButton,
+  optionHandler,
+  showBtn,
 };
