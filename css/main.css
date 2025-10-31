@@ -20,9 +20,8 @@ body.dark {
   --btn-border: rgba(255, 255, 255, 0.06); /* button border */
   --btn-hover: hsl(220 10% 22%); /* button hover */
   --btn-outline: rgba(255, 255, 255, 0.12); /* button outline */
-  --active-bg: hsl(210 18% 26%); /* auffälliger, aber weicher Blau‑Ton */
-  --active-text: hsl(0 0% 100%); /* weiß für Kontrast */
-  --active-accent: rgba(99, 160, 255, 0.3); /* sichtbarere blaue Akzentlinie */
+  --active-bg: hsl(210 18% 26%); /* isActive background */
+  --active-text: hsl(0 0% 100%); /* isActive text */
 }
 
 body.light {
@@ -70,7 +69,7 @@ h2 {
   justify-content: space-between;
   align-items: center;
   padding: 0 1.5rem;
-  height: 60px;
+  height: 8vh;
   box-sizing: border-box;
 }
 
@@ -193,7 +192,7 @@ h2 {
 }
 
 .category-list {
-  border-top: 1px solid;
+  border-top: 1px solid var(--btn-text);
   margin: 0 1.5rem 0 1.5rem;
   display: flex;
   align-items: center;
@@ -276,11 +275,20 @@ h2 {
   color: var(--active-text);
 }
 
+.noteItemTemplateDate {
+  justify-self: flex-start;
+}
+
 @media screen and (max-width: 700px) {
   .navbar {
+    height: 10vh;
     display: flex;
     flex-direction: column;
   }
+  .navbar-right {
+    margin: 20px 0;
+  }
+
   .category-list {
     overflow-x: auto;
   }
@@ -312,6 +320,7 @@ h2 {
     grid-auto-rows: auto;
   }
   .navbar {
+    height: 7vh;
     flex-direction: column;
     align-items: flex-start;
     height: auto;
@@ -323,6 +332,7 @@ h2 {
     text-align: center;
   }
   .navbar-right {
+    margin: 20px 0 0 0;
     width: 100%;
     flex-direction: column;
     align-items: flex-start;

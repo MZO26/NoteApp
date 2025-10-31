@@ -2,8 +2,9 @@ import {
   noteToBeRendered,
   categoryToBeRendered,
   reloadNoteList,
-  state,
   savedNoteIdState,
+  syncCategoriesWithNotes,
+  activeCategoryState,
 } from "./sidebar.js";
 import { inputListener, showToast } from "./events.js";
 
@@ -16,8 +17,6 @@ const showBtn = document.querySelector(".showModal-btn");
 const closeBtn = document.querySelector(".closeModal-btn");
 const overlay = document.getElementById("overlay");
 const modal = document.getElementById("modal");
-
-let tempSelectedCategory = null;
 
 showBtn.addEventListener("click", () => {
   const title = document.querySelector(".title");
@@ -71,9 +70,6 @@ const updateCategorySelect = (categoryArr, activeCategory = null) => {
 };
 
 const optionHandler = () => {
-  const select = document.getElementById("category-select");
-  if (!select) return;
-  tempSelectedCategory = select.options[select.selectedIndex].textContent;
   return;
 };
 
@@ -87,28 +83,32 @@ const saveButton = () => {
   const title = document.querySelector(".title");
   const note = document.querySelector(".note");
   const savedNoteId = savedNoteIdState.savedNoteId;
-  state.active_category = tempSelectedCategory || state.active_category;
+
+  const select = document.getElementById("category-select");
+  const selectedCategory = select
+    ? select.options[select.selectedIndex].textContent
+    : activeCategoryState.activeCategory;
+  console.log(selectedCategory);
   if (!savedNoteId) {
-    noteToBeRendered(note.value, title.value, state.active_category);
-    cleanup();
+    noteToBeRendered(note.value, title.value, selectedCategory);
     if (note.value == "Hello there") {
       showToast("General Kenobi");
     } else {
       showToast("Neue Notiz angelegt");
     }
   } else {
-    let notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
+    const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
     const savedNote = notesArr.find((notes) => notes.id == savedNoteId);
     savedNote.title = title.value.length == 0 ? "Kein Titel" : title.value;
     savedNote.data = note.value;
-    savedNote.category = state.active_category;
+    savedNote.category = selectedCategory;
     localStorage.setItem("notesArr", JSON.stringify(notesArr));
-    savedNoteIdState.savedNoteId = null;
-    cleanup();
+    syncCategoriesWithNotes();
     showToast("Notiz wurde gespeichert");
-    reloadNoteList();
   }
-  tempSelectedCategory = null;
+  cleanup();
+  reloadNoteList();
+  savedNoteIdState.savedNoteId = null;
 };
 
 add_btn.addEventListener("click", () => {
@@ -137,7 +137,7 @@ function toggleDarkMode(className = "dark") {
 }
 
 dark_mode_btn.addEventListener("click", () => {
-  const isDark = document.body.classList.toggle("dark"); // toggle 'dark' class
+  const isDark = document.body.classList.toggle("dark");
   if (isDark) {
     document.body.classList.remove("light");
     localStorage.setItem("mode", "dark");

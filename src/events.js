@@ -61,7 +61,6 @@ function isActive(item, parentElement = null) {
       document.removeEventListener("click", item._listener);
       savedNoteIdState.savedNoteId = null;
       item._listener = null;
-      console.log(savedNoteIdState.savedNoteId);
     }
   };
   setTimeout(() => document.addEventListener("click", item._listener), 0);

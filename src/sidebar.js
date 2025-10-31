@@ -1,16 +1,16 @@
-import { formatDate } from "./data.js";
 import { Category, Note } from "./classes.js";
 import {
   noteItemTemplate,
   categoryItemTemplate,
   defaultCategoryItemTemplate,
+  dateTemplate,
 } from "./templates.js";
 import { showToast, isActive } from "./events.js";
 import { filter } from "./filter.js";
 import { showBtn, updateCategorySelect } from "./buttons.js";
 
-let default_category = "Ohne Kategorie";
-let state = { active_category: default_category };
+let defaultCategory = "Ohne Kategorie";
+let activeCategoryState = { activeCategory: defaultCategory };
 let savedNoteIdState = { savedNoteId: null };
 
 const filterInput = document.querySelector(".search-input");
@@ -30,23 +30,23 @@ const syncCategoriesWithNotes = () => {
 //NOTES
 
 //create new notes
-const createNewNote = (note_value, note_title, category = null) => {
+const createNewNote = (noteValue, noteTitle, category = null) => {
   return new Note(
     Date.now() + Math.random(),
-    category || state.active_category,
-    note_value,
-    note_title,
-    formatDate()
+    category || activeCategoryState.activeCategory,
+    noteValue,
+    noteTitle,
+    dateTemplate()
   );
 };
 
 //note items to be added to sidebar with html rendering
-const noteToBeRendered = (note_value, note_title, category = null) => {
+const noteToBeRendered = (noteValue, noteTitle, category = null) => {
   const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
   const notesContainer = document.querySelector(".notes-container");
   const noteItem = document.createElement("div");
   noteItem.className = "noteItem";
-  const newNote = createNewNote(note_value, note_title, category);
+  const newNote = createNewNote(noteValue, noteTitle, category);
   noteItem.setAttribute("data-id", newNote.id);
   noteItem.innerHTML = noteItemTemplate(newNote);
   notesArr.push(newNote);
@@ -59,9 +59,9 @@ const noteToBeRendered = (note_value, note_title, category = null) => {
 //note items event handling
 const noteItemHandler = (noteItem, notes) => {
   const noteItem_btn = noteItem.querySelector("button");
-  let notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
   noteItem_btn.onclick = function (event) {
     event.stopPropagation();
+    const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
     const id = this.parentElement.getAttribute("data-id");
     const index = notesArr.findIndex((sidebarNote) => sidebarNote.id == id);
     if (index > -1) {
@@ -77,7 +77,6 @@ const noteItemHandler = (noteItem, notes) => {
     document.querySelector(".note").value = notes.data;
     isActive(noteItem, notesContainer);
     savedNoteIdState.savedNoteId = noteItem.getAttribute("data-id");
-    showToast("Notiz ausgewählt");
     showBtn.click();
   };
 };
@@ -89,32 +88,32 @@ const reloadNoteList = (arr) => {
     ? arr
     : JSON.parse(localStorage.getItem("notesArr") || "[]");
 
-  const active_categoryItems = notesArr.filter(
-    (items) => items.category == state.active_category
+  const activeCategoryItems = notesArr.filter(
+    (items) => items.category == activeCategoryState.activeCategory
   );
   notesContainer.innerHTML = "";
-  if (notesArr.length === 0 || active_categoryItems.length === 0) {
+  if (notesArr.length === 0 || activeCategoryItems.length === 0) {
     noteToBeRendered(
       "Willkommen zu meiner Notiz App!",
       "Erste Notiz",
-      state.active_category || default_category
+      activeCategoryState.activeCategory || defaultCategory
     );
     return;
   }
-  if (active_categoryItems.length == 0) return;
+  if (activeCategoryItems.length == 0) return;
   const savedNoteId = savedNoteIdState.savedNoteId;
-  for (let i = 0; i < active_categoryItems.length; i++) {
+  for (let i = 0; i < activeCategoryItems.length; i++) {
     const noteItem = document.createElement("div");
     noteItem.className = "noteItem";
-    noteItem.setAttribute("data-id", active_categoryItems[i].id);
-    noteItem.innerHTML = noteItemTemplate(active_categoryItems[i]);
+    noteItem.setAttribute("data-id", activeCategoryItems[i].id);
+    noteItem.innerHTML = noteItemTemplate(activeCategoryItems[i]);
     notesContainer.appendChild(noteItem);
-    if (savedNoteId && savedNoteId == active_categoryItems[i].id) {
+    if (savedNoteId && savedNoteId == activeCategoryItems[i].id) {
       const notesContainer = document.querySelector(".notes-container");
       savedNoteIdState.savedNoteId = noteItem.getAttribute("data-id");
       isActive(noteItem, notesContainer);
     }
-    noteItemHandler(noteItem, active_categoryItems[i]);
+    noteItemHandler(noteItem, activeCategoryItems[i]);
   }
   syncCategoriesWithNotes();
 };
@@ -122,13 +121,15 @@ const reloadNoteList = (arr) => {
 //CATEGORIES
 
 //category items event handling
-const categoryItemHandler = (category_item) => {
-  if (!category_item.getAttribute("default-category-id")) {
+const categoryItemHandler = (categoryItem) => {
+  if (!categoryItem.getAttribute("default-category-id")) {
     //default category cant be deleted
-    const noteItem_btn = category_item.querySelector("button");
+    const noteItem_btn = categoryItem.querySelector("button");
     noteItem_btn.onclick = function (event) {
       event.stopPropagation();
-      let categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
+      const categoryArr = JSON.parse(
+        localStorage.getItem("categoryArr") || "[]"
+      );
       const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
       const id = this.parentElement.getAttribute("category-id");
       const index = categoryArr.findIndex(
@@ -140,11 +141,11 @@ const categoryItemHandler = (category_item) => {
         if (toBeDeleted && toBeDeleted.items.length > 0) {
           toBeDeleted.items.forEach((item) => {
             const old_category = item.category;
-            item.category = default_category;
+            item.category = defaultCategory;
             if (notesArr.length > 0) {
               notesArr.forEach((note) => {
                 if (note.category == old_category) {
-                  note.category = default_category;
+                  note.category = defaultCategory;
                 }
               });
             }
@@ -161,22 +162,23 @@ const categoryItemHandler = (category_item) => {
       reloadNoteList();
     };
   }
-  category_item.onclick = () => {
+  categoryItem.onclick = () => {
     const categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
     let id;
-    if (category_item.getAttribute("default-category-id")) {
-      id = category_item.getAttribute("default-category-id");
+    if (categoryItem.getAttribute("default-category-id")) {
+      id = categoryItem.getAttribute("default-category-id");
     } else {
-      id = category_item.getAttribute("category-id");
+      id = categoryItem.getAttribute("category-id");
     }
     const category = categoryArr.find((c) => c.id == id);
-    if (!category) state.active_category = default_category;
-    else state.active_category = category.name;
+    if (!category) activeCategoryState.activeCategory = defaultCategory;
+    else activeCategoryState.activeCategory = category.name;
+    console.log(activeCategoryState.activeCategory);
     const categoryList = document.querySelector(".category-list");
-    isActive(category_item, categoryList);
+    isActive(categoryItem, categoryList);
     syncCategoriesWithNotes();
     reloadNoteList();
-    updateCategorySelect(categoryArr, state.active_category);
+    updateCategorySelect(categoryArr, activeCategoryState.activeCategory);
   };
 };
 
@@ -194,8 +196,8 @@ const createNewCategory = (categoryName, notesArr) => {
 
 //category items to be added to sidebar with html rendering
 const categoryToBeRendered = (categoryName) => {
-  let notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
-  let categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
+  const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
+  const categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
   const doesCategoryExist = categoryArr.find(
     (category) => category.name == categoryName
   );
@@ -204,58 +206,60 @@ const categoryToBeRendered = (categoryName) => {
     return;
   }
   const newCategory = createNewCategory(categoryName, notesArr);
-  let category_item;
-  const sidebar_categories = document.querySelector(".category-list");
-  const doesDefaultExist = categoryArr.find((c) => c.name == default_category);
-  category_item = document.createElement("div");
-  category_item.id = "categoryItem";
-  if (newCategory.name == default_category && doesDefaultExist == undefined) {
+  let categoryItem;
+  const categoryList = document.querySelector(".category-list");
+  const doesDefaultExist = categoryArr.find((c) => c.name == defaultCategory);
+  categoryItem = document.createElement("div");
+  categoryItem.id = "categoryItem";
+  if (newCategory.name == defaultCategory && doesDefaultExist == undefined) {
     newCategory.isDefault = true;
-    category_item.setAttribute("default-category-id", newCategory.id);
-  } else if (newCategory.name != default_category && doesDefaultExist) {
-    category_item.setAttribute("category-id", newCategory.id);
+    categoryItem.setAttribute("default-category-id", newCategory.id);
+  } else if (newCategory.name != defaultCategory && doesDefaultExist) {
+    categoryItem.setAttribute("category-id", newCategory.id);
   } else return;
   categoryArr.push(newCategory);
   localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
   if (newCategory.isDefault) {
-    category_item.innerHTML = defaultCategoryItemTemplate(newCategory.name);
+    categoryItem.innerHTML = defaultCategoryItemTemplate(newCategory.name);
   } else {
-    category_item.innerHTML = categoryItemTemplate(newCategory.name);
+    categoryItem.innerHTML = categoryItemTemplate(newCategory.name);
   }
-  sidebar_categories.appendChild(category_item);
+  categoryList.appendChild(categoryItem);
   showToast(`Kategorie "${categoryName}" hinzugefügt`);
-  isActive(category_item, sidebar_categories);
+  activeCategoryState.activeCategory = categoryName;
   updateCategorySelect(categoryArr);
-  categoryItemHandler(category_item);
+  categoryItemHandler(categoryItem);
   syncCategoriesWithNotes();
 };
 
 //category reload
 const reloadCategoryList = () => {
-  const category_sidebar = document.querySelector(".category-list");
+  console.log(activeCategoryState.activeCategory);
+  const categoryList = document.querySelector(".category-list");
   const categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
   if (!categoryArr.length) return;
-  category_sidebar.innerHTML = "";
+  categoryList.innerHTML = "";
   for (let i = 0; i < categoryArr.length; i++) {
-    const category_item = document.createElement("div");
-    category_item.id = "categoryItem";
+    const categoryItem = document.createElement("div");
+    categoryItem.id = "categoryItem";
     if (categoryArr[i].isDefault) {
-      category_item.setAttribute("default-category-id", categoryArr[i].id);
-      category_item.innerHTML = defaultCategoryItemTemplate(
-        categoryArr[i].name
-      );
+      categoryItem.setAttribute("default-category-id", categoryArr[i].id);
+      categoryItem.innerHTML = defaultCategoryItemTemplate(categoryArr[i].name);
     } else {
-      category_item.setAttribute("category-id", categoryArr[i].id);
-      category_item.innerHTML = categoryItemTemplate(categoryArr[i].name);
+      categoryItem.setAttribute("category-id", categoryArr[i].id);
+      categoryItem.innerHTML = categoryItemTemplate(categoryArr[i].name);
     }
-    category_sidebar.appendChild(category_item);
-    categoryItemHandler(category_item);
+    if (activeCategoryState.activeCategory == categoryArr[i].name) {
+      isActive(categoryItem, categoryList);
+    }
+    categoryList.appendChild(categoryItem);
+    categoryItemHandler(categoryItem);
   }
 };
 
 export {
   savedNoteIdState,
-  state,
+  activeCategoryState,
   reloadNoteList,
   reloadCategoryList,
   noteToBeRendered,

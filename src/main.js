@@ -2,7 +2,7 @@ import {
   categoryToBeRendered,
   reloadCategoryList,
   reloadNoteList,
-  state,
+  activeCategoryState,
 } from "./sidebar.js";
 import {
   updateCategorySelect,
@@ -22,7 +22,7 @@ window.onload = () => {
   }
   reloadNoteList();
   if (categoryArr.length === 0) {
-    categoryToBeRendered(state.active_category);
+    categoryToBeRendered(activeCategoryState.activeCategory);
   }
   const mode = localStorage.getItem("mode");
   if (!document.body.classList.contains(`${mode}`)) {
