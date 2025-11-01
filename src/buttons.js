@@ -8,51 +8,47 @@ import {
 } from "./sidebar.js";
 import { inputListener, showToast } from "./events.js";
 
-const dark_mode_btn = document.querySelector(".dark-mode-btn");
-const delete_btn = document.querySelector(".delete-btn");
-const add_btn = document.querySelector(".add-btn");
-const toggle_btn = document.querySelector(".toggle-btn");
-const category_btn = document.querySelector(".category-btn");
+const darkModeBtn = document.querySelector(".dark-mode-btn");
+const deleteBtn = document.querySelector(".delete-btn");
+const addBtn = document.querySelector(".add-btn");
+const toggleBtn = document.querySelector(".toggle-btn");
+const categoryBtn = document.querySelector(".category-btn");
 const showBtn = document.querySelector(".showModal-btn");
 const closeBtn = document.querySelector(".closeModal-btn");
 const overlay = document.getElementById("overlay");
 const modal = document.getElementById("modal");
 
-showBtn.addEventListener("click", () => {
+const openOverlay = () => {
   const title = document.querySelector(".title");
   const note = document.querySelector(".note");
   const notes = document.querySelector(".notes-container").children;
+  sessionStorage.setItem("savedNoteId", null);
+  title.value = "";
+  note.value = "";
   Array.from(notes).forEach((element) => {
     if (element.classList.contains("active"))
       element.classList.remove("active");
   });
-  if (!savedNoteIdState.savedNoteId) {
-    title.value = "";
-    note.value = "";
-  }
-
   overlay.classList.add("show");
   modal.classList.add("show");
-});
+};
+showBtn.addEventListener("click", openOverlay);
 
 closeBtn.addEventListener("click", () => {
   overlay.classList.remove("show");
   modal.classList.remove("show");
-  savedNoteIdState.savedNoteId = null;
 });
 
 const collapseCategories = () => {
-  const sidebar_categories = document.querySelector(".category-list");
-  const sidebar_notes = document.getElementById("sidebar2");
-  sidebar_notes.classList.toggle("collapsed");
-  sidebar_categories.classList.toggle("collapsed");
-  if (sidebar_categories.hasChildNodes()) {
-    [...sidebar_categories.children].forEach((child) =>
+  const categoryList = document.querySelector(".category-list");
+  categoryList.classList.toggle("collapsed");
+  if (categoryList.hasChildNodes()) {
+    [...categoryList.children].forEach((child) =>
       child.classList.toggle("collapsed")
     );
   }
 };
-toggle_btn.addEventListener("click", collapseCategories);
+toggleBtn.addEventListener("click", collapseCategories);
 
 const updateCategorySelect = (categoryArr, activeCategory = null) => {
   const select = document.getElementById("category-select");
@@ -82,16 +78,17 @@ const saveButton = () => {
   };
   const title = document.querySelector(".title");
   const note = document.querySelector(".note");
-  const savedNoteId = savedNoteIdState.savedNoteId;
-
+  const savedNoteId = JSON.parse(
+    sessionStorage.getItem("savedNoteId") || "null"
+  );
   const select = document.getElementById("category-select");
   const selectedCategory = select
     ? select.options[select.selectedIndex].textContent
     : activeCategoryState.activeCategory;
-  console.log(selectedCategory);
+  console.log(savedNoteId);
   if (!savedNoteId) {
     noteToBeRendered(note.value, title.value, selectedCategory);
-    if (note.value == "Hello there") {
+    if (note.value == "Hello there" || title.value == "Hello there") {
       showToast("General Kenobi");
     } else {
       showToast("Neue Notiz angelegt");
@@ -108,10 +105,9 @@ const saveButton = () => {
   }
   cleanup();
   reloadNoteList();
-  savedNoteIdState.savedNoteId = null;
 };
 
-add_btn.addEventListener("click", () => {
+addBtn.addEventListener("click", () => {
   saveButton();
   closeBtn.click();
 });
@@ -123,9 +119,9 @@ const deleteButton = () => {
     return;
   }
 };
-delete_btn.addEventListener("click", deleteButton);
+deleteBtn.addEventListener("click", deleteButton);
 
-function toggleDarkMode(className = "dark") {
+const toggleDarkMode = (className = "dark") => {
   const savedMode = localStorage.getItem("mode") || "dark";
   if (savedMode === "dark") {
     document.body.classList.add(className);
@@ -134,9 +130,9 @@ function toggleDarkMode(className = "dark") {
     document.body.classList.remove(className);
     document.body.classList.add("light");
   }
-}
+};
 
-dark_mode_btn.addEventListener("click", () => {
+darkModeBtn.addEventListener("click", () => {
   const isDark = document.body.classList.toggle("dark");
   if (isDark) {
     document.body.classList.remove("light");
@@ -148,17 +144,17 @@ dark_mode_btn.addEventListener("click", () => {
 });
 
 const categoryInputButton = async () => {
-  const category_btn = document.querySelector(".category-btn");
+  const categoryBtn = document.querySelector(".category-btn");
   const input = document.createElement("input");
   input.type = "text";
   input.id = "category-input";
   input.placeholder = "Kategorie eingeben";
-  category_btn.replaceWith(input);
+  categoryBtn.replaceWith(input);
   const value = await inputListener(input);
-  input.replaceWith(category_btn);
+  input.replaceWith(categoryBtn);
   if (value) categoryToBeRendered(value);
 };
-category_btn.addEventListener("click", (e) => {
+categoryBtn.addEventListener("click", (e) => {
   e.stopPropagation();
   categoryInputButton();
 });

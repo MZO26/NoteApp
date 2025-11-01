@@ -7,7 +7,7 @@ import {
 } from "./templates.js";
 import { showToast, isActive } from "./events.js";
 import { filter } from "./filter.js";
-import { showBtn, updateCategorySelect } from "./buttons.js";
+import { updateCategorySelect } from "./buttons.js";
 
 let defaultCategory = "Ohne Kategorie";
 let activeCategoryState = { activeCategory: defaultCategory };
@@ -58,27 +58,39 @@ const noteToBeRendered = (noteValue, noteTitle, category = null) => {
 
 //note items event handling
 const noteItemHandler = (noteItem, notes) => {
-  const noteItem_btn = noteItem.querySelector("button");
-  noteItem_btn.onclick = function (event) {
-    event.stopPropagation();
-    const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
-    const id = this.parentElement.getAttribute("data-id");
-    const index = notesArr.findIndex((sidebarNote) => sidebarNote.id == id);
-    if (index > -1) {
-      notesArr.splice(index, 1);
-      localStorage.setItem("notesArr", JSON.stringify(notesArr));
-    }
-    this.parentElement.remove();
-    syncCategoriesWithNotes();
-  };
-  noteItem.onclick = () => {
+  const noteItemBtn = noteItem.querySelector("button");
+  const overlay = document.getElementById("overlay");
+  const modal = document.getElementById("modal");
+  function viewNote() {
     const notesContainer = document.querySelector(".notes-container");
     document.querySelector(".title").value = notes.title;
     document.querySelector(".note").value = notes.data;
     isActive(noteItem, notesContainer);
     savedNoteIdState.savedNoteId = noteItem.getAttribute("data-id");
-    showBtn.click();
-  };
+    sessionStorage.setItem(
+      "savedNoteId",
+      JSON.stringify(savedNoteIdState.savedNoteId)
+    );
+    overlay.classList.add("show");
+    modal.classList.add("show");
+  }
+
+  function deleteNote(event) {
+    event.stopPropagation();
+    const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
+    const id = noteItem.getAttribute("data-id");
+    const index = notesArr.findIndex((sidebarNote) => sidebarNote.id == id);
+    if (index > -1) {
+      notesArr.splice(index, 1);
+      localStorage.setItem("notesArr", JSON.stringify(notesArr));
+    }
+    noteItemBtn.removeEventListener("click", deleteNote);
+    noteItem.removeEventListener("click", viewNote);
+    noteItem.remove();
+    syncCategoriesWithNotes();
+  }
+  noteItem.addEventListener("click", viewNote);
+  noteItemBtn.addEventListener("click", deleteNote);
 };
 
 //notes sidebar reload
@@ -101,7 +113,9 @@ const reloadNoteList = (arr) => {
     return;
   }
   if (activeCategoryItems.length == 0) return;
-  const savedNoteId = savedNoteIdState.savedNoteId;
+  const savedNoteId = JSON.parse(
+    sessionStorage.getItem("savedNoteId") || "null"
+  );
   for (let i = 0; i < activeCategoryItems.length; i++) {
     const noteItem = document.createElement("div");
     noteItem.className = "noteItem";
@@ -122,47 +136,9 @@ const reloadNoteList = (arr) => {
 
 //category items event handling
 const categoryItemHandler = (categoryItem) => {
-  if (!categoryItem.getAttribute("default-category-id")) {
-    //default category cant be deleted
-    const noteItem_btn = categoryItem.querySelector("button");
-    noteItem_btn.onclick = function (event) {
-      event.stopPropagation();
-      const categoryArr = JSON.parse(
-        localStorage.getItem("categoryArr") || "[]"
-      );
-      const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
-      const id = this.parentElement.getAttribute("category-id");
-      const index = categoryArr.findIndex(
-        (category) => String(category.id) == String(id)
-      );
-      if (index > -1) {
-        //item exists if index > -1 / -1 if it doesnt exist
-        let toBeDeleted = categoryArr.find((categories) => categories.id == id);
-        if (toBeDeleted && toBeDeleted.items.length > 0) {
-          toBeDeleted.items.forEach((item) => {
-            const old_category = item.category;
-            item.category = defaultCategory;
-            if (notesArr.length > 0) {
-              notesArr.forEach((note) => {
-                if (note.category == old_category) {
-                  note.category = defaultCategory;
-                }
-              });
-            }
-          });
-        }
-        categoryArr.splice(index, 1);
-      }
-      this.parentElement.remove();
-      localStorage.setItem("notesArr", JSON.stringify(notesArr));
-      localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
-      updateCategorySelect(categoryArr);
-      syncCategoriesWithNotes();
-      reloadCategoryList();
-      reloadNoteList();
-    };
-  }
-  categoryItem.onclick = () => {
+  const categoryItemBtn = categoryItem.querySelector("button");
+
+  function selectCategory() {
     const categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
     let id;
     if (categoryItem.getAttribute("default-category-id")) {
@@ -173,13 +149,54 @@ const categoryItemHandler = (categoryItem) => {
     const category = categoryArr.find((c) => c.id == id);
     if (!category) activeCategoryState.activeCategory = defaultCategory;
     else activeCategoryState.activeCategory = category.name;
-    console.log(activeCategoryState.activeCategory);
     const categoryList = document.querySelector(".category-list");
     isActive(categoryItem, categoryList);
     syncCategoriesWithNotes();
     reloadNoteList();
     updateCategorySelect(categoryArr, activeCategoryState.activeCategory);
-  };
+  }
+
+  function deleteCategory(event) {
+    event.stopPropagation();
+    //default category cant be deleted
+    const categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
+    const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
+    const id = categoryItem.getAttribute("category-id");
+    const index = categoryArr.findIndex(
+      (category) => String(category.id) == String(id)
+    );
+    if (index > -1) {
+      //item exists if index > -1 / -1 if it doesnt exist
+      let toBeDeleted = categoryArr.find((categories) => categories.id == id);
+      if (toBeDeleted && toBeDeleted.items.length > 0) {
+        toBeDeleted.items.forEach((item) => {
+          const old_category = item.category;
+          item.category = defaultCategory;
+          if (notesArr.length > 0) {
+            notesArr.forEach((note) => {
+              if (note.category == old_category) {
+                note.category = defaultCategory;
+              }
+            });
+          }
+        });
+      }
+      categoryArr.splice(index, 1);
+    }
+    categoryItem.removeEventListener("click", selectCategory);
+    categoryItemBtn.removeEventListener("click", deleteCategory);
+    categoryItem.remove();
+    localStorage.setItem("notesArr", JSON.stringify(notesArr));
+    localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
+    updateCategorySelect(categoryArr);
+    syncCategoriesWithNotes();
+    reloadCategoryList();
+    reloadNoteList();
+  }
+  if (!categoryItem.getAttribute("default-category-id")) {
+    categoryItemBtn.addEventListener("click", deleteCategory);
+  }
+  categoryItem.addEventListener("click", selectCategory);
 };
 
 //create new categories
@@ -234,7 +251,6 @@ const categoryToBeRendered = (categoryName) => {
 
 //category reload
 const reloadCategoryList = () => {
-  console.log(activeCategoryState.activeCategory);
   const categoryList = document.querySelector(".category-list");
   const categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
   if (!categoryArr.length) return;

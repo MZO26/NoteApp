@@ -1,4 +1,4 @@
-/*
+/*  for better overview when styling:
   --bg: hsl(220 10% 12%); page background
   --bg-light: hsl(220 10% 16%); slightly lighter panels
   --bg-dark: hsl(0 0% 96%); text color on dark bg
@@ -59,8 +59,8 @@ button:focus {
   background: var(--btn-bg);
   color: var(--btn-text);
   border: 1px solid var(--btn-border);
-  transition: background-color 0.12s ease, box-shadow 0.12s ease,
-    border-color 0.12s ease;
+  transition: background-color 0.1s ease, box-shadow 0.1s ease,
+    border-color 0.1s ease;
 }
 
 .input-wrapper .search-input::placeholder {
@@ -106,10 +106,13 @@ button:focus {
   align-items: center;
 }
 
+.button-collection {
+}
+
 .category-btn,
 #category-input {
   border-radius: 10px;
-  height: 35px;
+  height: 25px;
   padding: 6px 12px;
   box-sizing: border-box;
 }

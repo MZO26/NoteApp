@@ -1,5 +1,5 @@
 body {
-  overflow-y: auto;
+  overflow-y: scroll;
   overflow-x: hidden;
   margin: 0;
   background-color: var(--bg);
@@ -160,7 +160,6 @@ h2 {
   border-radius: 5px;
   font-size: 1.5rem;
   resize: none;
-  overflow: hidden;
   transition: font-size 0.3s, height 0.3s;
   margin-bottom: 10px;
 }
@@ -176,6 +175,16 @@ h2 {
   color: var(--bg-dark);
   background-color: var(--note);
   margin-top: 10px;
+  overflow-y: scroll;
+}
+
+textarea::-webkit-scrollbar {
+  width: 3px;
+  background-color: var(--note);
+}
+
+textarea::-webkit-scrollbar-thumb {
+  background-color: var(--bg-dark);
 }
 
 /* modal end */
