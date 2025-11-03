@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Notetaking App</title>
+    <title>Notiz App</title>
     <meta name="description" content="notetaking app" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="css/main.css" />
@@ -23,7 +23,7 @@
           </div>
           <div class="navbar-mobile-row">
             <button class="showModal-btn">Notiz hinzufügen</button>
-            <button title="toggle light- / darkmode" class="dark-mode-btn">
+            <button title="Hell / Dunkel" class="dark-mode-btn">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -42,7 +42,7 @@
       </div>
       <div class="button-collection">
         <button class="category-btn">Kategorie hinzufügen</button>
-        <button title="toggle sidebar" class="toggle-btn">
+        <button title="Kategorien einblenden / ausblenden" class="toggle-btn">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -62,10 +62,16 @@
       <div class="notes-container"></div>
       <div id="overlay"></div>
       <div id="modal">
-        <h2>Neue Notiz</h2>
-        <p>Titel hinzufügen</p>
+        <div class="modal-top">
+          <h2 class="modal-heading">Neue Notiz</h2>
+          <label class="simple-switch">
+            <input type="checkbox" />
+            <span class="switch-btn"></span>
+          </label>
+        </div>
+        <p class="modal-title">Titel hinzufügen</p>
         <textarea class="title"></textarea>
-        <p>Notiz hinzufügen</p>
+        <p class="modal-note">Notiz hinzufügen</p>
         <textarea class="note"></textarea>
         <div class="button-collection-modal">
           <button title="save note" class="add-btn">
@@ -100,7 +106,7 @@
             </svg>
           </button>
           <select id="category-select"></select>
-          <button class="closeModal-btn">schliessen</button>
+          <button class="closeModal-btn">Schliessen</button>
         </div>
       </div>
       <div id="toast-container"></div>

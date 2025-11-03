@@ -7,7 +7,7 @@ import {
 } from "./templates.js";
 import { showToast, isActive } from "./events.js";
 import { filter } from "./filter.js";
-import { updateCategorySelect } from "./buttons.js";
+import { saveTempNote, updateCategorySelect } from "./buttons.js";
 
 let defaultCategory = "Ohne Kategorie";
 let activeCategoryState = { activeCategory: defaultCategory };
@@ -62,9 +62,13 @@ const noteItemHandler = (noteItem, notes) => {
   const overlay = document.getElementById("overlay");
   const modal = document.getElementById("modal");
   function viewNote() {
+    const tempNote = JSON.parse(localStorage.getItem("tempNoteValue") || "{}");
     const notesContainer = document.querySelector(".notes-container");
-    document.querySelector(".title").value = notes.title;
-    document.querySelector(".note").value = notes.data;
+    const noteTitle = document.querySelector(".title");
+    const noteTextArea = document.querySelector(".note");
+    noteTitle.value = tempNote.title || notes.title;
+    noteTextArea.value = tempNote.note || notes.data;
+    saveTempNote();
     isActive(noteItem, notesContainer);
     savedNoteIdState.savedNoteId = noteItem.getAttribute("data-id");
     sessionStorage.setItem(
@@ -73,6 +77,9 @@ const noteItemHandler = (noteItem, notes) => {
     );
     overlay.classList.add("show");
     modal.classList.add("show");
+    localStorage.setItem("modal-status", "open");
+    noteTitle.addEventListener("input", saveTempNote);
+    noteTextArea.addEventListener("input", saveTempNote);
   }
 
   function deleteNote(event) {

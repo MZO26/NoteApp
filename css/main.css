@@ -1,9 +1,13 @@
+html,
 body {
+  background-color: var(--bg);
+}
+
+body {
+  color: var(--text);
   overflow-y: scroll;
   overflow-x: hidden;
   margin: 0;
-  background-color: var(--bg);
-  color: var(--text);
 }
 
 :root,
@@ -152,6 +156,11 @@ h2 {
   transform: translate(-50%, -50%) scale(1);
 }
 
+.modal-top {
+  display: flex;
+  justify-content: space-between;
+}
+
 .title,
 .note {
   align-self: center;
@@ -178,12 +187,155 @@ h2 {
   overflow-y: scroll;
 }
 
-textarea::-webkit-scrollbar {
+.todo-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-sizing: border-box;
+  overflow-y: scroll;
+  padding: 5px;
+  width: 100%;
+  height: 12rem;
+  color: var(--bg-dark);
+  background-color: var(--note);
+  border-radius: 5px;
+  margin: 10px 0 10px 0;
+  font-size: 1rem;
+}
+
+.todo-input {
+  height: 2.5rem;
+  font-size: 1.2rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  color: var(--bg-dark);
+  background-color: var(--btn-bg);
+}
+
+.todo-input input[type="text"],
+.todo-input textarea {
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: var(--bg-dark);
+  box-sizing: border-box;
+  transition: background-color 0.1s ease, border-color 0.1s ease;
+  font-size: 1.5rem;
+}
+
+.todo-input input::placeholder,
+.todo-input textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.todo-input input:focus,
+.todo-input textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--btn-outline);
+  border-color: var(--btn-hover);
+}
+
+.task-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.task-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border: 1px solid var(--btn-border);
+  box-sizing: border-box;
+}
+
+.task-list li {
+  position: relative;
+}
+
+.task-checkbox {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  opacity: 0;
+  z-index: 2;
+  cursor: pointer;
+}
+
+.task-list li > span {
+  display: inline-block;
+  padding-left: 36px;
+  position: relative;
+  color: var(--btn-text);
+}
+
+.task-list li > span::before,
+.task-checkbox:focus + span::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 8px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+}
+
+.task-list li > span::before {
+  border-radius: 6px;
+  background: var(--btn-bg);
+  border: 1px solid var(--btn-border);
+}
+
+.task-checkbox:checked + span::before {
+  background: var(--active-bg);
+  border-color: var(--active-bg);
+  transform: translateY(-50%) scale(1);
+}
+
+.task-list li > span::after {
+  content: "";
+  position: absolute;
+  top: 45%;
+  left: 15px;
+  transform: translateY(-50%) rotate(45deg);
+  width: 6px;
+  height: 10px;
+  border-right: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+  opacity: 0;
+}
+
+.task-checkbox:checked + span::after {
+  border-right-color: var(--active-text);
+  border-bottom-color: var(--active-text);
+  opacity: 1;
+}
+.task-completed {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  opacity: 0.9;
+}
+
+textarea::-webkit-scrollbar,
+.todo-container::-webkit-scrollbar {
   width: 3px;
   background-color: var(--note);
 }
 
-textarea::-webkit-scrollbar-thumb {
+textarea::-webkit-scrollbar-thumb,
+.todo-container::-webkit-scrollbar-thumb {
   background-color: var(--bg-dark);
 }
 
@@ -318,6 +470,18 @@ textarea::-webkit-scrollbar-thumb {
   }
 }
 @media screen and (max-width: 480px) {
+  .todo-container {
+    padding: 0.5rem;
+    max-height: 10rem;
+  }
+  .add-btn,
+  .addBtn {
+    height: 34px;
+    padding: 0 10px;
+  }
+  .task-list li {
+    padding: 6px;
+  }
   .container {
     padding: 0.5rem 1rem;
   }

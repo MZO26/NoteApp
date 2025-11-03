@@ -12,6 +12,7 @@
   --btn-hover: hsl(220 10% 22%); button hover
   --btn-outline: rgba(255, 255, 255, 0.12); button outline
  */
+
 button {
   cursor: pointer;
   background: var(--btn-bg);
@@ -38,7 +39,6 @@ button:focus {
 }
 
 .toggle-btn {
-  /* for toggling category-sidebar */
   border-radius: 18px;
   max-width: 35px;
   max-height: 35px;
@@ -106,7 +106,44 @@ button:focus {
   align-items: center;
 }
 
-.button-collection {
+.simple-switch {
+  margin-top: 20px;
+  display: inline-block;
+}
+
+.simple-switch input {
+  display: none;
+}
+
+.switch-btn {
+  width: 50px;
+  height: 25px;
+  background-color: var(--btn-hover);
+  border: 2px solid var(--btn-border);
+  border-radius: 12px;
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+}
+
+.simple-switch input:checked + .switch-btn {
+  background-color: var(--active-bg);
+}
+
+.switch-btn::after {
+  content: "";
+  width: 21px;
+  height: 21px;
+  background: var(--bg-dark);
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: 0.2s;
+}
+
+.simple-switch input:checked + .switch-btn::after {
+  left: 27px;
 }
 
 .category-btn,
@@ -118,7 +155,8 @@ button:focus {
 }
 
 .add-btn,
-.delete-btn {
+.delete-btn,
+.task-delete-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -127,6 +165,36 @@ button:focus {
   margin-right: 10px;
   border-radius: 18px;
 }
+
+.task-delete-btn {
+  position: absolute;
+  right: 0;
+}
+
+.todo-btn {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border: 1px solid var(--btn-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font: inherit;
+}
+.todo-btn:hover {
+  background: var(--btn-hover);
+}
+.todo-btn:active {
+  transform: translateY(1px);
+}
+.todo-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--btn-outline);
+}
+
 /* Modal end */
 
 .category-btn,

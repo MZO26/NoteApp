@@ -2,11 +2,11 @@ import {
   noteToBeRendered,
   categoryToBeRendered,
   reloadNoteList,
-  savedNoteIdState,
   syncCategoriesWithNotes,
   activeCategoryState,
 } from "./sidebar.js";
 import { inputListener, showToast } from "./events.js";
+import { changeOverlayInterface } from "./toDo.js";
 
 const darkModeBtn = document.querySelector(".dark-mode-btn");
 const deleteBtn = document.querySelector(".delete-btn");
@@ -17,27 +17,49 @@ const showBtn = document.querySelector(".showModal-btn");
 const closeBtn = document.querySelector(".closeModal-btn");
 const overlay = document.getElementById("overlay");
 const modal = document.getElementById("modal");
+const switchBtn = document.querySelector(".switch-btn");
+
+const saveTempNote = () => {
+  const noteTitle = document.querySelector(".title");
+  const noteTextArea = document.querySelector(".note");
+  localStorage.setItem(
+    "tempNoteValue",
+    JSON.stringify({ title: noteTitle.value, note: noteTextArea.value })
+  );
+};
 
 const openOverlay = () => {
-  const title = document.querySelector(".title");
-  const note = document.querySelector(".note");
+  const noteTitle = document.querySelector(".title");
+  const noteTextArea = document.querySelector(".note");
   const notes = document.querySelector(".notes-container").children;
+  const tempNote = JSON.parse(localStorage.getItem("tempNoteValue") || "{}");
   sessionStorage.setItem("savedNoteId", null);
-  title.value = "";
-  note.value = "";
+  noteTitle.value = tempNote.title || "";
+  noteTextArea.value = tempNote.note || "";
   Array.from(notes).forEach((element) => {
     if (element.classList.contains("active"))
       element.classList.remove("active");
   });
   overlay.classList.add("show");
   modal.classList.add("show");
+  localStorage.setItem("modal-status", "open");
+  noteTitle.addEventListener("input", saveTempNote);
+  noteTextArea.addEventListener("input", saveTempNote);
 };
 showBtn.addEventListener("click", openOverlay);
 
 closeBtn.addEventListener("click", () => {
+  const noteTitle = document.querySelector(".title");
+  const noteTextArea = document.querySelector(".note");
+  noteTitle.removeEventListener("input", saveTempNote);
+  noteTextArea.removeEventListener("input", saveTempNote);
   overlay.classList.remove("show");
   modal.classList.remove("show");
+  localStorage.setItem("modal-status", "closed");
+  localStorage.removeItem("tempNoteValue");
 });
+
+switchBtn.addEventListener("click", changeOverlayInterface);
 
 const collapseCategories = () => {
   const categoryList = document.querySelector(".category-list");
@@ -65,10 +87,6 @@ const updateCategorySelect = (categoryArr, activeCategory = null) => {
   });
 };
 
-const optionHandler = () => {
-  return;
-};
-
 const saveButton = () => {
   const cleanup = () => {
     const title = document.querySelector(".title");
@@ -78,6 +96,13 @@ const saveButton = () => {
   };
   const title = document.querySelector(".title");
   const note = document.querySelector(".note");
+  const modalState = JSON.parse(sessionStorage.getItem("modalState"));
+  console.log(modalState);
+  if (modalState.note == false) {
+    setTimeout(() => {
+      switchBtn.click();
+    }, 0);
+  }
   const savedNoteId = JSON.parse(
     sessionStorage.getItem("savedNoteId") || "null"
   );
@@ -160,12 +185,13 @@ categoryBtn.addEventListener("click", (e) => {
 });
 
 export {
+  saveTempNote,
+  openOverlay,
   toggleDarkMode,
   updateCategorySelect,
   saveButton,
   deleteButton,
   collapseCategories,
   categoryInputButton,
-  optionHandler,
   showBtn,
 };
