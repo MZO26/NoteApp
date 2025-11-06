@@ -1,4 +1,4 @@
-import { CategoryItem } from "./classes.js";
+import { createNewCategory } from "./classes.js";
 import {
   categoryItemTemplate,
   defaultCategoryItemTemplate,
@@ -10,18 +10,6 @@ import { reloadNoteList } from "./notes.js";
 let defaultCategory = "Ohne Kategorie";
 let activeCategoryState = { activeCategory: defaultCategory };
 
-const createNewCategory = (categoryName, notesArr) => {
-  const categoryItems =
-    notesArr.filter((notes) => notes.category == categoryName) || [];
-  return new CategoryItem(
-    Date.now() + Math.random(),
-    categoryItems,
-    categoryName,
-    false
-  );
-};
-
-//category items to be added to sidebar with html rendering
 const categoryToBeRendered = (categoryName) => {
   const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
   const categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
@@ -61,7 +49,6 @@ const categoryToBeRendered = (categoryName) => {
 
 const categoryItemHandler = (categoryItem) => {
   const categoryItemBtn = categoryItem.querySelector("button");
-
   function selectCategory() {
     sessionStorage.setItem("savedNoteId", "null");
     const categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
@@ -83,7 +70,6 @@ const categoryItemHandler = (categoryItem) => {
 
   function deleteCategory(event) {
     event.stopPropagation();
-    //default category cant be deleted
     const categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
     const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
     const id = categoryItem.getAttribute("category-id");
@@ -91,7 +77,6 @@ const categoryItemHandler = (categoryItem) => {
       (category) => String(category.id) == String(id)
     );
     if (index > -1) {
-      //item exists if index > -1 / -1 if it doesnt exist
       let toBeDeleted = categoryArr.find((categories) => categories.id == id);
       if (toBeDeleted && toBeDeleted.items.length > 0) {
         toBeDeleted.items.forEach((item) => {
@@ -124,7 +109,6 @@ const categoryItemHandler = (categoryItem) => {
   categoryItem.addEventListener("click", selectCategory);
 };
 
-//category reload
 const reloadCategoryList = () => {
   const categoryList = document.querySelector(".category-list");
   const categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");

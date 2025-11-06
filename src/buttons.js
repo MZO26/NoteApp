@@ -1,13 +1,14 @@
 import { noteToBeRendered, reloadNoteList } from "./notes.js";
 import { categoryToBeRendered, activeCategoryState } from "./categories.js";
-import { inputListener, showToast, syncCategoriesWithNotes } from "./events.js";
 import {
-  changeOverlayInterface,
-  toDoToBeRendered,
+  inputListener,
+  showToast,
+  syncCategoriesWithNotes,
   saveTempNote,
-} from "./toDo.js";
+} from "./events.js";
+import { toDoToBeRendered } from "./toDo.js";
+import { changeOverlayInterface } from "./renderModalUI.js";
 import { filter } from "./filter.js";
-
 const darkModeBtn = document.querySelector(".dark-mode-btn");
 const deleteBtn = document.querySelector(".delete-btn");
 const saveBtn = document.querySelector(".add-btn");

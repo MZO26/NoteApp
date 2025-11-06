@@ -1,26 +1,11 @@
-import { NoteItem } from "./classes.js";
-import {
-  noteItemTemplate,
-  dateTemplate,
-  toDoItemTemplate,
-} from "./templates.js";
-import { isActive, syncCategoriesWithNotes } from "./events.js";
+import { createNewNote } from "./classes.js";
+import { noteItemTemplate, toDoItemTemplate } from "./templates.js";
+import { isActive, syncCategoriesWithNotes, saveTempNote } from "./events.js";
 import { activeCategoryState, defaultCategory } from "./categories.js";
-import { toDoItemHandler, saveTempNote } from "./toDo.js";
+import { toDoItemHandler } from "./toDo.js";
 import { openOverlay } from "./buttons.js";
 
 let savedNoteIdState = { savedNoteId: null };
-
-const createNewNote = (type, category = null, noteValue, noteTitle) => {
-  return new NoteItem(
-    Date.now() + Math.random(),
-    type,
-    category || activeCategoryState.activeCategory,
-    noteValue,
-    noteTitle,
-    dateTemplate()
-  );
-};
 
 const noteToBeRendered = (noteValue, noteTitle, category = null, type) => {
   if (type !== "note") return;
@@ -135,10 +120,4 @@ const reloadNoteList = (arr) => {
   syncCategoriesWithNotes();
 };
 
-export {
-  savedNoteIdState,
-  reloadNoteList,
-  createNewNote,
-  noteToBeRendered,
-  noteItemHandler,
-};
+export { savedNoteIdState, reloadNoteList, noteToBeRendered, noteItemHandler };

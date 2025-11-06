@@ -76,4 +76,40 @@ const syncCategoriesWithNotes = () => {
   localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
 };
 
-export { showToast, inputListener, isActive, syncCategoriesWithNotes };
+const saveTempToDo = () => {
+  const toDoTitle = document.querySelector(".todo-title");
+  const currentToDo = document.querySelector(".todo-container");
+  const toDoList = currentToDo.querySelectorAll(".task-list li span");
+  const titleValue = toDoTitle ? toDoTitle.value : "Kein Titel";
+  const toDoData = [];
+  if (toDoList.length) {
+    toDoList.forEach((span) => {
+      toDoData.push(span.textContent);
+    });
+  }
+  localStorage.setItem(
+    "tempToDoValue",
+    JSON.stringify({ title: titleValue, data: toDoData })
+  );
+};
+
+const saveTempNote = () => {
+  const noteTitle = document.querySelector(".title");
+  const noteTextArea = document.querySelector(".note");
+  localStorage.setItem(
+    "tempNoteValue",
+    JSON.stringify({
+      title: noteTitle.value || "Kein Titel",
+      note: noteTextArea.value,
+    })
+  );
+};
+
+export {
+  showToast,
+  inputListener,
+  isActive,
+  syncCategoriesWithNotes,
+  saveTempToDo,
+  saveTempNote,
+};
