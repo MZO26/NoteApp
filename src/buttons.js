@@ -1,65 +1,110 @@
+import { noteToBeRendered, reloadNoteList } from "./notes.js";
+import { categoryToBeRendered, activeCategoryState } from "./categories.js";
+import { inputListener, showToast, syncCategoriesWithNotes } from "./events.js";
 import {
-  noteToBeRendered,
-  categoryToBeRendered,
-  reloadNoteList,
-  syncCategoriesWithNotes,
-  activeCategoryState,
-} from "./sidebar.js";
-import { inputListener, showToast } from "./events.js";
-import { changeOverlayInterface } from "./toDo.js";
+  changeOverlayInterface,
+  toDoToBeRendered,
+  saveTempNote,
+} from "./toDo.js";
+import { filter } from "./filter.js";
 
 const darkModeBtn = document.querySelector(".dark-mode-btn");
 const deleteBtn = document.querySelector(".delete-btn");
-const addBtn = document.querySelector(".add-btn");
+const saveBtn = document.querySelector(".add-btn");
 const toggleBtn = document.querySelector(".toggle-btn");
 const categoryBtn = document.querySelector(".category-btn");
 const showBtn = document.querySelector(".showModal-btn");
 const closeBtn = document.querySelector(".closeModal-btn");
 const overlay = document.getElementById("overlay");
 const modal = document.getElementById("modal");
-const switchBtn = document.querySelector(".switch-btn");
+const switchBtn = document.querySelector(".switch-checkbox");
+const switchBtnUI = document.querySelector(".switch");
+const filterInput = document.querySelector(".search-input");
 
-const saveTempNote = () => {
+filterInput.addEventListener("click", filter);
+
+const resetNoteInterface = () => {
   const noteTitle = document.querySelector(".title");
-  const noteTextArea = document.querySelector(".note");
-  localStorage.setItem(
-    "tempNoteValue",
-    JSON.stringify({ title: noteTitle.value, note: noteTextArea.value })
-  );
+  const noteContent = document.querySelector(".note");
+  if (noteTitle) noteTitle.value = "";
+  if (noteContent) noteContent.value = "";
+};
+
+const resetToDoInterface = () => {
+  const todoTitle = document.querySelector(".todo-title");
+  const todoContent = document.querySelector(".task-list");
+  if (todoTitle) todoTitle.value = "";
+  if (todoContent) todoContent.innerHTML = "";
+};
+
+const addNewNote = () => {
+  localStorage.setItem("modal-state", JSON.stringify({ interface: "note" }));
+  if (switchBtn) switchBtn.checked = false;
+  changeOverlayInterface();
+  resetNoteInterface();
+  openOverlay();
+  if (switchBtnUI) switchBtnUI.classList.remove("hidden");
 };
 
 const openOverlay = () => {
-  const noteTitle = document.querySelector(".title");
-  const noteTextArea = document.querySelector(".note");
+  overlay.classList.add("show");
+  modal.classList.add("show");
+  localStorage.setItem("modal-status", "open");
   const notes = document.querySelector(".notes-container").children;
-  const tempNote = JSON.parse(localStorage.getItem("tempNoteValue") || "{}");
-  sessionStorage.setItem("savedNoteId", null);
-  noteTitle.value = tempNote.title || "";
-  noteTextArea.value = tempNote.note || "";
+  const savedNoteId = JSON.parse(
+    sessionStorage.getItem("savedNoteId") || "null"
+  );
+  if (savedNoteId && switchBtnUI && !switchBtnUI.classList.contains("hidden")) {
+    switchBtnUI.classList.add("hidden");
+  }
   Array.from(notes).forEach((element) => {
     if (element.classList.contains("active"))
       element.classList.remove("active");
   });
-  overlay.classList.add("show");
-  modal.classList.add("show");
-  localStorage.setItem("modal-status", "open");
-  noteTitle.addEventListener("input", saveTempNote);
-  noteTextArea.addEventListener("input", saveTempNote);
 };
-showBtn.addEventListener("click", openOverlay);
+showBtn.addEventListener("click", addNewNote);
 
 closeBtn.addEventListener("click", () => {
+  const modalState = JSON.parse(localStorage.getItem("modal-state")) || {
+    interface: "note",
+  };
   const noteTitle = document.querySelector(".title");
   const noteTextArea = document.querySelector(".note");
-  noteTitle.removeEventListener("input", saveTempNote);
-  noteTextArea.removeEventListener("input", saveTempNote);
+  if (noteTitle) noteTitle.removeEventListener("input", saveTempNote);
+  if (noteTextArea) noteTextArea.removeEventListener("input", saveTempNote);
+  localStorage.removeItem("tempNoteValue");
+  localStorage.removeItem("tempToDoValue");
   overlay.classList.remove("show");
   modal.classList.remove("show");
+  sessionStorage.removeItem("savedNoteId");
   localStorage.setItem("modal-status", "closed");
-  localStorage.removeItem("tempNoteValue");
+  setTimeout(() => {
+    if (switchBtnUI && switchBtnUI.classList.contains("hidden")) {
+      switchBtnUI.classList.remove("hidden");
+    }
+  }, 300);
+  if (modalState.interface === "toDo") {
+    setTimeout(() => {
+      switchBtn.click();
+    }, 300);
+    localStorage.setItem("modal-state", JSON.stringify({ interface: "note" }));
+  }
 });
 
-switchBtn.addEventListener("click", changeOverlayInterface);
+switchBtn.addEventListener("change", () => {
+  let modalState = JSON.parse(localStorage.getItem("modal-state")) || {
+    interface: "note",
+  };
+  const isToDo = switchBtn.checked;
+  modalState = { interface: isToDo ? "toDo" : "note" };
+  localStorage.setItem("modal-state", JSON.stringify(modalState));
+  changeOverlayInterface();
+  if (modalState.interface === "note") {
+    resetNoteInterface();
+  } else {
+    resetToDoInterface();
+  }
+});
 
 const collapseCategories = () => {
   const categoryList = document.querySelector(".category-list");
@@ -88,60 +133,87 @@ const updateCategorySelect = (categoryArr, activeCategory = null) => {
 };
 
 const saveButton = () => {
-  const cleanup = () => {
-    const title = document.querySelector(".title");
-    const note = document.querySelector(".note");
-    if (title) title.value = "";
-    if (note) note.value = "";
-  };
-  const title = document.querySelector(".title");
-  const note = document.querySelector(".note");
-  const modalState = JSON.parse(sessionStorage.getItem("modalState"));
-  console.log(modalState);
-  if (modalState.note == false) {
-    setTimeout(() => {
-      switchBtn.click();
-    }, 0);
-  }
+  const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
   const savedNoteId = JSON.parse(
     sessionStorage.getItem("savedNoteId") || "null"
   );
+  const modalState = JSON.parse(localStorage.getItem("modal-state")) || {
+    interface: "note",
+  };
   const select = document.getElementById("category-select");
   const selectedCategory = select
     ? select.options[select.selectedIndex].textContent
     : activeCategoryState.activeCategory;
-  console.log(savedNoteId);
-  if (!savedNoteId) {
-    noteToBeRendered(note.value, title.value, selectedCategory);
-    if (note.value == "Hello there" || title.value == "Hello there") {
-      showToast("General Kenobi");
+  const showEasterEggToast = () => showToast("General Kenobi");
+
+  if (modalState.interface === "toDo") {
+    const spans = document.querySelectorAll(".todo-container .task-list span");
+    const allTasks = Array.from(spans).map((span) => span.textContent);
+    const title = document.querySelector(".todo-title");
+    if (!savedNoteId) {
+      toDoToBeRendered(allTasks, title.value, selectedCategory, "toDo");
+      title.value === "Hello there"
+        ? showEasterEggToast()
+        : showToast("Neue ToDo-Liste angelegt");
     } else {
-      showToast("Neue Notiz angelegt");
+      const savedItem = notesArr.find((note) => note.id == savedNoteId);
+      if (savedItem && savedItem.type === "toDo") {
+        savedItem.title = title.value.trim() || "Kein Titel";
+        savedItem.data = allTasks;
+        savedItem.category = selectedCategory;
+        localStorage.setItem("notesArr", JSON.stringify(notesArr));
+        syncCategoriesWithNotes();
+        showToast("ToDo-Liste wurde gespeichert");
+        reloadNoteList();
+      }
     }
-  } else {
-    const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
-    const savedNote = notesArr.find((notes) => notes.id == savedNoteId);
-    savedNote.title = title.value.length == 0 ? "Kein Titel" : title.value;
-    savedNote.data = note.value;
-    savedNote.category = selectedCategory;
-    localStorage.setItem("notesArr", JSON.stringify(notesArr));
-    syncCategoriesWithNotes();
-    showToast("Notiz wurde gespeichert");
+  } else if (modalState.interface === "note") {
+    const title = document.querySelector(".title");
+    const note = document.querySelector(".note");
+    if (!savedNoteId) {
+      noteToBeRendered(note.value, title.value, selectedCategory, "note");
+      title.value === "Hello there"
+        ? showEasterEggToast()
+        : showToast("Neue Notiz angelegt");
+    } else {
+      const savedItem = notesArr.find((note) => note.id == savedNoteId);
+      if (savedItem && savedItem.type === "note") {
+        savedItem.title = title.value.trim() || "Kein Titel";
+        savedItem.data = note.value;
+        savedItem.category = selectedCategory;
+        localStorage.setItem("notesArr", JSON.stringify(notesArr));
+        syncCategoriesWithNotes();
+        showToast("Notiz wurde gespeichert");
+        reloadNoteList();
+      }
+    }
   }
-  cleanup();
-  reloadNoteList();
+  sessionStorage.removeItem("savedNoteId");
 };
 
-addBtn.addEventListener("click", () => {
+saveBtn.addEventListener("click", () => {
   saveButton();
   closeBtn.click();
 });
 
 const deleteButton = () => {
-  const note = document.querySelector(".note");
-  if (note.value.length) {
-    note.value = "";
-    return;
+  const modalState = JSON.parse(localStorage.getItem("modal-state")) || {
+    interface: "note",
+  };
+  if (modalState.interface === "note") {
+    const title = document.querySelector(".title");
+    const content = document.querySelector(".note");
+    if (title.value || content.value) {
+      title.value = "";
+      content.value = "";
+    }
+  } else if (modalState.interface === "toDo") {
+    const title = document.querySelector(".todo-title");
+    const content = document.querySelector(".task-list");
+    if (title.value && content.innerHTML) {
+      title.value = "";
+      content.innerHTML = "";
+    }
   }
 };
 deleteBtn.addEventListener("click", deleteButton);
@@ -185,7 +257,6 @@ categoryBtn.addEventListener("click", (e) => {
 });
 
 export {
-  saveTempNote,
   openOverlay,
   toggleDarkMode,
   updateCategorySelect,
@@ -194,4 +265,5 @@ export {
   collapseCategories,
   categoryInputButton,
   showBtn,
+  switchBtn,
 };

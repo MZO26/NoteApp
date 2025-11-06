@@ -1,4 +1,4 @@
-class Category {
+class CategoryItem {
   constructor(id, items, name, isDefault = false) {
     (this.id = id),
       (this.items = items),
@@ -7,9 +7,10 @@ class Category {
   }
 }
 
-class Note {
-  constructor(id, category, data, title, formattedDate) {
+class NoteItem {
+  constructor(id, type, category, data, title, formattedDate) {
     (this.id = id),
+      (this.type = type),
       (this.category = category),
       (this.data = data),
       (this.title = title),
@@ -17,4 +18,4 @@ class Note {
   }
 }
 
-export { Category, Note };
+export { CategoryItem, NoteItem };

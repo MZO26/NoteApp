@@ -1,17 +1,25 @@
 import {
   categoryToBeRendered,
   reloadCategoryList,
-  reloadNoteList,
   activeCategoryState,
-} from "./sidebar.js";
+} from "./categories.js";
 import {
   updateCategorySelect,
   toggleDarkMode,
   openOverlay,
+  switchBtn,
 } from "./buttons.js";
+import { reloadNoteList } from "./notes.js";
 
 window.onload = () => {
   const modalStatus = localStorage.getItem("modal-status");
+  const modalState = JSON.parse(localStorage.getItem("modal-state")) || {
+    interface: "note",
+  };
+  if (modalState.interface === "toDo") {
+    switchBtn.click();
+  }
+  localStorage.setItem("modalState", JSON.stringify({ interface: "note" }));
   if (modalStatus == "open") {
     openOverlay();
   }

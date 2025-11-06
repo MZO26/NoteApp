@@ -1,4 +1,4 @@
-import { savedNoteIdState } from "./sidebar.js";
+import { savedNoteIdState } from "./notes.js";
 
 const showToast = (value, duration = 4000) => {
   const container = document.getElementById("toast-container");
@@ -66,4 +66,14 @@ function isActive(item, parentElement = null) {
   setTimeout(() => document.addEventListener("click", item._listener), 0);
 }
 
-export { showToast, inputListener, isActive };
+const syncCategoriesWithNotes = () => {
+  let categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
+  let notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
+  categoryArr = categoryArr.map((category) => {
+    category.items = notesArr.filter((note) => note.category == category.name);
+    return category;
+  });
+  localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
+};
+
+export { showToast, inputListener, isActive, syncCategoriesWithNotes };

@@ -18,11 +18,19 @@
         </div>
         <div class="navbar-right">
           <div class="input-wrapper">
-            <input type="text" placeholder="filter" class="search-input" />
+            <input
+              type="text"
+              placeholder="filter"
+              class="search-input"
+              name="search-input"
+              title="Nach Notiz / ToDo filtern"
+            />
             <div id="dropdown" class="dropdown"></div>
           </div>
           <div class="navbar-mobile-row">
-            <button class="showModal-btn">Notiz hinzufügen</button>
+            <button title="Notiz / ToDo hinzufügen" class="showModal-btn">
+              Notiz hinzufügen
+            </button>
             <button title="Hell / Dunkel" class="dark-mode-btn">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -41,7 +49,9 @@
         </div>
       </div>
       <div class="button-collection">
-        <button class="category-btn">Kategorie hinzufügen</button>
+        <button title="Neue Kategorie erstellen" class="category-btn">
+          Kategorie hinzufügen
+        </button>
         <button title="Kategorien einblenden / ausblenden" class="toggle-btn">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -64,17 +74,21 @@
       <div id="modal">
         <div class="modal-top">
           <h2 class="modal-heading">Neue Notiz</h2>
-          <label class="simple-switch">
-            <input type="checkbox" />
+          <label class="switch">
+            <input
+              type="checkbox"
+              class="switch-checkbox"
+              name="switch-checkbox"
+            />
             <span class="switch-btn"></span>
           </label>
         </div>
         <p class="modal-title">Titel hinzufügen</p>
-        <textarea class="title"></textarea>
+        <textarea class="title" name="title-textarea"></textarea>
         <p class="modal-note">Notiz hinzufügen</p>
-        <textarea class="note"></textarea>
+        <textarea class="note" name="note-textarea"></textarea>
         <div class="button-collection-modal">
-          <button title="save note" class="add-btn">
+          <button title="Inhalt speichern" class="add-btn">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -91,7 +105,7 @@
               />
             </svg>
           </button>
-          <button title="delete note" class="delete-btn">
+          <button title="Inhalt löschen" class="delete-btn">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -105,7 +119,10 @@
               />
             </svg>
           </button>
-          <select id="category-select"></select>
+          <select
+            title="Unter ausgewählter Kategorie speichern"
+            id="category-select"
+          ></select>
           <button class="closeModal-btn">Schliessen</button>
         </div>
       </div>

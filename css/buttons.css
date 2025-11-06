@@ -17,7 +17,7 @@ button {
   cursor: pointer;
   background: var(--btn-bg);
   color: var(--btn-text);
-  border: 1px solid var(--btn-border);
+  border: 1px solid var(--btn-outline);
   transition: background-color 0.1s ease, box-shadow 0.1s ease;
   font: inherit;
 }
@@ -36,6 +36,37 @@ button:focus {
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
+}
+
+.button-collection {
+  display: flex;
+  align-items: center;
+}
+
+.category-btn,
+#category-input {
+  border-radius: 10px;
+  height: 40px;
+  padding: 6px 12px;
+  box-sizing: border-box;
+  text-align: left;
+  margin-left: 1.6rem;
+  background-color: var(--btn-bg);
+  color: var(--btn-text);
+  width: 177px;
+  border-radius: 5px;
+  box-sizing: border-box;
+  display: inline-block;
+  transition: padding 0.2s ease-in-out;
+}
+
+#category-input:hover {
+  background: var(--btn-hover);
+}
+
+#category-input::placeholder {
+  color: var(--text-muted);
+  transition: padding 0.2s ease-in-out;
 }
 
 .toggle-btn {
@@ -99,19 +130,17 @@ button:focus {
   transition: 0.1s ease-in-out;
 }
 
-.category-btn {
-  display: flex;
-  margin-left: 5px;
-  justify-content: center;
-  align-items: center;
-}
-
-.simple-switch {
+.switch {
   margin-top: 20px;
   display: inline-block;
 }
 
-.simple-switch input {
+.hidden {
+  display: none;
+  pointer-events: none;
+}
+
+.switch-checkbox {
   display: none;
 }
 
@@ -126,7 +155,7 @@ button:focus {
   display: inline-block;
 }
 
-.simple-switch input:checked + .switch-btn {
+.switch input:checked + .switch-btn {
   background-color: var(--active-bg);
 }
 
@@ -142,16 +171,8 @@ button:focus {
   transition: 0.2s;
 }
 
-.simple-switch input:checked + .switch-btn::after {
+.switch input:checked + .switch-btn::after {
   left: 27px;
-}
-
-.category-btn,
-#category-input {
-  border-radius: 10px;
-  height: 25px;
-  padding: 6px 12px;
-  box-sizing: border-box;
 }
 
 .add-btn,
@@ -169,21 +190,24 @@ button:focus {
 .task-delete-btn {
   position: absolute;
   right: 0;
+  border: 1px solid var(--btn-border);
+  z-index: 10;
 }
 
 .todo-btn {
-  height: 36px;
+  min-height: 36px;
   padding: 0 12px;
   border-radius: 8px;
   background: var(--btn-bg);
   color: var(--btn-text);
-  border: 1px solid var(--btn-border);
+  border: 1px solid var(--btn-outline);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   font: inherit;
 }
+
 .todo-btn:hover {
   background: var(--btn-hover);
 }
@@ -196,26 +220,3 @@ button:focus {
 }
 
 /* Modal end */
-
-.category-btn,
-#category-input {
-  text-align: left;
-  margin-left: 1.6rem;
-  background-color: var(--btn-bg);
-  color: var(--btn-text);
-  width: 180px;
-  border-radius: 5px;
-  box-sizing: border-box;
-  display: inline-block;
-  height: 60px;
-  transition: padding 0.2s ease-in-out;
-}
-
-#category-input:hover {
-  background: var(--btn-hover);
-}
-
-#category-input::placeholder {
-  color: var(--text-muted);
-  transition: padding 0.2s ease-in-out;
-}

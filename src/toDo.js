@@ -1,4 +1,9 @@
-const modalState = { note: true };
+import { createNewNote, savedNoteIdState } from "./notes.js";
+import { toDoItemTemplate } from "./templates.js";
+import { syncCategoriesWithNotes, isActive } from "./events.js";
+import { openOverlay } from "./buttons.js";
+
+const modalState = { interface: "note" };
 
 const addEventListeners = (li, checkbox, taskSpan, taskDeleteBtn) => {
   const onChange = () => {
@@ -27,9 +32,15 @@ const getToDoInterfaceElements = () => {
   const todoDiv = document.createElement("div");
   todoDiv.className = "todo-container";
 
+  const title = Object.assign(document.createElement("textarea"), {
+    className: "todo-title",
+    name: "todo-title-textarea",
+  });
+
   const input = Object.assign(document.createElement("input"), {
     type: "text",
     className: "todo-input",
+    name: "todo-input",
   });
 
   const addBtn = Object.assign(document.createElement("button"), {
@@ -47,6 +58,7 @@ const getToDoInterfaceElements = () => {
     input,
     addBtn,
     taskList,
+    title,
   };
 };
 
@@ -56,6 +68,7 @@ const createTaskItem = (taskText) => {
   const checkbox = Object.assign(document.createElement("input"), {
     type: "checkbox",
     className: "task-checkbox",
+    name: "task-checkbox",
   });
 
   const taskSpan = Object.assign(document.createElement("span"), {
@@ -76,6 +89,7 @@ const createTaskItem = (taskText) => {
               />
             </svg>`,
     className: "task-delete-btn",
+    title: "Task löschen",
   });
 
   li.appendChild(checkbox);
@@ -85,98 +99,227 @@ const createTaskItem = (taskText) => {
   return { li, checkbox, taskSpan, taskDeleteBtn };
 };
 
-const createFragmentElement = () => {
-  const currentNote = document.querySelector(".note");
+const renderNoteUI = () => {
+  const currentToDoTitle = document.querySelector(".todo-title");
   const currentToDo = document.querySelector(".todo-container");
-  const fragment = document.createDocumentFragment();
+  if (!currentToDoTitle || !currentToDo) return;
+  const tempNoteValue = JSON.parse(
+    localStorage.getItem("tempNoteValue") || "{}"
+  );
+  saveTempToDo();
+  const note = document.createElement("textarea");
+  const title = document.createElement("textarea");
+  note.className = "note";
+  note.name = "note-textarea";
+  title.className = "title";
+  title.name = "title-textarea";
+  const titleFragment = document.createDocumentFragment();
+  const noteFragment = document.createDocumentFragment();
+  title.value = tempNoteValue.title || "";
+  note.value = tempNoteValue.note || "";
+  titleFragment.appendChild(title);
+  noteFragment.appendChild(note);
+  currentToDoTitle.replaceWith(titleFragment);
+  currentToDo.replaceWith(noteFragment);
+};
 
-  if (currentNote) {
-    const toDoArr = JSON.parse(localStorage.getItem("toDoArr") || "[]");
-    if (toDoArr.length) reloadToDoList();
-    else {
-      const { todoDiv } = getToDoInterfaceElements();
-      fragment.appendChild(todoDiv);
-      currentNote.replaceWith(fragment);
-      sessionStorage.setItem(
-        "modalState",
-        JSON.stringify((modalState.note = false))
-      );
-    }
+const addToDo = (taskList, input) => {
+  const taskText = input.value.trim();
+  if (!taskText) return;
+  const { li, checkbox, taskSpan, taskDeleteBtn } = createTaskItem(taskText);
+  taskList.appendChild(li);
+  input.value = "";
+  addEventListeners(li, checkbox, taskSpan, taskDeleteBtn);
+};
 
-    addBtn.onclick = () => {
-      const taskText = input.value.trim();
-      if (!taskText) return;
-      const { li, checkbox, taskSpan, taskDeleteBtn } =
-        createTaskItem(taskText);
-      taskList.appendChild(li);
-      input.value = "";
-      addEventListeners(li, checkbox, taskSpan, taskDeleteBtn);
-    };
-  } else if (currentToDo) {
-    const textarea = document.createElement("textarea");
-    textarea.className = "note";
-    const allTasks = currentToDo.querySelectorAll(".task-list li span");
-    let taskArr = [];
-    allTasks.forEach((span) => {
-      taskArr.push(span.textContent);
-    });
-    console.log(taskArr);
-    localStorage.setItem("toDoArr", JSON.stringify(taskArr));
-    const savedNoteValue = JSON.parse(localStorage.getItem("savedNoteValue"));
-    if (savedNoteValue.note) {
-      textarea.value = "";
-      textarea.value += savedNoteValue;
-    }
-    if (savedNoteValue.title) {
-      title.value = "";
-      title.value = savedNoteValue;
-    }
-    fragment.appendChild(textarea);
-    currentToDo.replaceWith(fragment);
-    sessionStorage.setItem(
-      "modalState",
-      JSON.stringify((modalState.note = true))
-    );
+const renderToDoUI = () => {
+  const currentTitle = document.querySelector(".title");
+  const currentNote = document.querySelector(".note");
+  if (!currentTitle || !currentNote) return;
+  const { todoDiv, addBtn, taskList, input, title } =
+    getToDoInterfaceElements();
+  const tempToDoValue = JSON.parse(
+    localStorage.getItem("tempToDoValue") || "{}"
+  );
+  saveTempNote();
+  title.value = tempToDoValue.title || "";
+  const titleFragment = document.createDocumentFragment();
+  const noteFragment = document.createDocumentFragment();
+  titleFragment.appendChild(title);
+  noteFragment.appendChild(todoDiv);
+  currentTitle.replaceWith(titleFragment);
+  currentNote.replaceWith(noteFragment);
+  const toDoData = tempToDoValue.data || null;
+  if (toDoData && toDoData.length) {
+    reloadToDoList(tempToDoValue);
+  }
+  addBtn.addEventListener("click", () => addToDo(taskList, input));
+};
+
+const createFragmentElement = (modalState) => {
+  if (modalState === "note") {
+    renderNoteUI();
+  } else if (modalState === "toDo") {
+    renderToDoUI();
   }
 };
 
 const changeOverlayInterface = () => {
+  const modalState = JSON.parse(localStorage.getItem("modal-state")) || {
+    interface: "note",
+  };
   const modalHeadingElement = document.querySelector(".modal-heading");
   const modalNoteElement = document.querySelector(".modal-note");
-  let modalHeading = modalHeadingElement.textContent;
-  let modalNote = modalNoteElement.textContent;
-  switch (modalHeading) {
-    case "Neue Notiz":
-      modalHeading = "Neue ToDo Liste";
-      break;
-    default:
-      modalHeading = "Neue Notiz";
+  if (modalState.interface === "note") {
+    modalHeadingElement.textContent = "Neue Notiz";
+    modalNoteElement.textContent = "Notiz hinzufügen";
+  } else if (modalState.interface === "toDo") {
+    modalHeadingElement.textContent = "Neue ToDo Liste";
+    modalNoteElement.textContent = "ToDo's hinzufügen";
   }
-  switch (modalNote) {
-    case "Notiz hinzufügen":
-      modalNote = "ToDo's hinzufügen";
-      break;
-    default:
-      modalNote = "Notiz hinzufügen";
-  }
-  createFragmentElement();
-  modalHeadingElement.textContent = modalHeading;
-  modalNoteElement.textContent = modalNote;
+  createFragmentElement(modalState.interface);
 };
 
-const reloadToDoList = () => {
-  const { todoDiv } = getToDoInterfaceElements();
-  const toDoArr = JSON.parse(localStorage.getItem("toDoArr") || "[]");
-  console.log({ array: toDoArr });
-  if (!toDoArr.length) return;
-
-  for (let i = 0; i < toDoArr.length; i++) {
+const reloadToDoList = (toDo) => {
+  const taskList = document.querySelector(".task-list");
+  if (!toDo.data || toDo.data.length === 0) return;
+  for (let i = 0; i < toDo.data.length; i++) {
     const { li, checkbox, taskSpan, taskDeleteBtn } = createTaskItem(
-      toDoArr[i]
+      toDo.data && toDo.data[i]
     );
     taskList.appendChild(li);
     addEventListeners(li, checkbox, taskSpan, taskDeleteBtn);
   }
 };
 
-export { changeOverlayInterface };
+const toDoToBeRendered = (toDoList, toDoTitle, category = null, type) => {
+  if (type !== "toDo") return;
+  const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
+  const notesContainer = document.querySelector(".notes-container");
+  const toDoItem = document.createElement("div");
+  toDoItem.className = "toDoItem";
+  const newToDo = createNewNote(type, category, toDoList, toDoTitle);
+  toDoItem.setAttribute("data-id", newToDo.id);
+  toDoItem.innerHTML = toDoItemTemplate(newToDo);
+  notesArr.push(newToDo);
+  localStorage.setItem("notesArr", JSON.stringify(notesArr));
+  notesContainer.appendChild(toDoItem);
+  toDoItemHandler(toDoItem, newToDo);
+  syncCategoriesWithNotes();
+};
+
+const saveTempToDo = () => {
+  const toDoTitle = document.querySelector(".todo-title");
+  const currentToDo = document.querySelector(".todo-container");
+  const toDoList = currentToDo.querySelectorAll(".task-list li span");
+  const titleValue = toDoTitle ? toDoTitle.value : "Kein Titel";
+  const toDoData = [];
+  if (toDoList.length) {
+    toDoList.forEach((span) => {
+      toDoData.push(span.textContent);
+    });
+  }
+  localStorage.setItem(
+    "tempToDoValue",
+    JSON.stringify({ title: titleValue, data: toDoData })
+  );
+};
+
+const saveTempNote = () => {
+  const noteTitle = document.querySelector(".title");
+  const noteTextArea = document.querySelector(".note");
+  localStorage.setItem(
+    "tempNoteValue",
+    JSON.stringify({
+      title: noteTitle.value || "Kein Titel",
+      note: noteTextArea.value,
+    })
+  );
+};
+
+const toDoItemHandler = (toDoItem, newToDo) => {
+  const toDoItemBtn = toDoItem.querySelector("button");
+  function viewToDo() {
+    localStorage.setItem("modal-state", JSON.stringify({ interface: "toDo" }));
+    savedNoteIdState.savedNoteId = toDoItem.getAttribute("data-id");
+    sessionStorage.setItem(
+      "savedNoteId",
+      JSON.stringify(savedNoteIdState.savedNoteId)
+    );
+    const switchBtn = document.querySelector(".switch-checkbox");
+
+    if (switchBtn) {
+      switchBtn.checked = true;
+      switchBtn.dispatchEvent(new Event("change"));
+    }
+    requestAnimationFrame(() => {
+      openOverlay();
+      const tempToDo = JSON.parse(
+        localStorage.getItem("tempToDoValue") || "{}"
+      );
+      const notesContainer = document.querySelector(".notes-container");
+      const toDoTitle = document.querySelector(".todo-title");
+      if (toDoTitle) {
+        toDoTitle.value = newToDo.title || tempToDo.title;
+      } else {
+        localStorage.setItem(
+          "tempToDoValue",
+          JSON.stringify({
+            title: newToDo.title || tempToDo.title,
+            data: newToDo.data || tempToDo.data || [],
+          })
+        );
+      }
+      reloadToDoList(newToDo);
+      saveTempToDo();
+      isActive(toDoItem, notesContainer);
+      const container = document.querySelector(".todo-container");
+      const addBtn = container.querySelector(".todo-btn");
+      const taskList = container.querySelector(".task-list");
+      const input = container.querySelector(".todo-input");
+      if (toDoTitle) toDoTitle.addEventListener("input", saveTempToDo);
+      if (input) input.addEventListener("input", saveTempToDo);
+      if (addBtn) {
+        if (addBtn._addHandlerRef) {
+          addBtn.removeEventListener("click", addBtn._addHandlerRef);
+        }
+        const addHandler = () => addToDo(taskList, input);
+        addBtn._addHandlerRef = addHandler;
+        addBtn.addEventListener("click", addHandler);
+      }
+    });
+  }
+
+  function deleteToDo(event) {
+    event.stopPropagation();
+    const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
+    const id = toDoItem.getAttribute("data-id");
+    const index = notesArr.findIndex((note) => note.id == id);
+    if (index > -1) {
+      notesArr.splice(index, 1);
+      localStorage.setItem("notesArr", JSON.stringify(notesArr));
+    }
+    const container = document.querySelector(".todo-container");
+    const addBtn = container?.querySelector(".todo-btn");
+    if (addBtn && addBtn._addHandlerRef) {
+      addBtn.removeEventListener("click", addBtn._addHandlerRef);
+      delete addBtn._addHandlerRef;
+    }
+    toDoItemBtn.removeEventListener("click", deleteToDo);
+    toDoItem.removeEventListener("click", viewToDo);
+    toDoItem.remove();
+    syncCategoriesWithNotes();
+  }
+  if (toDoItemBtn) toDoItemBtn.addEventListener("click", deleteToDo);
+  if (toDoItem) toDoItem.addEventListener("click", viewToDo);
+};
+
+export {
+  changeOverlayInterface,
+  toDoToBeRendered,
+  toDoItemHandler,
+  saveTempToDo,
+  saveTempNote,
+  reloadToDoList,
+  modalState,
+};
