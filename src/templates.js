@@ -70,8 +70,9 @@ const getToDoInterfaceElements = () => {
   });
 
   const addBtn = Object.assign(document.createElement("button"), {
-    innerText: "Add Task",
+    innerText: "ToDo hinzufügen",
     className: "todo-btn",
+    title: "Fügt neuen Task zur Liste hinzu",
   });
 
   const taskList = Object.assign(document.createElement("ul"), {
@@ -95,6 +96,7 @@ const createTaskItem = (taskText) => {
     type: "checkbox",
     className: "task-checkbox",
     name: "task-checkbox",
+    title: "Markiert Task als abgeschlossen",
   });
 
   const taskSpan = Object.assign(document.createElement("span"), {

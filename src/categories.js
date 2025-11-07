@@ -37,10 +37,12 @@ const categoryToBeRendered = (categoryName) => {
   if (newCategory.isDefault) {
     categoryItem.innerHTML = defaultCategoryItemTemplate(newCategory.name);
   } else {
-    categoryItem.innerHTML = categoryItemTemplate(newCategory.name);
+    categoryItem.innerHTML = categoryItemTemplate(
+      newCategory.name.slice(0, 15) + "..."
+    );
   }
   categoryList.appendChild(categoryItem);
-  showToast(`Kategorie "${categoryName}" hinzugefügt`);
+  showToast(`Kategorie "${categoryName.slice(0, 15) + "..."}" hinzugefügt`);
   localStorage.setItem(
     "activeCategoryState",
     JSON.stringify({ activeCategory: categoryName })

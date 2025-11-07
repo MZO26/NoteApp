@@ -130,6 +130,9 @@ const updateCategorySelect = (categoryArr, activeCategory = null) => {
     const option = document.createElement("option");
     option.value = category.id;
     option.textContent = category.name;
+    if (option.textContent.length > 20) {
+      option.textContent = option.textContent.slice(0, 20) + "...";
+    }
     if (category.name == activeCategoryState.activeCategory) {
       option.selected = true;
     }

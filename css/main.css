@@ -369,7 +369,7 @@ textarea::-webkit-scrollbar-thumb,
   display: flex;
   align-items: center;
   flex-direction: row;
-  height: 10vh;
+  height: 12vh;
   transition: height 0.4s ease-in-out, padding 0.3s ease;
   overflow: hidden;
 }
@@ -382,20 +382,21 @@ textarea::-webkit-scrollbar-thumb,
 }
 
 .category-list::-webkit-scrollbar {
-  height: 4px;
+  height: 5px;
   background-color: var(--note);
 }
 
 .category-list::-webkit-scrollbar-thumb {
+  cursor: pointer;
   background-color: var(--bg-dark);
 }
 
 #categoryItem {
   display: flex;
   align-items: center;
-  padding: 0 1.5rem 0 0.5rem;
+  padding: 0.5rem, 1.5rem;
   margin-right: 10px;
-  text-overflow: ellipsis;
+  overflow-y: scroll;
   border: 1px solid;
   width: 180px;
   border-radius: 5px;
@@ -443,8 +444,8 @@ textarea::-webkit-scrollbar-thumb,
 .toDoItem button,
 #categoryItem button {
   position: absolute;
-  top: 1rem;
-  right: 0.8rem;
+  top: 1.2rem;
+  right: 0.4rem;
   height: 30px;
   width: 30px;
   border-radius: 15px;
@@ -531,6 +532,9 @@ textarea::-webkit-scrollbar-thumb,
   }
   #categoryItem {
     height: 50px;
+  }
+  #categoryItem button {
+    top: 0.5rem;
   }
   .notes-container {
     grid-template-columns: 1fr;
