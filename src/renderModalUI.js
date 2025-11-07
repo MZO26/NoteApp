@@ -82,12 +82,14 @@ const renderNoteUI = () => {
   title.name = "title-textarea";
   const titleFragment = document.createDocumentFragment();
   const noteFragment = document.createDocumentFragment();
-  title.value = tempNoteValue.title || "";
-  note.value = tempNoteValue.note || "";
   titleFragment.appendChild(title);
   noteFragment.appendChild(note);
   currentToDoTitle.replaceWith(titleFragment);
   currentToDo.replaceWith(noteFragment);
+  requestAnimationFrame(() => {
+    title.value = tempNoteValue.title || "";
+    note.value = tempNoteValue.note || "";
+  });
 };
 
 const renderToDoUI = () => {
@@ -100,7 +102,6 @@ const renderToDoUI = () => {
     localStorage.getItem("tempToDoValue") || "{}"
   );
   saveTempNote();
-  title.value = tempToDoValue.title;
   const titleFragment = document.createDocumentFragment();
   const noteFragment = document.createDocumentFragment();
   titleFragment.appendChild(title);
@@ -108,10 +109,13 @@ const renderToDoUI = () => {
   currentTitle.replaceWith(titleFragment);
   currentNote.replaceWith(noteFragment);
   const toDoData = tempToDoValue.data || [];
-  if (toDoData && toDoData.length) {
-    reloadToDoList(tempToDoValue, tempToDoValue.dataCompleted);
-  }
-  addBtn.addEventListener("click", () => addToDo(taskList, input));
+  requestAnimationFrame(() => {
+    title.value = tempToDoValue.title;
+    if (toDoData && toDoData.length) {
+      reloadToDoList(tempToDoValue, tempToDoValue.dataCompleted);
+    }
+    addBtn.addEventListener("click", () => addToDo(taskList, input));
+  });
 };
 
 const createFragmentElement = (modalState) => {

@@ -54,7 +54,7 @@ const toDoItemHandler = (toDoItem, newToDo, completedTasks) => {
       const notesContainer = document.querySelector(".notes-container");
       const toDoTitle = document.querySelector(".todo-title");
       if (toDoTitle) {
-        toDoTitle.value = newToDo.title || tempToDo.title;
+        toDoTitle.value = newToDo.title || tempToDo.title || "Kein Titel";
       } else {
         localStorage.setItem(
           "tempToDoValue",

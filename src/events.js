@@ -95,7 +95,7 @@ const saveTempToDo = () => {
   localStorage.setItem(
     "tempToDoValue",
     JSON.stringify({
-      title: titleValue || "Kein Titel",
+      title: titleValue || "",
       data: toDoData || [],
       dataCompleted: completedTasks || [],
     })
@@ -108,8 +108,8 @@ const saveTempNote = () => {
   localStorage.setItem(
     "tempNoteValue",
     JSON.stringify({
-      title: noteTitle.value || "Kein Titel",
-      note: noteTextArea.value,
+      title: noteTitle.value || "",
+      note: noteTextArea.value || "",
     })
   );
 };

@@ -22,21 +22,26 @@ const modal = document.getElementById("modal");
 const switchBtn = document.querySelector(".switch-checkbox");
 const switchBtnUI = document.querySelector(".switch");
 const filterInput = document.querySelector(".search-input");
+let reset = false;
 
 filterInput.addEventListener("click", filter);
 
 const resetNoteInterface = () => {
-  const noteTitle = document.querySelector(".title");
-  const noteContent = document.querySelector(".note");
-  if (noteTitle) noteTitle.value = "";
-  if (noteContent) noteContent.value = "";
+  requestAnimationFrame(() => {
+    const noteTitle = document.querySelector(".title");
+    const noteContent = document.querySelector(".note");
+    if (noteTitle) noteTitle.value = "";
+    if (noteContent) noteContent.value = "";
+  });
 };
 
 const resetToDoInterface = () => {
-  const todoTitle = document.querySelector(".todo-title");
-  const todoContent = document.querySelector(".task-list");
-  if (todoTitle) todoTitle.value = "";
-  if (todoContent) todoContent.innerHTML = "";
+  requestAnimationFrame(() => {
+    const todoTitle = document.querySelector(".todo-title");
+    const todoContent = document.querySelector(".task-list");
+    if (todoTitle) todoTitle.value = "";
+    if (todoContent) todoContent.innerHTML = "";
+  });
 };
 
 const addNewNote = () => {
@@ -47,6 +52,7 @@ const addNewNote = () => {
   openOverlay();
   if (switchBtnUI) switchBtnUI.classList.remove("hidden");
 };
+showBtn.addEventListener("click", addNewNote);
 
 const openOverlay = () => {
   overlay.classList.add("show");
@@ -64,7 +70,6 @@ const openOverlay = () => {
       element.classList.remove("active");
   });
 };
-showBtn.addEventListener("click", addNewNote);
 
 closeBtn.addEventListener("click", () => {
   const modalState = JSON.parse(localStorage.getItem("modal-state")) || {
@@ -78,6 +83,11 @@ closeBtn.addEventListener("click", () => {
   localStorage.removeItem("tempToDoValue");
   overlay.classList.remove("show");
   modal.classList.remove("show");
+  if (modalState.interface === "note") {
+    resetNoteInterface();
+  } else {
+    resetToDoInterface();
+  }
   sessionStorage.removeItem("savedNoteId");
   localStorage.setItem("modal-status", "closed");
   setTimeout(() => {
@@ -85,12 +95,6 @@ closeBtn.addEventListener("click", () => {
       switchBtnUI.classList.remove("hidden");
     }
   }, 300);
-  if (modalState.interface === "toDo") {
-    setTimeout(() => {
-      switchBtn.click();
-    }, 300);
-    localStorage.setItem("modal-state", JSON.stringify({ interface: "note" }));
-  }
 });
 
 switchBtn.addEventListener("change", () => {
@@ -101,10 +105,9 @@ switchBtn.addEventListener("change", () => {
   modalState = { interface: isToDo ? "toDo" : "note" };
   localStorage.setItem("modal-state", JSON.stringify(modalState));
   changeOverlayInterface();
-  if (modalState.interface === "note") {
-    resetNoteInterface();
-  } else {
+  if (isToDo && !reset) {
     resetToDoInterface();
+    reset = true;
   }
 });
 

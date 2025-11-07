@@ -43,7 +43,7 @@ const noteItemHandler = (noteItem, notes) => {
     const notesContainer = document.querySelector(".notes-container");
     const noteTitle = document.querySelector(".title");
     const noteTextArea = document.querySelector(".note");
-    noteTitle.value = notes.title || tempNote.title;
+    noteTitle.value = notes.title || tempNote.title || "Kein Titel";
     noteTextArea.value = notes.data || tempNote.note;
     saveTempNote();
     isActive(noteItem, notesContainer);
