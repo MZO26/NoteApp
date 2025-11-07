@@ -1,9 +1,9 @@
-import { createNewNote } from "./classes.js";
-import { noteItemTemplate, toDoItemTemplate } from "./templates.js";
-import { isActive, syncCategoriesWithNotes, saveTempNote } from "./events.js";
+import { createNewNote } from "../utils/classes.js";
+import { noteItemTemplate, toDoItemTemplate } from "../utils/templates.js";
+import { isActive, syncCategoriesWithNotes, saveTempNote } from "../events.js";
 import { defaultCategory } from "./categories.js";
 import { toDoItemHandler } from "./toDo.js";
-import { openOverlay } from "./buttons.js";
+import { openOverlay } from "../buttons.js";
 
 let savedNoteIdState = { savedNoteId: null };
 
@@ -38,20 +38,23 @@ const noteItemHandler = (noteItem, notes) => {
       switchBtn.checked = false;
       switchBtn.dispatchEvent(new Event("change"));
     }
-    openOverlay();
-    const tempNote = JSON.parse(localStorage.getItem("tempNoteValue") || "{}");
-    const notesContainer = document.querySelector(".notes-container");
-    const noteTitle = document.querySelector(".title");
-    const noteTextArea = document.querySelector(".note");
-    noteTitle.value = notes.title || tempNote.title || "Kein Titel";
-    noteTextArea.value = notes.data || tempNote.note;
-    saveTempNote();
-    isActive(noteItem, notesContainer);
+    requestAnimationFrame(() => {
+      openOverlay();
+      const tempNote = JSON.parse(
+        localStorage.getItem("tempNoteValue") || "{}"
+      );
+      const notesContainer = document.querySelector(".notes-container");
+      const noteTitle = document.querySelector(".title");
+      const noteTextArea = document.querySelector(".note");
+      noteTitle.value = notes.title || tempNote.title || "Kein Titel";
+      noteTextArea.value = notes.data || tempNote.note;
+      saveTempNote();
+      isActive(noteItem, notesContainer);
 
-    if (noteTitle) noteTitle.addEventListener("input", saveTempNote);
-    if (noteTextArea) noteTextArea.addEventListener("input", saveTempNote);
+      if (noteTitle) noteTitle.addEventListener("input", saveTempNote);
+      if (noteTextArea) noteTextArea.addEventListener("input", saveTempNote);
+    });
   }
-
   function deleteNote(event) {
     event.stopPropagation();
     const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");

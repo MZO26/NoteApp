@@ -1,4 +1,4 @@
-import { savedNoteIdState } from "./notes.js";
+import { savedNoteIdState } from "./features/notes.js";
 
 const showToast = (value, duration = 4000) => {
   const container = document.getElementById("toast-container");

@@ -1,4 +1,4 @@
-import { defaultCategory } from "./categories.js";
+import { defaultCategory } from "../features/categories.js";
 import { dateTemplate } from "./templates.js";
 
 class CategoryItem {

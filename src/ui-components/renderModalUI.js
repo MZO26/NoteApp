@@ -1,5 +1,8 @@
-import { saveTempNote, saveTempToDo } from "./events.js";
-import { getToDoInterfaceElements, createTaskItem } from "./templates.js";
+import { saveTempNote, saveTempToDo } from "../events.js";
+import {
+  getToDoInterfaceElements,
+  createTaskItem,
+} from "../utils/templates.js";
 
 const modalState = { interface: "note" };
 

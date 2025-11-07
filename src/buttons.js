@@ -1,5 +1,8 @@
-import { noteToBeRendered, reloadNoteList } from "./notes.js";
-import { categoryToBeRendered, defaultCategory } from "./categories.js";
+import { noteToBeRendered, reloadNoteList } from "./features/notes.js";
+import {
+  categoryToBeRendered,
+  defaultCategory,
+} from "./features/categories.js";
 import {
   inputListener,
   showToast,
@@ -7,9 +10,9 @@ import {
   saveTempNote,
   saveTempToDo,
 } from "./events.js";
-import { toDoToBeRendered } from "./toDo.js";
-import { changeOverlayInterface } from "./renderModalUI.js";
-import { filter } from "./filter.js";
+import { toDoToBeRendered } from "./features/toDo.js";
+import { changeOverlayInterface } from "./ui-components/renderModalUI.js";
+import { filter } from "./features/filter.js";
 const darkModeBtn = document.querySelector(".dark-mode-btn");
 const deleteBtn = document.querySelector(".delete-btn");
 const saveBtn = document.querySelector(".add-btn");
@@ -22,9 +25,16 @@ const modal = document.getElementById("modal");
 const switchBtn = document.querySelector(".switch-checkbox");
 const switchBtnUI = document.querySelector(".switch");
 const filterInput = document.querySelector(".search-input");
+const openInfoBtn = document.querySelector(".info-btn");
+const sidebarOverlay = document.querySelector(".sidebar-overlay");
 let reset = false;
 
 filterInput.addEventListener("click", filter);
+
+openInfoBtn.addEventListener("click", () => {
+  sidebarOverlay.classList.toggle("visible");
+  sidebarOverlay.classList.toggle("hidden");
+});
 
 const resetNoteInterface = () => {
   requestAnimationFrame(() => {

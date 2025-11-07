@@ -1,10 +1,10 @@
-import { createNewCategory } from "./classes.js";
+import { createNewCategory } from "../utils/classes.js";
 import {
   categoryItemTemplate,
   defaultCategoryItemTemplate,
-} from "./templates.js";
-import { showToast, isActive, syncCategoriesWithNotes } from "./events.js";
-import { updateCategorySelect } from "./buttons.js";
+} from "../utils/templates.js";
+import { showToast, isActive, syncCategoriesWithNotes } from "../events.js";
+import { updateCategorySelect } from "../buttons.js";
 import { reloadNoteList } from "./notes.js";
 
 let defaultCategory = "Ohne Kategorie";

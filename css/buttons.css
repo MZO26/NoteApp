@@ -22,13 +22,22 @@ button {
   font: inherit;
 }
 
+input:hover,
+input:focus {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
 button:hover {
   background-color: var(--btn-hover);
   transition: 0.1s ease-in-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: box-shadow 0.3s ease-in-out;
 }
 
 button:focus {
   box-shadow: 0 0 0 3px var(--btn-outline);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .button-collection-modal {
@@ -115,6 +124,16 @@ button:focus {
   height: 35px;
   border-radius: 10px;
   margin: 10px;
+}
+
+.contact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 5px;
+  height: 40px;
+  width: 40px;
+  border-radius: 20px;
 }
 
 #category-select {
@@ -217,7 +236,20 @@ button:focus {
 }
 .todo-btn:focus {
   outline: none;
-  box-shadow: 0 0 0 4px var(--btn-outline);
+}
+
+.info-btn {
+  display: flex;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  height: 40px;
+  width: 40px;
+  border-radius: 25px;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* Modal end */

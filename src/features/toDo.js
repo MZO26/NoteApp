@@ -1,9 +1,9 @@
 import { savedNoteIdState } from "./notes.js";
-import { createNewNote } from "./classes.js";
-import { toDoItemTemplate } from "./templates.js";
-import { syncCategoriesWithNotes, isActive, saveTempToDo } from "./events.js";
-import { openOverlay } from "./buttons.js";
-import { reloadToDoList, addToDo } from "./renderModalUI.js";
+import { createNewNote } from "../utils/classes.js";
+import { toDoItemTemplate } from "../utils/templates.js";
+import { syncCategoriesWithNotes, isActive, saveTempToDo } from "../events.js";
+import { openOverlay } from "../buttons.js";
+import { reloadToDoList, addToDo } from "../ui-components/renderModalUI.js";
 
 const toDoToBeRendered = (
   toDoList,
@@ -73,7 +73,6 @@ const toDoItemHandler = (toDoItem, newToDo, completedTasks) => {
       const taskList = container.querySelector(".task-list");
       const input = container.querySelector(".todo-input");
       const taskCheckboxes = document.querySelectorAll(".task-checkbox");
-      const taskSpans = document.querySelectorAll(".task-list li span");
       if (toDoTitle) toDoTitle.addEventListener("input", saveTempToDo);
       if (input) input.addEventListener("input", saveTempToDo);
       taskCheckboxes.forEach((checkbox) => {

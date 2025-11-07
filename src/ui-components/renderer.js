@@ -2,14 +2,14 @@ import {
   categoryToBeRendered,
   reloadCategoryList,
   activeCategoryState,
-} from "./categories.js";
+} from "../features/categories.js";
 import {
   updateCategorySelect,
   toggleDarkMode,
   openOverlay,
   switchBtn,
-} from "./buttons.js";
-import { reloadNoteList } from "./notes.js";
+} from "../buttons.js";
+import { reloadNoteList } from "../features/notes.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const modalStatus = localStorage.getItem("modal-status");
