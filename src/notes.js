@@ -1,7 +1,7 @@
 import { createNewNote } from "./classes.js";
 import { noteItemTemplate, toDoItemTemplate } from "./templates.js";
 import { isActive, syncCategoriesWithNotes, saveTempNote } from "./events.js";
-import { activeCategoryState, defaultCategory } from "./categories.js";
+import { defaultCategory } from "./categories.js";
 import { toDoItemHandler } from "./toDo.js";
 import { openOverlay } from "./buttons.js";
 
@@ -75,7 +75,9 @@ const reloadNoteList = (arr) => {
   const notesArr = arr
     ? arr
     : JSON.parse(localStorage.getItem("notesArr") || "[]");
-
+  const activeCategoryState = JSON.parse(
+    localStorage.getItem("activeCategoryState")
+  ) || { activeCategory: defaultCategory };
   const activeCategoryItems = notesArr.filter(
     (items) => items.category == activeCategoryState.activeCategory
   );
@@ -84,12 +86,14 @@ const reloadNoteList = (arr) => {
     noteToBeRendered(
       "Willkommen zu meiner Notiz App!",
       "Erste Notiz",
-      activeCategoryState.activeCategory || defaultCategory,
+      activeCategoryState.activeCategory,
       "note"
     );
     return;
   }
   for (let i = 0; i < activeCategoryItems.length; i++) {
+    const tempToDoValue =
+      JSON.parse(localStorage.getItem("tempToDoValue")) || "{}";
     const noteItem = document.createElement("div");
     noteItem.setAttribute("data-id", activeCategoryItems[i].id);
     noteItem.className = `${activeCategoryItems[i].type}Item`;
@@ -102,7 +106,10 @@ const reloadNoteList = (arr) => {
       noteItem.classList.contains("toDoItem") &&
       activeCategoryItems[i].type === "toDo"
     ) {
-      noteItem.innerHTML = toDoItemTemplate(activeCategoryItems[i]);
+      noteItem.innerHTML = toDoItemTemplate(
+        activeCategoryItems[i],
+        tempToDoValue.dataCompleted || []
+      );
     }
     notesContainer.appendChild(noteItem);
     if (
@@ -114,7 +121,11 @@ const reloadNoteList = (arr) => {
       noteItem.classList.contains("toDoItem") &&
       activeCategoryItems[i].type === "toDo"
     ) {
-      toDoItemHandler(noteItem, activeCategoryItems[i]);
+      toDoItemHandler(
+        noteItem,
+        activeCategoryItems[i],
+        tempToDoValue.dataCompleted || []
+      );
     }
   }
   syncCategoriesWithNotes();

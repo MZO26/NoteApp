@@ -39,6 +39,7 @@ button:focus {
 }
 
 .button-collection {
+  margin-top: 1.5rem;
   display: flex;
   align-items: center;
 }
@@ -220,3 +221,9 @@ button:focus {
 }
 
 /* Modal end */
+
+@media screen and (max-width: 480px) {
+  .button-collection {
+    margin: 0;
+  }
+}

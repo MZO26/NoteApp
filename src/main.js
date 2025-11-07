@@ -1,39 +1,27 @@
-import {
-  categoryToBeRendered,
-  reloadCategoryList,
-  activeCategoryState,
-} from "./categories.js";
-import {
-  updateCategorySelect,
-  toggleDarkMode,
-  openOverlay,
-  switchBtn,
-} from "./buttons.js";
-import { reloadNoteList } from "./notes.js";
+import { app, BrowserWindow } from "electron";
 
-window.onload = () => {
-  const modalStatus = localStorage.getItem("modal-status");
-  const modalState = JSON.parse(localStorage.getItem("modal-state")) || {
-    interface: "note",
-  };
-  if (modalState.interface === "toDo") {
-    switchBtn.click();
+function createWindow() {
+  const mainWindow = new BrowserWindow({
+    width: 350,
+    height: 700,
+    maxWidth: 1200,
+    maxHeight: 1000,
+    minWidth: 350,
+    minHeight: 700,
+  });
+  mainWindow.loadFile("../index.html");
+}
+
+app.whenReady().then(createWindow);
+
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
   }
-  localStorage.setItem("modalState", JSON.stringify({ interface: "note" }));
-  if (modalStatus == "open") {
-    openOverlay();
+});
+
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
   }
-  const categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
-  reloadCategoryList();
-  if (categoryArr.length) {
-    updateCategorySelect(categoryArr);
-  }
-  reloadNoteList();
-  if (categoryArr.length === 0) {
-    categoryToBeRendered(activeCategoryState.activeCategory);
-  }
-  const mode = localStorage.getItem("mode");
-  if (!document.body.classList.contains(`${mode}`)) {
-    toggleDarkMode();
-  }
-};
+});

@@ -1,0 +1,24 @@
+{
+  "name": "project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "prettier.configs.js",
+  "scripts": {
+    "start": "electron ./src/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mewtu26/project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Mewtu26/project/issues"
+  },
+  "homepage": "https://github.com/Mewtu26/project#readme",
+  "devDependencies": {
+    "electron": "^39.1.0"
+  }
+}

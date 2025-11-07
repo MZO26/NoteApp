@@ -1,3 +1,4 @@
+import { defaultCategory } from "./categories.js";
 import { dateTemplate } from "./templates.js";
 
 class CategoryItem {
@@ -32,6 +33,9 @@ const createNewCategory = (categoryName, notesArr) => {
 };
 
 const createNewNote = (type, category = null, noteValue, noteTitle) => {
+  const activeCategoryState = JSON.parse(
+    localStorage.getItem("activeCategoryState")
+  ) || { activeCategory: defaultCategory };
   return new NoteItem(
     Date.now() + Math.random(),
     type,

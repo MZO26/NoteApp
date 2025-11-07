@@ -1,10 +1,11 @@
 import { noteToBeRendered, reloadNoteList } from "./notes.js";
-import { categoryToBeRendered, activeCategoryState } from "./categories.js";
+import { categoryToBeRendered, defaultCategory } from "./categories.js";
 import {
   inputListener,
   showToast,
   syncCategoriesWithNotes,
   saveTempNote,
+  saveTempToDo,
 } from "./events.js";
 import { toDoToBeRendered } from "./toDo.js";
 import { changeOverlayInterface } from "./renderModalUI.js";
@@ -120,13 +121,16 @@ toggleBtn.addEventListener("click", collapseCategories);
 
 const updateCategorySelect = (categoryArr, activeCategory = null) => {
   const select = document.getElementById("category-select");
+  const activeCategoryState = JSON.parse(
+    localStorage.getItem("activeCategoryState")
+  ) || { activeCategory: defaultCategory };
   if (!select) return;
   select.innerHTML = "";
   categoryArr.forEach((category) => {
     const option = document.createElement("option");
     option.value = category.id;
     option.textContent = category.name;
-    if (activeCategory) {
+    if (category.name == activeCategoryState.activeCategory) {
       option.selected = true;
     }
     select.appendChild(option);
@@ -138,9 +142,14 @@ const saveButton = () => {
   const savedNoteId = JSON.parse(
     sessionStorage.getItem("savedNoteId") || "null"
   );
+  const activeCategoryState = JSON.parse(
+    localStorage.getItem("activeCategoryState")
+  ) || { activeCategory: defaultCategory };
   const modalState = JSON.parse(localStorage.getItem("modal-state")) || {
     interface: "note",
   };
+  const tempToDoValue =
+    JSON.parse(localStorage.getItem("tempToDoValue")) || "{}";
   const select = document.getElementById("category-select");
   const selectedCategory = select
     ? select.options[select.selectedIndex].textContent
@@ -149,20 +158,32 @@ const saveButton = () => {
 
   if (modalState.interface === "toDo") {
     const spans = document.querySelectorAll(".todo-container .task-list span");
+    const completedTasks =
+      Array.from(spans)
+        .filter((elements) => elements.classList.contains("task-completed"))
+        .map((element) => element.textContent) || tempToDoValue.dataCompleted;
     const allTasks = Array.from(spans).map((span) => span.textContent);
     const title = document.querySelector(".todo-title");
     if (!savedNoteId) {
-      toDoToBeRendered(allTasks, title.value, selectedCategory, "toDo");
+      toDoToBeRendered(
+        allTasks,
+        title.value,
+        selectedCategory,
+        "toDo",
+        completedTasks
+      );
       title.value === "Hello there"
         ? showEasterEggToast()
         : showToast("Neue ToDo-Liste angelegt");
     } else {
       const savedItem = notesArr.find((note) => note.id == savedNoteId);
       if (savedItem && savedItem.type === "toDo") {
-        savedItem.title = title.value.trim() || "Kein Titel";
+        savedItem.title = title.value.trim() || tempToDoValue.title;
         savedItem.data = allTasks;
         savedItem.category = selectedCategory;
+        savedItem.completedTasks = completedTasks;
         localStorage.setItem("notesArr", JSON.stringify(notesArr));
+        saveTempToDo();
         syncCategoriesWithNotes();
         showToast("ToDo-Liste wurde gespeichert");
         reloadNoteList();

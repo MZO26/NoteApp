@@ -5,23 +5,33 @@ import { syncCategoriesWithNotes, isActive, saveTempToDo } from "./events.js";
 import { openOverlay } from "./buttons.js";
 import { reloadToDoList, addToDo } from "./renderModalUI.js";
 
-const toDoToBeRendered = (toDoList, toDoTitle, category = null, type) => {
+const toDoToBeRendered = (
+  toDoList,
+  toDoTitle,
+  category = null,
+  type,
+  completedTasks
+) => {
   if (type !== "toDo") return;
   const notesArr = JSON.parse(localStorage.getItem("notesArr") || "[]");
+  const tempToDoValue =
+    JSON.parse(localStorage.getItem("tempToDoValue")) || "{}";
+  completedTasks ? completedTasks : tempToDoValue.dataCompleted;
   const notesContainer = document.querySelector(".notes-container");
   const toDoItem = document.createElement("div");
   toDoItem.className = "toDoItem";
   const newToDo = createNewNote(type, category, toDoList, toDoTitle);
   toDoItem.setAttribute("data-id", newToDo.id);
-  toDoItem.innerHTML = toDoItemTemplate(newToDo);
+  toDoItem.innerHTML = toDoItemTemplate(newToDo, completedTasks);
   notesArr.push(newToDo);
   localStorage.setItem("notesArr", JSON.stringify(notesArr));
+  saveTempToDo();
   notesContainer.appendChild(toDoItem);
-  toDoItemHandler(toDoItem, newToDo);
+  toDoItemHandler(toDoItem, newToDo, completedTasks);
   syncCategoriesWithNotes();
 };
 
-const toDoItemHandler = (toDoItem, newToDo) => {
+const toDoItemHandler = (toDoItem, newToDo, completedTasks) => {
   const toDoItemBtn = toDoItem.querySelector("button");
   function viewToDo() {
     localStorage.setItem("modal-state", JSON.stringify({ interface: "toDo" }));
@@ -50,19 +60,30 @@ const toDoItemHandler = (toDoItem, newToDo) => {
           "tempToDoValue",
           JSON.stringify({
             title: newToDo.title || tempToDo.title,
-            data: newToDo.data || tempToDo.data || [],
+            data: newToDo.data || tempToDo.data,
+            dataCompleted: completedTasks || [],
           })
         );
       }
-      reloadToDoList(newToDo);
+      reloadToDoList(newToDo, completedTasks);
       saveTempToDo();
       isActive(toDoItem, notesContainer);
       const container = document.querySelector(".todo-container");
       const addBtn = container.querySelector(".todo-btn");
       const taskList = container.querySelector(".task-list");
       const input = container.querySelector(".todo-input");
+      const taskCheckboxes = document.querySelectorAll(".task-checkbox");
+      const taskSpans = document.querySelectorAll(".task-list li span");
       if (toDoTitle) toDoTitle.addEventListener("input", saveTempToDo);
       if (input) input.addEventListener("input", saveTempToDo);
+      taskCheckboxes.forEach((checkbox) => {
+        const container = checkbox.closest("li");
+        const span = container.querySelector("span");
+        const hasTaskCompletedClass = span.classList.contains("task-completed");
+        if (!checkbox.checked && hasTaskCompletedClass) {
+          checkbox.checked = true;
+        }
+      });
       if (addBtn) {
         if (addBtn._addHandlerRef) {
           addBtn.removeEventListener("click", addBtn._addHandlerRef);

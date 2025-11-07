@@ -1,18 +1,4 @@
-html,
-body {
-  height: 100%;
-  background-color: var(--bg);
-}
-
-body {
-  color: var(--text);
-  overflow-y: scroll;
-  overflow-x: hidden;
-  margin: 0;
-}
-
-:root,
-body.dark {
+:root {
   --bg: hsl(220 10% 12%); /* page background */
   --bg-light: hsl(220 10% 16%); /* slightly lighter panels */
   --bg-dark: hsl(0 0% 96%); /* text color on dark bg */
@@ -43,6 +29,16 @@ body.light {
   --active-bg: hsl(210 9% 94%);
   --active-text: hsl(210 8% 12%);
   --active-accent: rgba(30, 40, 50, 0.08);
+}
+
+html,
+body {
+  height: 100%;
+  background-color: var(--bg);
+  color: var(--text);
+  overflow-y: scroll;
+  overflow-x: hidden;
+  margin: 0;
 }
 
 p {
@@ -334,6 +330,15 @@ h2 {
   opacity: 0.9;
 }
 
+::-webkit-scrollbar {
+  width: 5px;
+  background-color: var(--note);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--bg-dark);
+}
+
 textarea::-webkit-scrollbar,
 .task-list::-webkit-scrollbar {
   width: 3px;
@@ -364,7 +369,7 @@ textarea::-webkit-scrollbar-thumb,
   display: flex;
   align-items: center;
   flex-direction: row;
-  height: 8vh;
+  height: 10vh;
   transition: height 0.4s ease-in-out, padding 0.3s ease;
   overflow: hidden;
 }
@@ -374,6 +379,15 @@ textarea::-webkit-scrollbar-thumb,
   padding: 0;
   overflow: hidden;
   transition: height 0.4s ease-in-out, padding 0.3s ease;
+}
+
+.category-list::-webkit-scrollbar {
+  height: 4px;
+  background-color: var(--note);
+}
+
+.category-list::-webkit-scrollbar-thumb {
+  background-color: var(--bg-dark);
 }
 
 #categoryItem {
@@ -446,6 +460,10 @@ textarea::-webkit-scrollbar-thumb,
   font-size: 1.2rem;
   color: var(--bg-dark);
   overflow: hidden;
+}
+
+.toDoItem li {
+  color: var(--bg-dark);
 }
 
 .noteItem:hover,
@@ -557,5 +575,8 @@ textarea::-webkit-scrollbar-thumb,
   }
   #overlay {
     backdrop-filter: blur(4px);
+  }
+  .category-list {
+    height: 10vh;
   }
 }

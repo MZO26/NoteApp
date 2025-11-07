@@ -82,14 +82,23 @@ const saveTempToDo = () => {
   const toDoList = currentToDo.querySelectorAll(".task-list li span");
   const titleValue = toDoTitle ? toDoTitle.value : "Kein Titel";
   const toDoData = [];
+  const completedTasks = [];
   if (toDoList.length) {
     toDoList.forEach((span) => {
       toDoData.push(span.textContent);
+      if (span.classList.contains("task-completed")) {
+        completedTasks.push(span.textContent);
+      }
     });
   }
+
   localStorage.setItem(
     "tempToDoValue",
-    JSON.stringify({ title: titleValue, data: toDoData })
+    JSON.stringify({
+      title: titleValue || "Kein Titel",
+      data: toDoData || [],
+      dataCompleted: completedTasks || [],
+    })
   );
 };
 

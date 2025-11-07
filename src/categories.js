@@ -41,8 +41,11 @@ const categoryToBeRendered = (categoryName) => {
   }
   categoryList.appendChild(categoryItem);
   showToast(`Kategorie "${categoryName}" hinzugefügt`);
-  activeCategoryState.activeCategory = categoryName;
-  updateCategorySelect(categoryArr);
+  localStorage.setItem(
+    "activeCategoryState",
+    JSON.stringify({ activeCategory: categoryName })
+  );
+  updateCategorySelect(categoryArr, categoryName);
   categoryItemHandler(categoryItem);
   syncCategoriesWithNotes();
 };
@@ -61,6 +64,10 @@ const categoryItemHandler = (categoryItem) => {
     const category = categoryArr.find((c) => c.id == id);
     if (!category) activeCategoryState.activeCategory = defaultCategory;
     else activeCategoryState.activeCategory = category.name;
+    localStorage.setItem(
+      "activeCategoryState",
+      JSON.stringify({ activeCategory: activeCategoryState.activeCategory })
+    );
     const categoryList = document.querySelector(".category-list");
     isActive(categoryItem, categoryList);
     syncCategoriesWithNotes();
@@ -98,7 +105,11 @@ const categoryItemHandler = (categoryItem) => {
     categoryItem.remove();
     localStorage.setItem("notesArr", JSON.stringify(notesArr));
     localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
-    updateCategorySelect(categoryArr);
+    localStorage.setItem(
+      "activeCategoryState",
+      JSON.stringify({ activeCategory: defaultCategory })
+    );
+    updateCategorySelect(categoryArr, defaultCategory);
     syncCategoriesWithNotes();
     reloadCategoryList();
     reloadNoteList();
@@ -112,6 +123,9 @@ const categoryItemHandler = (categoryItem) => {
 const reloadCategoryList = () => {
   const categoryList = document.querySelector(".category-list");
   const categoryArr = JSON.parse(localStorage.getItem("categoryArr") || "[]");
+  const activeCategoryState = JSON.parse(
+    localStorage.getItem("activeCategoryState")
+  ) || { activeCategory: defaultCategory };
   if (!categoryArr.length) return;
   categoryList.innerHTML = "";
   for (let i = 0; i < categoryArr.length; i++) {

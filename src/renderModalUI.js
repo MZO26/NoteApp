@@ -28,13 +28,16 @@ const addToDo = (taskList, input) => {
   addEventListeners(li, checkbox, taskSpan, taskDeleteBtn);
 };
 
-const reloadToDoList = (toDo) => {
+const reloadToDoList = (toDo, completedTasks) => {
   const taskList = document.querySelector(".task-list");
   if (!toDo.data || toDo.data.length === 0) return;
   for (let i = 0; i < toDo.data.length; i++) {
     const { li, checkbox, taskSpan, taskDeleteBtn } = createTaskItem(
       toDo.data && toDo.data[i]
     );
+    if (completedTasks && completedTasks.includes(toDo.data[i])) {
+      taskSpan.classList.add("task-completed");
+    }
     taskList.appendChild(li);
     addEventListeners(li, checkbox, taskSpan, taskDeleteBtn);
   }
@@ -97,16 +100,16 @@ const renderToDoUI = () => {
     localStorage.getItem("tempToDoValue") || "{}"
   );
   saveTempNote();
-  title.value = tempToDoValue.title || "";
+  title.value = tempToDoValue.title;
   const titleFragment = document.createDocumentFragment();
   const noteFragment = document.createDocumentFragment();
   titleFragment.appendChild(title);
   noteFragment.appendChild(todoDiv);
   currentTitle.replaceWith(titleFragment);
   currentNote.replaceWith(noteFragment);
-  const toDoData = tempToDoValue.data || null;
+  const toDoData = tempToDoValue.data || [];
   if (toDoData && toDoData.length) {
-    reloadToDoList(tempToDoValue);
+    reloadToDoList(tempToDoValue, tempToDoValue.dataCompleted);
   }
   addBtn.addEventListener("click", () => addToDo(taskList, input));
 };

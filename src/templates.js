@@ -13,8 +13,14 @@ const noteItemTemplate = (noteData) => {
                 </svg></button><h3>${noteData.title}</h3><p class="noteItemTemplateDate">Erstellt: ${noteData.formattedDate}</p><p>${noteData.data}</p>`;
 };
 
-const toDoItemTemplate = (toDoData) => {
-  const htmlString = toDoData.data.map((item) => `<li>${item}</li>`).join("");
+const toDoItemTemplate = (toDoData, completedTasks) => {
+  const htmlString = toDoData.data
+    .map((task) =>
+      completedTasks && completedTasks.includes(task)
+        ? `<li><span class="task-completed">${task}</span></li>`
+        : `<li><span>${task}</span></li>`
+    )
+    .join("");
   return `<button class="btn" title="Notiz löschen">       <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
