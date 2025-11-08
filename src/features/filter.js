@@ -45,12 +45,12 @@ const filter = () => {
         isActive(targetItem, notesContainer);
         const end = performance.now();
         const duration = end - start;
-        div.innerHTML = `Titel: ${result.title}<br>Dauer: ${duration.toFixed(
+        div.innerHTML = `title: ${result.title}<br>duration: ${duration.toFixed(
           3
         )} ms`;
       }
     } else {
-      div.innerHTML = "Keine Notiz gefunden";
+      div.innerHTML = "No matching title found";
     }
     dropdown.appendChild(div);
     dropdown.style.display = "block";

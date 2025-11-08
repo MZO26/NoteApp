@@ -54,13 +54,6 @@ h2 {
   color: var(--bg-dark);
 }
 
-.noteItem:hover,
-.toDoItem:hover,
-#categoryItem:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: box-shadow 0.3s ease-in-out;
-}
-
 .container {
   width: 100%;
   max-width: 1200px;
@@ -72,6 +65,7 @@ h2 {
   gap: 1.5rem;
 }
 
+/** navbar styling start **/
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -99,7 +93,6 @@ h2 {
   align-items: center;
 }
 
-/* for filter results */
 .dropdown {
   position: absolute;
   background: var(--btn-bg);
@@ -110,8 +103,9 @@ h2 {
   display: none;
   border-radius: 5px;
 }
+/** navbar styling end **/
 
-/* modal start */
+/** modal overlay to blur background start **/
 #overlay {
   position: fixed;
   top: 0;
@@ -130,7 +124,9 @@ h2 {
   opacity: 1;
   pointer-events: all;
 }
+/** modal overlay to blur background end **/
 
+/** modal for notes / toDo's start **/
 #modal {
   position: fixed;
   top: 50%;
@@ -150,7 +146,9 @@ h2 {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
   z-index: 20;
 }
 
@@ -165,6 +163,7 @@ h2 {
   justify-content: space-between;
 }
 
+/** note part styling start **/
 .title,
 .note,
 .todo-title {
@@ -174,7 +173,9 @@ h2 {
   border-radius: 5px;
   font-size: 1.5rem;
   resize: none;
-  transition: font-size 0.3s, height 0.3s;
+  transition:
+    font-size 0.3s,
+    height 0.3s;
   margin-bottom: 10px;
 }
 
@@ -193,6 +194,17 @@ h2 {
   overflow-y: scroll;
 }
 
+.title:focus,
+.note:focus,
+.todo-title:focus,
+.todo-input:focus {
+  outline: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.1s ease-in-out;
+}
+/** note part styling end **/
+
+/** toDo part styling start **/
 .todo-container {
   display: flex;
   flex-direction: column;
@@ -226,7 +238,9 @@ h2 {
   border-radius: 8px;
   color: var(--bg-dark);
   box-sizing: border-box;
-  transition: background-color 0.1s ease, border-color 0.1s ease;
+  transition:
+    background-color 0.1s ease,
+    border-color 0.1s ease;
   font-size: 1.5rem;
 }
 
@@ -336,40 +350,9 @@ h2 {
   text-decoration: line-through;
   opacity: 0.9;
 }
+/** toDo part styling end **/
 
-::-webkit-scrollbar {
-  width: 5px;
-  background-color: var(--note);
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: var(--bg-dark);
-}
-
-textarea::-webkit-scrollbar,
-.task-list::-webkit-scrollbar {
-  width: 3px;
-  background-color: var(--note);
-}
-
-textarea::-webkit-scrollbar-thumb,
-.task-list::-webkit-scrollbar-thumb {
-  background-color: var(--bg-dark);
-}
-
-/* modal end */
-
-.notes-container {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  grid-auto-rows: 400px;
-  justify-content: center;
-  gap: 1.5rem;
-  padding: 1.5rem;
-  box-sizing: border-box;
-}
-
+/** categoryList / categoryItem styling start **/
 .category-list {
   border-top: 1px solid var(--btn-text);
   margin: 0 1.5rem 0 1.5rem;
@@ -377,7 +360,9 @@ textarea::-webkit-scrollbar-thumb,
   align-items: center;
   flex-direction: row;
   height: 12vh;
-  transition: height 0.4s ease-in-out, padding 0.3s ease;
+  transition:
+    height 0.4s ease-in-out,
+    padding 0.3s ease;
   overflow: hidden;
 }
 
@@ -385,17 +370,9 @@ textarea::-webkit-scrollbar-thumb,
   height: 0;
   padding: 0;
   overflow: hidden;
-  transition: height 0.4s ease-in-out, padding 0.3s ease;
-}
-
-.category-list::-webkit-scrollbar {
-  height: 5px;
-  background-color: var(--note);
-}
-
-.category-list::-webkit-scrollbar-thumb {
-  cursor: pointer;
-  background-color: var(--bg-dark);
+  transition:
+    height 0.4s ease-in-out,
+    padding 0.3s ease;
 }
 
 #categoryItem {
@@ -410,7 +387,7 @@ textarea::-webkit-scrollbar-thumb,
   height: 70px;
   background-color: var(--note);
   color: var(--text);
-  border: 1px solid var(--bg-dark);
+  border: 1px solid var(--bg-light);
   font-size: 1.2rem;
   cursor: pointer;
   position: relative;
@@ -419,31 +396,30 @@ textarea::-webkit-scrollbar-thumb,
 #categoryItem.collapsed {
   overflow: hidden;
 }
+/** categoryList / categoryItem styling end **/
+
+/** notesContainer / noteItem / toDoItem styling start **/
+
+.notes-container {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-auto-rows: 400px;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
 
 .noteItem,
 .toDoItem {
-  border: 1px solid black;
+  border: 1px solid var(--bg-light);
   box-sizing: border-box;
   overflow-y: scroll;
   background-color: var(--note);
   color: var(--text);
   cursor: pointer;
   position: relative;
-}
-
-.noteItem::-webkit-scrollbar,
-.toDoItem::-webkit-scrollbar {
-  width: 3px;
-  background-color: var(--note);
-}
-
-.noteItem::-webkit-scrollbar-thumb,
-.toDoItem::-webkit-scrollbar-thumb {
-  background-color: var(--bg-dark);
-}
-
-.toDoItemTemplateList {
-  font-size: 1.2rem;
 }
 
 .noteItem button,
@@ -482,10 +458,24 @@ textarea::-webkit-scrollbar-thumb,
   transition: box-shadow 0.3s ease-in-out;
 }
 
+.noteItem:hover,
+.toDoItem:hover,
+#categoryItem:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.toDoItemTemplateList {
+  font-size: 1.2rem;
+}
+
 .noteItemTemplateDate {
   justify-self: flex-start;
 }
 
+/** noteItem / toDoItem styling end **/
+
+/** contact info styling start **/
 .sidebar-overlay {
   position: absolute;
   display: grid;
@@ -494,14 +484,15 @@ textarea::-webkit-scrollbar-thumb,
   width: 150px;
   height: 80px;
   background: var(--active-bg-);
-  border: var(--btn-border);
-  border: 1px solid;
+  border: 1px solid var(--btn-border);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   padding: 0 10px;
   border-radius: 10px;
   overflow-y: auto;
   z-index: 1000;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
 }
 
 .sidebar-overlay h3 {
@@ -519,8 +510,51 @@ textarea::-webkit-scrollbar-thumb,
   visibility: visible;
   pointer-events: auto;
 }
+/** contact info styling end **/
 
+/** scrollbar styling start **/
+::-webkit-scrollbar {
+  width: 5px;
+  background-color: var(--note);
+}
+
+::-webkit-scrollbar-thumb {
+  cursor: pointer;
+  background-color: var(--bg-dark);
+}
+
+textarea::-webkit-scrollbar,
+.task-list::-webkit-scrollbar,
+.noteItem::-webkit-scrollbar,
+.toDoItem::-webkit-scrollbar {
+  width: 3px;
+  background-color: var(--note);
+}
+
+textarea::-webkit-scrollbar-thumb,
+.task-list::-webkit-scrollbar-thumb,
+.noteItem::-webkit-scrollbar-thumb,
+.toDoItem::-webkit-scrollbar-thumb {
+  background-color: var(--bg-dark);
+}
+
+.category-list::-webkit-scrollbar {
+  height: 5px;
+  background-color: var(--note);
+}
+
+.category-list::-webkit-scrollbar-thumb {
+  background-color: var(--bg-dark);
+}
+
+/** scrollbar styling end **/
+
+/** smaller screen sizes styling start **/
 @media screen and (max-width: 700px) {
+  .info-btn {
+    visibility: hidden;
+    pointer-events: none;
+  }
   .navbar {
     height: 10vh;
     display: flex;
@@ -619,3 +653,4 @@ textarea::-webkit-scrollbar-thumb,
     height: 10vh;
   }
 }
+/** smaller screen sizes styling end **/

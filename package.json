@@ -1,17 +1,38 @@
 {
-  "name": "project",
+  "name": "noteapp",
   "version": "1.0.0",
-  "description": "",
-  "main": "prettier.configs.js",
+  "description": "Minimal Notetaking / ToDo App",
+  "main": "./src/main.js",
   "scripts": {
-    "start": "electron ./src/main.js"
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
+  "config": {
+    "forge": {
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "authors": "Mewtu26",
+            "exe": "noteapp.exe"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        }
+      ]
+    }
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Mewtu26/project.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Mewtu26",
   "license": "ISC",
   "type": "module",
   "bugs": {
@@ -19,6 +40,17 @@
   },
   "homepage": "https://github.com/Mewtu26/project#readme",
   "devDependencies": {
+    "@electron-forge/cli": "^7.10.2",
+    "@electron-forge/maker-deb": "^7.10.2",
+    "@electron-forge/maker-rpm": "^7.10.2",
+    "@electron-forge/maker-squirrel": "^7.10.2",
+    "@electron-forge/maker-zip": "^7.10.2",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.10.2",
+    "@electron-forge/plugin-fuses": "^7.10.2",
+    "@electron/fuses": "^1.8.0",
     "electron": "^39.1.0"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.1"
   }
 }

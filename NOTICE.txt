@@ -1,0 +1,47 @@
+NOTICE
+
+This product includes open source software components.
+
+Bootstrap Icons
+---------------
+This application uses Bootstrap Icons to provide user interface icons.
+
+Bootstrap Icons © 2019-2025 The Bootstrap Authors  
+Licensed under the MIT License.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy  
+of Bootstrap Icons and associated documentation files (the "Software"), to deal  
+in the Software without restriction, including without limitation the rights to use,  
+copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,  
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies  
+or substantial portions of the Software.
+
+For the full text of the MIT License, please visit:  
+https://opensource.org/licenses/MIT
+
+For more information about Bootstrap Icons, please visit:  
+https://icons.getbootstrap.com/
+
+Electron
+--------
+This application uses Electron to build the desktop application shell.
+
+Electron © 2013-2025 GitHub, Inc. and contributors  
+Licensed under the MIT License.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy  
+of Electron and associated documentation files (the "Software"), to deal  
+in the Software without restriction, including without limitation the rights to use,  
+copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,  
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies  
+or substantial portions of the Software.
+
+For the full text of the MIT License, please visit:  
+https://opensource.org/licenses/MIT
+
+For more information about Electron, please visit:  
+https://www.electronjs.org/

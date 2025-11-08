@@ -13,11 +13,11 @@ const changeOverlayInterface = () => {
   const modalHeadingElement = document.querySelector(".modal-heading");
   const modalNoteElement = document.querySelector(".modal-note");
   if (modalState.interface === "note") {
-    modalHeadingElement.textContent = "Neue Notiz";
-    modalNoteElement.textContent = "Notiz hinzufügen";
+    modalHeadingElement.textContent = "New note";
+    modalNoteElement.textContent = "Add note";
   } else if (modalState.interface === "toDo") {
-    modalHeadingElement.textContent = "Neue ToDo Liste";
-    modalNoteElement.textContent = "ToDo's hinzufügen";
+    modalHeadingElement.textContent = "New toDo list";
+    modalNoteElement.textContent = "Add toDo's";
   }
   createFragmentElement(modalState.interface);
 };

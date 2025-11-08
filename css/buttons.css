@@ -13,17 +13,21 @@
   --btn-outline: rgba(255, 255, 255, 0.12); button outline
  */
 
-button {
+button,
+select {
   cursor: pointer;
   background: var(--btn-bg);
   color: var(--btn-text);
   border: 1px solid var(--btn-outline);
-  transition: background-color 0.1s ease, box-shadow 0.1s ease;
+  transition:
+    background-color 0.1s ease,
+    box-shadow 0.1s ease;
   font: inherit;
 }
 
 input:hover,
-input:focus {
+input:focus,
+button:focus {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: box-shadow 0.3s ease-in-out;
 }
@@ -33,11 +37,6 @@ button:hover {
   transition: 0.1s ease-in-out;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: box-shadow 0.3s ease-in-out;
-}
-
-button:focus {
-  box-shadow: 0 0 0 3px var(--btn-outline);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .button-collection-modal {
@@ -100,7 +99,9 @@ button:focus {
   background: var(--btn-bg);
   color: var(--btn-text);
   border: 1px solid var(--btn-border);
-  transition: background-color 0.1s ease, box-shadow 0.1s ease,
+  transition:
+    background-color 0.1s ease,
+    box-shadow 0.1s ease,
     border-color 0.1s ease;
 }
 
@@ -110,19 +111,18 @@ button:focus {
 }
 
 .dark-mode-btn {
-  border-radius: 18px;
-  max-width: 35px;
-  max-height: 35px;
-  padding: 8px;
+  border-radius: 20px;
+  width: 40px;
+  height: 40px;
+  padding: 11px;
   margin-right: 20px;
 }
 
-/* Modal start */
 .showModal-btn,
 .closeModal-btn {
   width: 150px;
-  height: 35px;
-  border-radius: 10px;
+  height: 40px;
+  border-radius: 20px;
   margin: 10px;
 }
 
@@ -251,8 +251,6 @@ button:focus {
   z-index: 1000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
-
-/* Modal end */
 
 @media screen and (max-width: 480px) {
   .button-collection {

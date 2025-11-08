@@ -190,7 +190,7 @@ const saveButton = () => {
       );
       title.value === "Hello there"
         ? showEasterEggToast()
-        : showToast("Neue ToDo-Liste angelegt");
+        : showToast("New toDo-list added");
     } else {
       const savedItem = notesArr.find((note) => note.id == savedNoteId);
       if (savedItem && savedItem.type === "toDo") {
@@ -201,7 +201,7 @@ const saveButton = () => {
         localStorage.setItem("notesArr", JSON.stringify(notesArr));
         saveTempToDo();
         syncCategoriesWithNotes();
-        showToast("ToDo-Liste wurde gespeichert");
+        showToast("ToDo-list was saved");
         reloadNoteList();
       }
     }
@@ -212,16 +212,16 @@ const saveButton = () => {
       noteToBeRendered(note.value, title.value, selectedCategory, "note");
       title.value === "Hello there"
         ? showEasterEggToast()
-        : showToast("Neue Notiz angelegt");
+        : showToast("New note added");
     } else {
       const savedItem = notesArr.find((note) => note.id == savedNoteId);
       if (savedItem && savedItem.type === "note") {
-        savedItem.title = title.value.trim() || "Kein Titel";
+        savedItem.title = title.value.trim() || "No title";
         savedItem.data = note.value;
         savedItem.category = selectedCategory;
         localStorage.setItem("notesArr", JSON.stringify(notesArr));
         syncCategoriesWithNotes();
-        showToast("Notiz wurde gespeichert");
+        showToast("Note was saved");
         reloadNoteList();
       }
     }
@@ -283,7 +283,7 @@ const categoryInputButton = async () => {
   const input = document.createElement("input");
   input.type = "text";
   input.id = "category-input";
-  input.placeholder = "Kategorie eingeben";
+  input.placeholder = "Input category name";
   categoryBtn.replaceWith(input);
   const value = await inputListener(input);
   input.replaceWith(categoryBtn);

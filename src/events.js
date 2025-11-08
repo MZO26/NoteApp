@@ -80,7 +80,7 @@ const saveTempToDo = () => {
   const toDoTitle = document.querySelector(".todo-title");
   const currentToDo = document.querySelector(".todo-container");
   const toDoList = currentToDo.querySelectorAll(".task-list li span");
-  const titleValue = toDoTitle ? toDoTitle.value : "Kein Titel";
+  const titleValue = toDoTitle ? toDoTitle.value : "No title";
   const toDoData = [];
   const completedTasks = [];
   if (toDoList.length) {

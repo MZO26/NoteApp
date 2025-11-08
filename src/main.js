@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, Menu } from "electron";
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -9,7 +9,8 @@ function createWindow() {
     minWidth: 350,
     minHeight: 700,
   });
-  mainWindow.loadFile("../index.html");
+  mainWindow.loadFile("index.html");
+  Menu.setApplicationMenu(null);
 }
 
 app.whenReady().then(createWindow);

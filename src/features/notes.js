@@ -46,7 +46,7 @@ const noteItemHandler = (noteItem, notes) => {
       const notesContainer = document.querySelector(".notes-container");
       const noteTitle = document.querySelector(".title");
       const noteTextArea = document.querySelector(".note");
-      noteTitle.value = notes.title || tempNote.title || "Kein Titel";
+      noteTitle.value = notes.title || tempNote.title || "No title";
       noteTextArea.value = notes.data || tempNote.note;
       saveTempNote();
       isActive(noteItem, notesContainer);
@@ -87,8 +87,8 @@ const reloadNoteList = (arr) => {
   notesContainer.innerHTML = "";
   if (notesArr.length === 0 || activeCategoryItems.length === 0) {
     noteToBeRendered(
-      "Willkommen zu meiner Notiz App!",
-      "Erste Notiz",
+      "Welcome to my notes app!",
+      "First note",
       activeCategoryState.activeCategory,
       "note"
     );

@@ -1,5 +1,5 @@
 const noteItemTemplate = (noteData) => {
-  return `<button class="btn" title="Notiz löschen">       <svg
+  return `<button class="btn" title="delete note">       <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
                   height="16"
@@ -10,7 +10,7 @@ const noteItemTemplate = (noteData) => {
                   <path
                     d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"
                   />
-                </svg></button><h3>${noteData.title}</h3><p class="noteItemTemplateDate">Erstellt: ${noteData.formattedDate}</p><p>${noteData.data}</p>`;
+                </svg></button><h3>${noteData.title}</h3><p class="noteItemTemplateDate">Created: ${noteData.formattedDate}</p><p>${noteData.data}</p>`;
 };
 
 const toDoItemTemplate = (toDoData, completedTasks) => {
@@ -21,7 +21,7 @@ const toDoItemTemplate = (toDoData, completedTasks) => {
         : `<li><span>${task}</span></li>`
     )
     .join("");
-  return `<button class="btn" title="Notiz löschen">       <svg
+  return `<button class="btn" title="delete toDo-list">       <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
                   height="16"
@@ -32,11 +32,11 @@ const toDoItemTemplate = (toDoData, completedTasks) => {
                   <path
                     d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"
                   />
-                </svg></button><h3>${toDoData.title}</h3><p class="noteItemTemplateDate">Erstellt: ${toDoData.formattedDate}</p><ul class="toDoItemTemplateList">${htmlString}</ul>`;
+                </svg></button><h3>${toDoData.title}</h3><p class="noteItemTemplateDate">Created: ${toDoData.formattedDate}</p><ul class="toDoItemTemplateList">${htmlString}</ul>`;
 };
 
 const categoryItemTemplate = (value) => {
-  return `<button class="btn" title="Kategorie löschen">       <svg
+  return `<button class="btn" title="delete category">       <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
                 height="16"
@@ -70,9 +70,9 @@ const getToDoInterfaceElements = () => {
   });
 
   const addBtn = Object.assign(document.createElement("button"), {
-    innerText: "ToDo hinzufügen",
+    innerText: "Add toDo",
     className: "todo-btn",
-    title: "Fügt neuen Task zur Liste hinzu",
+    title: "adds new task to task-list",
   });
 
   const taskList = Object.assign(document.createElement("ul"), {
@@ -96,7 +96,7 @@ const createTaskItem = (taskText) => {
     type: "checkbox",
     className: "task-checkbox",
     name: "task-checkbox",
-    title: "Markiert Task als abgeschlossen",
+    title: "marks task as completed",
   });
 
   const taskSpan = Object.assign(document.createElement("span"), {
@@ -117,7 +117,7 @@ const createTaskItem = (taskText) => {
               />
             </svg>`,
     className: "task-delete-btn",
-    title: "Task löschen",
+    title: "delete task",
   });
 
   li.appendChild(checkbox);

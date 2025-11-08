@@ -7,7 +7,7 @@ import { showToast, isActive, syncCategoriesWithNotes } from "../events.js";
 import { updateCategorySelect } from "../buttons.js";
 import { reloadNoteList } from "./notes.js";
 
-let defaultCategory = "Ohne Kategorie";
+let defaultCategory = "Without category";
 let activeCategoryState = { activeCategory: defaultCategory };
 
 const categoryToBeRendered = (categoryName) => {
@@ -17,7 +17,7 @@ const categoryToBeRendered = (categoryName) => {
     (category) => category.name == categoryName
   );
   if (doesCategoryExist) {
-    showToast("Kategorie existiert bereits");
+    showToast("Category already exists");
     return;
   }
   const newCategory = createNewCategory(categoryName, notesArr);
@@ -32,22 +32,28 @@ const categoryToBeRendered = (categoryName) => {
   } else if (newCategory.name != defaultCategory && doesDefaultExist) {
     categoryItem.setAttribute("category-id", newCategory.id);
   } else return;
+
   categoryArr.push(newCategory);
   localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
   if (newCategory.isDefault) {
     categoryItem.innerHTML = defaultCategoryItemTemplate(newCategory.name);
   } else {
     categoryItem.innerHTML = categoryItemTemplate(
-      newCategory.name.slice(0, 15) + "..."
+      (newCategory.name =
+        newCategory.name.length > 15
+          ? newCategory.name.slice(0, 15) + "..."
+          : newCategory.name)
     );
   }
   categoryList.appendChild(categoryItem);
-  showToast(`Kategorie "${categoryName.slice(0, 15) + "..."}" hinzugefügt`);
+  if (newCategory.name !== defaultCategory) {
+    showToast(`Added "${newCategory.name}"`);
+  }
   localStorage.setItem(
     "activeCategoryState",
-    JSON.stringify({ activeCategory: categoryName })
+    JSON.stringify({ activeCategory: newCategory.name })
   );
-  updateCategorySelect(categoryArr, categoryName);
+  updateCategorySelect(categoryArr, newCategory.name);
   categoryItemHandler(categoryItem);
   syncCategoriesWithNotes();
 };
