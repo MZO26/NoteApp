@@ -8,6 +8,12 @@ function createWindow() {
     maxHeight: 1000,
     minWidth: 350,
     minHeight: 700,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      enableRemoteModule: false,
+      webSecurity: true,
+    },
   });
   mainWindow.loadFile("index.html");
   Menu.setApplicationMenu(null);

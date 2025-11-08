@@ -483,7 +483,7 @@ h2 {
   bottom: 60px;
   width: 150px;
   height: 80px;
-  background: var(--active-bg-);
+  background: var(--active-bg);
   border: 1px solid var(--btn-border);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   padding: 0 10px;

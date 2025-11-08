@@ -21,7 +21,7 @@ This project was created as a personal challenge to build a functional note-taki
 
 1. Ensure [Node.js](https://nodejs.org/) is installed on your machine.
 
-2. Clone the repository: git clone https://github.com/Mewtu26/project.git
+2. Clone the repository: git clone https://github.com/Mewtu26/NoteApp.git
 
 3. Open your terminal and navigate to the project’s root directory.
 
@@ -33,7 +33,7 @@ This project was created as a personal challenge to build a functional note-taki
 6. Build the app for distribution: Package and create installers for the app with: npm run make
    This command uses the build configuration (in this case Electron Forge) and outputs platform-specific installers in the `out/` directory
 
-7. Replace `https://github.com/Mewtu26/project.git` with your repository URL and adjust scripts if customized.
+7. Replace `https://github.com/Mewtu26/NoteApp.git` with your repository URL and adjust scripts if customized.
 
 ## License
 
