@@ -27,6 +27,20 @@
             "authors": "Mewtu26",
             "exe": "noteapp.exe"
           }
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {
+            "authors": "Mewtu26",
+            "exe": "noteapp.exe"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {
+            "authors": "Mewtu26",
+            "exe": "noteapp.exe"
+          }
         }
       ]
     }

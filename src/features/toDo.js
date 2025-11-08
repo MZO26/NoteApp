@@ -1,9 +1,13 @@
-import { savedNoteIdState } from "./notes.js";
+import {
+  addToDo,
+  openOverlay,
+  reloadToDoList,
+} from "../ui-components/renderModalUI.js";
 import { createNewNote } from "../utils/classes.js";
+import { isActive } from "../utils/events.js";
+import { saveTempToDo, syncCategoriesWithNotes } from "../utils/storage.js";
 import { toDoItemTemplate } from "../utils/templates.js";
-import { syncCategoriesWithNotes, isActive, saveTempToDo } from "../events.js";
-import { openOverlay } from "../buttons.js";
-import { reloadToDoList, addToDo } from "../ui-components/renderModalUI.js";
+import { savedNoteIdState } from "./notes.js";
 
 const toDoToBeRendered = (
   toDoList,
@@ -54,7 +58,7 @@ const toDoItemHandler = (toDoItem, newToDo, completedTasks) => {
       const notesContainer = document.querySelector(".notes-container");
       const toDoTitle = document.querySelector(".todo-title");
       if (toDoTitle) {
-        toDoTitle.value = newToDo.title || tempToDo.title || "Kein Titel";
+        toDoTitle.value = newToDo.title || tempToDo.title || "";
       } else {
         localStorage.setItem(
           "tempToDoValue",
@@ -118,4 +122,4 @@ const toDoItemHandler = (toDoItem, newToDo, completedTasks) => {
   if (toDoItem) toDoItem.addEventListener("click", viewToDo);
 };
 
-export { toDoToBeRendered, toDoItemHandler };
+export { toDoItemHandler, toDoToBeRendered };

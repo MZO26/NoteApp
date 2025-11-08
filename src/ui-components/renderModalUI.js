@@ -1,10 +1,34 @@
-import { saveTempNote, saveTempToDo } from "../events.js";
+import { saveTempNote, saveTempToDo } from "../utils/storage.js";
 import {
-  getToDoInterfaceElements,
   createTaskItem,
+  getToDoInterfaceElements,
 } from "../utils/templates.js";
 
+const overlay = document.getElementById("overlay");
+const modal = document.getElementById("modal");
+const switchBtnVisibility = document.querySelector(".switch");
 const modalState = { interface: "note" };
+
+const openOverlay = () => {
+  overlay.classList.add("show");
+  modal.classList.add("show");
+  localStorage.setItem("modal-status", "open");
+  const notes = document.querySelector(".notes-container").children;
+  const savedNoteId = JSON.parse(
+    sessionStorage.getItem("savedNoteId") || "null"
+  );
+  if (
+    savedNoteId &&
+    switchBtnVisibility &&
+    !switchBtnVisibility.classList.contains("hidden")
+  ) {
+    switchBtnVisibility.classList.add("hidden");
+  }
+  Array.from(notes).forEach((element) => {
+    if (element.classList.contains("active"))
+      element.classList.remove("active");
+  });
+};
 
 const changeOverlayInterface = () => {
   const modalState = JSON.parse(localStorage.getItem("modal-state")) || {
@@ -129,4 +153,10 @@ const createFragmentElement = (modalState) => {
   }
 };
 
-export { changeOverlayInterface, addToDo, reloadToDoList, modalState };
+export {
+  addToDo,
+  changeOverlayInterface,
+  modalState,
+  openOverlay,
+  reloadToDoList,
+};

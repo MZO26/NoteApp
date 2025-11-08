@@ -6,16 +6,16 @@ You can create, view, and manage your notes and tasks on your desktop, offline o
 
 ## Motivation
 
-This project was created as a personal challenge to build a functional note-taking application using only JavaScript that runs entirely in the browser. It helped me improve my JavaScript skills and practice frontend development principles. The application is perfect for users who want quick access to their notes / to-do's with minimal setup.
+This project was created as a personal challenge to build a functional note-taking application using JavaScript. It helped me improve my JavaScript skills and practice frontend development principles. The application is perfect for users who want quick access to their notes / to-do's with minimal setup.
 
 ## Features
 
-- Create, edit, and delete notes / to-do's in the browser
-- Responsive design for desktop and mobile use
+- Create, edit, and delete notes / to-do's
+- Responsive design
 - Uses Bootstrap Icons for UI enhancements
-- Data saved locally in the browser (localStorage/sessionStorage)
+- Data saved locally (localStorage/sessionStorage)
 - Electron App with minimalistic user interface
-- Cross-platform support (Windows, macOs, Linux (needs to be configured))
+- Cross-platform support (Windows, macOs, Linux)
 
 ## Installation
 

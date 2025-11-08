@@ -1,10 +1,11 @@
+import { updateCategorySelect } from "../handlers/modalHandlers.js";
 import { createNewCategory } from "../utils/classes.js";
+import { isActive, showToast } from "../utils/events.js";
+import { syncCategoriesWithNotes } from "../utils/storage.js";
 import {
   categoryItemTemplate,
   defaultCategoryItemTemplate,
 } from "../utils/templates.js";
-import { showToast, isActive, syncCategoriesWithNotes } from "../events.js";
-import { updateCategorySelect } from "../buttons.js";
 import { reloadNoteList } from "./notes.js";
 
 let defaultCategory = "Without category";
@@ -53,7 +54,7 @@ const categoryToBeRendered = (categoryName) => {
     "activeCategoryState",
     JSON.stringify({ activeCategory: newCategory.name })
   );
-  updateCategorySelect(categoryArr, newCategory.name);
+  updateCategorySelect(categoryArr);
   categoryItemHandler(categoryItem);
   syncCategoriesWithNotes();
 };
@@ -80,7 +81,7 @@ const categoryItemHandler = (categoryItem) => {
     isActive(categoryItem, categoryList);
     syncCategoriesWithNotes();
     reloadNoteList();
-    updateCategorySelect(categoryArr, activeCategoryState.activeCategory);
+    updateCategorySelect(categoryArr);
   }
 
   function deleteCategory(event) {
@@ -117,7 +118,7 @@ const categoryItemHandler = (categoryItem) => {
       "activeCategoryState",
       JSON.stringify({ activeCategory: defaultCategory })
     );
-    updateCategorySelect(categoryArr, defaultCategory);
+    updateCategorySelect(categoryArr);
     syncCategoriesWithNotes();
     reloadCategoryList();
     reloadNoteList();
@@ -155,10 +156,10 @@ const reloadCategoryList = () => {
 };
 
 export {
-  defaultCategory,
   activeCategoryState,
-  reloadCategoryList,
-  categoryToBeRendered,
   categoryItemHandler,
+  categoryToBeRendered,
+  defaultCategory,
+  reloadCategoryList,
   syncCategoriesWithNotes,
 };

@@ -1,9 +1,10 @@
+import { openOverlay } from "../ui-components/renderModalUI.js";
 import { createNewNote } from "../utils/classes.js";
+import { isActive } from "../utils/events.js";
+import { saveTempNote, syncCategoriesWithNotes } from "../utils/storage.js";
 import { noteItemTemplate, toDoItemTemplate } from "../utils/templates.js";
-import { isActive, syncCategoriesWithNotes, saveTempNote } from "../events.js";
 import { defaultCategory } from "./categories.js";
 import { toDoItemHandler } from "./toDo.js";
-import { openOverlay } from "../buttons.js";
 
 let savedNoteIdState = { savedNoteId: null };
 
@@ -46,8 +47,8 @@ const noteItemHandler = (noteItem, notes) => {
       const notesContainer = document.querySelector(".notes-container");
       const noteTitle = document.querySelector(".title");
       const noteTextArea = document.querySelector(".note");
-      noteTitle.value = notes.title || tempNote.title || "No title";
-      noteTextArea.value = notes.data || tempNote.note;
+      noteTitle.value = notes.title || tempNote.title || "Untitled";
+      noteTextArea.value = notes.data || tempNote.note || "";
       saveTempNote();
       isActive(noteItem, notesContainer);
 
@@ -134,4 +135,4 @@ const reloadNoteList = (arr) => {
   syncCategoriesWithNotes();
 };
 
-export { savedNoteIdState, reloadNoteList, noteToBeRendered, noteItemHandler };
+export { noteItemHandler, noteToBeRendered, reloadNoteList, savedNoteIdState };

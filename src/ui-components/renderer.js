@@ -1,14 +1,12 @@
 import {
+  activeCategoryState,
   categoryToBeRendered,
   reloadCategoryList,
-  activeCategoryState,
 } from "../features/categories.js";
-import {
-  updateCategorySelect,
-  toggleDarkMode,
-  openOverlay,
-} from "../buttons.js";
 import { reloadNoteList } from "../features/notes.js";
+import { applyMode } from "../handlers/documentHandlers.js";
+import { updateCategorySelect } from "../handlers/modalHandlers.js";
+import { openOverlay } from "./renderModalUI.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const modalStatus = localStorage.getItem("modal-status");
@@ -25,8 +23,5 @@ document.addEventListener("DOMContentLoaded", () => {
   if (categoryArr.length === 0) {
     categoryToBeRendered(activeCategoryState.activeCategory);
   }
-  const mode = localStorage.getItem("mode");
-  if (!document.body.classList.contains(`${mode}`)) {
-    toggleDarkMode();
-  }
+  applyMode();
 });

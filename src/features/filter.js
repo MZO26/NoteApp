@@ -1,4 +1,4 @@
-import { inputListener, isActive } from "../events.js";
+import { inputListener, isActive } from "../utils/events.js";
 
 const filter = () => {
   const searchInput = document.querySelector(".search-input");

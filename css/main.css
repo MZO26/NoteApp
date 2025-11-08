@@ -162,6 +162,7 @@ h2 {
   display: flex;
   justify-content: space-between;
 }
+/** modal for notes / toDo's end **/
 
 /** note part styling start **/
 .title,
@@ -472,7 +473,6 @@ h2 {
 .noteItemTemplateDate {
   justify-self: flex-start;
 }
-
 /** noteItem / toDoItem styling end **/
 
 /** contact info styling start **/
@@ -546,7 +546,6 @@ textarea::-webkit-scrollbar-thumb,
 .category-list::-webkit-scrollbar-thumb {
   background-color: var(--bg-dark);
 }
-
 /** scrollbar styling end **/
 
 /** smaller screen sizes styling start **/

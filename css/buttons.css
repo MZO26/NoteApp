@@ -1,27 +1,10 @@
-/*  for better overview when styling:
-  --bg: hsl(220 10% 12%); page background
-  --bg-light: hsl(220 10% 16%); slightly lighter panels
-  --bg-dark: hsl(0 0% 96%); text color on dark bg
-  --note: hsl(220 8% 18%); note background (dark but readable)
-  --hover-color: hsl(220 8% 25%); hover highlight for items
-  --text: hsl(0 0% 96%); general text color
-  --text-muted: hsl(0 0% 72%); muted text (for subtle elements)
-  --btn-bg: hsl(220 10% 18%); button background
-  --btn-text: hsl(0 0% 96%); button text
-  --btn-border: rgba(255, 255, 255, 0.06); button border
-  --btn-hover: hsl(220 10% 22%); button hover
-  --btn-outline: rgba(255, 255, 255, 0.12); button outline
- */
-
 button,
 select {
   cursor: pointer;
   background: var(--btn-bg);
   color: var(--btn-text);
   border: 1px solid var(--btn-outline);
-  transition:
-    background-color 0.1s ease,
-    box-shadow 0.1s ease;
+  transition: background-color 0.1s ease, box-shadow 0.1s ease;
   font: inherit;
 }
 
@@ -99,9 +82,7 @@ button:hover {
   background: var(--btn-bg);
   color: var(--btn-text);
   border: 1px solid var(--btn-border);
-  transition:
-    background-color 0.1s ease,
-    box-shadow 0.1s ease,
+  transition: background-color 0.1s ease, box-shadow 0.1s ease,
     border-color 0.1s ease;
 }
 

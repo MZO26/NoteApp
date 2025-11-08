@@ -24,11 +24,17 @@ export default {
     },
     {
       name: "@electron-forge/maker-deb",
-      config: {},
+      config: {
+        authors: "Mewtu26",
+        exe: "noteapp.exe",
+      },
     },
     {
       name: "@electron-forge/maker-rpm",
-      config: {},
+      config: {
+        authors: "Mewtu26",
+        exe: "noteapp.exe",
+      },
     },
   ],
   plugins: [
