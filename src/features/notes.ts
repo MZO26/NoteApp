@@ -117,7 +117,7 @@ const reloadNoteList = (args?: []): void => {
   notesContainer.innerHTML = "";
   if (notesArr.length === 0 || activeCategoryItems.length === 0) {
     noteToBeRendered("note", activeCategoryState.activeCategory, "First note", [
-      "Welcome to my notes app!",
+      "This is your first note!",
     ]);
     return;
   }
