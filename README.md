@@ -1,4 +1,4 @@
-# NoteApp
+# Note App Project
 
 A note-taking desktop application built with Electron and Typescript.
 It offers the ability to create simple notes as well as to-do lists.

@@ -6,8 +6,8 @@
   "scripts": {
     "compile": "npx tsc",
     "start": "npm run compile && electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make"
+    "package": "npm run compile && electron-forge package",
+    "make": "npm run compile && electron-forge make"
   },
   "config": {
     "forge": {
