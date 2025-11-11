@@ -55,7 +55,7 @@ const changeOverlayInterface = () => {
   createFragmentElement(modalState);
 };
 
-const addToDo = (taskList: HTMLUListElement, input: HTMLInputElement) => {
+const addToDo = (taskList: HTMLUListElement, input: HTMLInputElement): void => {
   const taskText = input.value.trim();
   if (!taskText) return;
   const { li, checkbox, taskSpan, taskDeleteBtn } = createTaskItem(taskText);
@@ -67,7 +67,7 @@ const addToDo = (taskList: HTMLUListElement, input: HTMLInputElement) => {
 const reloadToDoList = (
   toDoData: Pick<NoteObject, "data">,
   completedTasks: Array<string>
-) => {
+): void => {
   const taskList = document.querySelector<HTMLUListElement>(".task-list");
   if (toDoData.data) {
     for (let i = 0; i < toDoData.data.length; i++) {
@@ -170,7 +170,7 @@ const renderToDoUI = () => {
   });
 };
 
-const createFragmentElement = (modalState: ModalState) => {
+const createFragmentElement = (modalState: ModalState): void => {
   if (modalState.interface === "note") {
     renderNoteUI();
   } else if (modalState.interface === "toDo") {

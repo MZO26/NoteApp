@@ -1,12 +1,12 @@
 # NoteApp
 
-A note-taking desktop application built with Electron and JavaScript.
+A note-taking desktop application built with Electron and Typescript.
 It offers the ability to create simple notes as well as to-do lists.
 You can create, view, and manage your notes and tasks on your desktop, offline or online.
 
 ## Motivation
 
-This project was created as a personal challenge to build a functional note-taking application using JavaScript. It helped me improve my JavaScript skills and practice frontend development principles. The application is perfect for users who want quick access to their notes / to-do's with minimal setup.
+This project was created as a personal challenge to build a functional note-taking application using Typescript / JavaScript. It helped me improve my skills and practice frontend development principles. The application is perfect for users who want quick access to their notes / to-do's with minimal setup.
 
 ## Features
 

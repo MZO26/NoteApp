@@ -1,6 +1,6 @@
 import type { CategoryArray, NoteArray } from "../types/storageTypes";
 
-const syncCategoriesWithNotes = () => {
+const syncCategoriesWithNotes = (): void => {
   let categoryArr: CategoryArray = JSON.parse(
     localStorage.getItem("categoryArr") || "[]"
   );
@@ -14,7 +14,7 @@ const syncCategoriesWithNotes = () => {
   localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
 };
 
-const saveTempToDo = () => {
+const saveTempToDo = (): void => {
   const toDoTitle = document.querySelector<HTMLTextAreaElement>(".todo-title")!;
   const currentToDo =
     document.querySelector<HTMLDivElement>(".todo-container")!;
@@ -43,7 +43,7 @@ const saveTempToDo = () => {
   );
 };
 
-const saveTempNote = () => {
+const saveTempNote = (): void => {
   const noteTitle = document.querySelector<HTMLTextAreaElement>(".title")!;
   const noteTextArea = document.querySelector<HTMLTextAreaElement>(".note")!;
   const noteDataToArr = noteTextArea.value ? [noteTextArea.value] : [];

@@ -118,7 +118,7 @@ const toDoItemHandler = (
     });
   }
 
-  function deleteToDo(event: Event) {
+  function deleteToDo(event: Event): void {
     event.stopPropagation();
     const notesArr: NoteArray = JSON.parse(
       localStorage.getItem("notesArr") || "[]"

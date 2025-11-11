@@ -42,7 +42,7 @@ const noteToBeRendered = (
   syncCategoriesWithNotes();
 };
 
-const noteItemHandler = (noteItem: NoteItem, note: NoteObject) => {
+const noteItemHandler = (noteItem: NoteItem, note: NoteObject): void => {
   const noteItemBtn = noteItem.querySelector<HTMLButtonElement>("button");
 
   function viewNote(): void {
@@ -81,7 +81,7 @@ const noteItemHandler = (noteItem: NoteItem, note: NoteObject) => {
       noteTextArea.addEventListener("input", saveTempNote);
     });
   }
-  function deleteNote(event: Event) {
+  function deleteNote(event: Event): void {
     event.stopPropagation();
     const notesArr: NoteArray = JSON.parse(
       localStorage.getItem("notesArr") || "[]"
@@ -101,7 +101,7 @@ const noteItemHandler = (noteItem: NoteItem, note: NoteObject) => {
   noteItemBtn!.addEventListener("click", deleteNote);
 };
 
-const reloadNoteList = (args?: []) => {
+const reloadNoteList = (args?: []): void => {
   const notesContainer =
     document.querySelector<HTMLDivElement>(".notes-container")!;
   const notesArr: NoteArray | [] = args

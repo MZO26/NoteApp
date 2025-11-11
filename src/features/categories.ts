@@ -66,7 +66,7 @@ const categoryToBeRendered = (categoryName: string): void => {
   syncCategoriesWithNotes();
 };
 
-const categoryItemHandler = (categoryItem: CategoryItem) => {
+const categoryItemHandler = (categoryItem: CategoryItem): void => {
   const categoryItemBtn =
     categoryItem.querySelector<HTMLButtonElement>("button");
   function selectCategory(): void {
@@ -95,7 +95,7 @@ const categoryItemHandler = (categoryItem: CategoryItem) => {
     updateCategorySelect(categoryArr);
   }
 
-  function deleteCategory(event: Event) {
+  function deleteCategory(event: Event): void {
     event.stopPropagation();
     const categoryArr: CategoryArray = JSON.parse(
       localStorage.getItem("categoryArr") || "[]"

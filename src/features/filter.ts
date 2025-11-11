@@ -68,7 +68,7 @@ const filter = async (): Promise<void> => {
   dropdown.style.display = "block";
 };
 
-document.addEventListener("click", (e: Event) => {
+document.addEventListener("click", (e: Event): void => {
   const target = e.target as Element | null;
   const dropdown = document.querySelector<HTMLDivElement>(".dropdown");
   if (target && !target.closest(".input-wrapper") && dropdown)

@@ -1,7 +1,8 @@
 import type { NoteObject } from "../types/noteTypes";
+import type { TaskItems, ToDoInterfaceElements } from "../types/toDoTypes";
 import type { Note } from "./classes";
 
-const noteItemTemplate = (noteData: Note) => {
+const noteItemTemplate = (noteData: Note): string => {
   return `<button class="btn" title="delete note">       <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -19,7 +20,7 @@ const noteItemTemplate = (noteData: Note) => {
 const toDoItemTemplate = (
   toDoData: NoteObject,
   completedTasks: Array<string>
-) => {
+): string => {
   const htmlString: string = toDoData.data
     .map((task) =>
       completedTasks && completedTasks.includes(task)
@@ -41,7 +42,7 @@ const toDoItemTemplate = (
                 </svg></button><h3>${toDoData.title}</h3><p class="noteItemTemplateDate">Created: ${toDoData.formattedDate}</p><ul class="toDoItemTemplateList">${htmlString}</ul>`;
 };
 
-const categoryItemTemplate = (value: string) => {
+const categoryItemTemplate = (value: string): string => {
   return `<button class="btn" title="delete category">       <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -56,11 +57,11 @@ const categoryItemTemplate = (value: string) => {
               </svg></button><p>${value}</p>`;
 };
 
-const defaultCategoryItemTemplate = (value: string) => {
+const defaultCategoryItemTemplate = (value: string): string => {
   return `<p>${value}</p>`;
 };
 
-const getToDoInterfaceElements = () => {
+const getToDoInterfaceElements = (): ToDoInterfaceElements => {
   const todoDiv = document.createElement("div");
   todoDiv.className = "todo-container";
 
@@ -95,7 +96,7 @@ const getToDoInterfaceElements = () => {
   };
 };
 
-const createTaskItem = (taskText: string) => {
+const createTaskItem = (taskText: string): TaskItems => {
   const li = document.createElement("li");
 
   const checkbox = Object.assign(document.createElement("input"), {
@@ -133,7 +134,7 @@ const createTaskItem = (taskText: string) => {
   return { li, checkbox, taskSpan, taskDeleteBtn };
 };
 
-const dateTemplate = () => {
+const dateTemplate = (): string => {
   const now = new Date();
   const day = now.getDate();
   const month = now.getMonth() + 1;

@@ -1,7 +1,7 @@
 import { savedNoteIdState } from "../features/notes.js";
 import type { NoteItem } from "../types/noteTypes.js";
 
-const showToast = (value: string, duration = 4000) => {
+const showToast = (value: string, duration = 4000): void => {
   const container = document.querySelector<HTMLDivElement>(".toast-container")!;
   const toast = document.createElement("div");
   toast.className = "toast";
@@ -50,7 +50,7 @@ const inputListener = (input: HTMLInputElement): Promise<string> => {
   });
 };
 
-function isActive(item: NoteItem, parentElement?: Element) {
+function isActive(item: NoteItem, parentElement?: Element): void {
   const targetParent = parentElement || document.body;
   item.classList.add("active");
   if (item._listener) document.removeEventListener("click", item._listener);
