@@ -1,4 +1,7 @@
-const noteItemTemplate = (noteData) => {
+import type { NoteObject } from "../types/noteTypes";
+import type { Note } from "./classes";
+
+const noteItemTemplate = (noteData: Note) => {
   return `<button class="btn" title="delete note">       <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -10,11 +13,14 @@ const noteItemTemplate = (noteData) => {
                   <path
                     d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"
                   />
-                </svg></button><h3>${noteData.title}</h3><p class="noteItemTemplateDate">Created: ${noteData.formattedDate}</p><p>${noteData.data}</p>`;
+                </svg></button><h3>${noteData.title}</h3><p class="noteItemTemplateDate">Created: ${noteData.formattedDate}</p><p>${noteData.data.length ? noteData.data.toString() : ""}</p>`;
 };
 
-const toDoItemTemplate = (toDoData, completedTasks) => {
-  const htmlString = toDoData.data
+const toDoItemTemplate = (
+  toDoData: NoteObject,
+  completedTasks: Array<string>
+) => {
+  const htmlString: string = toDoData.data
     .map((task) =>
       completedTasks && completedTasks.includes(task)
         ? `<li><span class="task-completed">${task}</span></li>`
@@ -35,7 +41,7 @@ const toDoItemTemplate = (toDoData, completedTasks) => {
                 </svg></button><h3>${toDoData.title}</h3><p class="noteItemTemplateDate">Created: ${toDoData.formattedDate}</p><ul class="toDoItemTemplateList">${htmlString}</ul>`;
 };
 
-const categoryItemTemplate = (value) => {
+const categoryItemTemplate = (value: string) => {
   return `<button class="btn" title="delete category">       <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -50,7 +56,7 @@ const categoryItemTemplate = (value) => {
               </svg></button><p>${value}</p>`;
 };
 
-const defaultCategoryItemTemplate = (value) => {
+const defaultCategoryItemTemplate = (value: string) => {
   return `<p>${value}</p>`;
 };
 
@@ -89,7 +95,7 @@ const getToDoInterfaceElements = () => {
   };
 };
 
-const createTaskItem = (taskText) => {
+const createTaskItem = (taskText: string) => {
   const li = document.createElement("li");
 
   const checkbox = Object.assign(document.createElement("input"), {
@@ -140,11 +146,11 @@ const dateTemplate = () => {
 };
 
 export {
-  noteItemTemplate,
-  toDoItemTemplate,
   categoryItemTemplate,
-  defaultCategoryItemTemplate,
-  getToDoInterfaceElements,
   createTaskItem,
   dateTemplate,
+  defaultCategoryItemTemplate,
+  getToDoInterfaceElements,
+  noteItemTemplate,
+  toDoItemTemplate,
 };

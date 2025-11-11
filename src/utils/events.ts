@@ -1,7 +1,8 @@
 import { savedNoteIdState } from "../features/notes.js";
+import type { NoteItem } from "../types/noteTypes.js";
 
-const showToast = (value, duration = 4000) => {
-  const container = document.getElementById("toast-container");
+const showToast = (value: string, duration = 4000) => {
+  const container = document.querySelector<HTMLDivElement>(".toast-container")!;
   const toast = document.createElement("div");
   toast.className = "toast";
   if (value.length > 15) {
@@ -23,9 +24,9 @@ const showToast = (value, duration = 4000) => {
   }, duration);
 };
 
-const inputListener = (input) => {
+const inputListener = (input: HTMLInputElement): Promise<string> => {
   return new Promise((resolve) => {
-    const clickOutside = (e) => {
+    const clickOutside = (e: MouseEvent) => {
       if (!document.body.contains(input)) return;
       if (e.target !== input) {
         cleanup();
@@ -33,13 +34,13 @@ const inputListener = (input) => {
         resolve(input.value);
       }
     };
-    const onKeyDown = (e) => {
+    const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
         cleanup();
         resolve(input.value);
       }
     };
-    const cleanup = () => {
+    const cleanup = (): void => {
       document.removeEventListener("click", clickOutside);
       input.removeEventListener("keydown", onKeyDown);
     };
@@ -49,21 +50,33 @@ const inputListener = (input) => {
   });
 };
 
-function isActive(item, parentElement = null) {
+function isActive(item: NoteItem, parentElement?: Element) {
   const targetParent = parentElement || document.body;
   item.classList.add("active");
   if (item._listener) document.removeEventListener("click", item._listener);
   //no const declaration because own declaration of object property
   //dom objects also seen as objects
-  item._listener = (e) => {
-    if (targetParent.contains(e.target) && e.target != item) {
+  item._listener = (e: Event) => {
+    const target = e.target as Element | null;
+    if (targetParent.contains(target) && e.target != item) {
       item.classList.remove("active");
-      document.removeEventListener("click", item._listener);
+      if (item._listener) {
+        document.removeEventListener("click", item._listener);
+      }
       savedNoteIdState.savedNoteId = null;
       item._listener = null;
     }
   };
-  setTimeout(() => document.addEventListener("click", item._listener), 0);
+  if (item._listener) {
+    setTimeout(
+      () =>
+        document.addEventListener(
+          "click",
+          item._listener as (event: Event) => void
+        ),
+      0
+    );
+  }
 }
 
 export { inputListener, isActive, showToast };

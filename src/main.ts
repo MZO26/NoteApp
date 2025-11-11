@@ -1,6 +1,6 @@
 import { app, BrowserWindow, Menu } from "electron";
 
-function createWindow() {
+function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: 350,
     height: 700,
@@ -11,7 +11,6 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      enableRemoteModule: false,
       webSecurity: true,
     },
   });
@@ -19,7 +18,9 @@ function createWindow() {
   Menu.setApplicationMenu(null);
 }
 
-app.whenReady().then(createWindow);
+app.on("ready", () => {
+  createWindow();
+});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {

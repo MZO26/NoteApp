@@ -1,5 +1,6 @@
 import { categoryToBeRendered } from "../features/categories.js";
 import { filter } from "../features/filter.js";
+import type { DocumentMode } from "../types/storageTypes.js";
 import {
   changeOverlayInterface,
   openOverlay,
@@ -7,24 +8,26 @@ import {
 import { inputListener } from "../utils/events.js";
 import { resetNoteInterface } from "./modalHandlers.js";
 
-const filterInput = document.querySelector(".search-input");
-const switchBtn = document.querySelector(".switch-checkbox");
-const darkModeBtn = document.querySelector(".dark-mode-btn");
-const toggleBtn = document.querySelector(".toggle-btn");
-const categoryBtn = document.querySelector(".category-btn");
-const showBtn = document.querySelector(".showModal-btn");
-const openInfoBtn = document.querySelector(".info-btn");
-const sidebarOverlay = document.querySelector(".sidebar-overlay");
-const switchBtnVisibility = document.querySelector(".switch");
+const filterInput = document.querySelector<HTMLInputElement>(".search-input")!;
+const switchBtn = document.querySelector<HTMLInputElement>(".switch-checkbox");
+const darkModeBtn =
+  document.querySelector<HTMLButtonElement>(".dark-mode-btn")!;
+const toggleBtn = document.querySelector<HTMLButtonElement>(".toggle-btn")!;
+const categoryBtn = document.querySelector<HTMLButtonElement>(".category-btn");
+const showBtn = document.querySelector<HTMLButtonElement>(".showModal-btn")!;
+const openInfoBtn = document.querySelector<HTMLButtonElement>(".info-btn");
+const sidebarOverlay =
+  document.querySelector<HTMLDivElement>(".sidebar-overlay");
+const switchBtnVisibility = document.querySelector<HTMLLabelElement>(".switch");
 
 filterInput.addEventListener("click", filter);
 
-openInfoBtn.addEventListener("click", () => {
-  sidebarOverlay.classList.toggle("visible");
-  sidebarOverlay.classList.toggle("hidden");
+openInfoBtn?.addEventListener("click", (): void => {
+  sidebarOverlay?.classList.toggle("visible");
+  sidebarOverlay?.classList.toggle("hidden");
 });
 
-const addNewNote = () => {
+const addNewNote = (): void => {
   localStorage.setItem("modal-state", JSON.stringify({ interface: "note" }));
   if (switchBtn) switchBtn.checked = false;
   changeOverlayInterface();
@@ -34,19 +37,20 @@ const addNewNote = () => {
 };
 showBtn.addEventListener("click", addNewNote);
 
-const collapseCategories = () => {
-  const categoryList = document.querySelector(".category-list");
+const collapseCategories = (): void => {
+  const categoryList =
+    document.querySelector<HTMLDivElement>(".category-list")!;
   categoryList.classList.toggle("collapsed");
   if (categoryList.hasChildNodes()) {
-    [...categoryList.children].forEach((child) =>
-      child.classList.toggle("collapsed")
-    );
+    for (const children of categoryList.children) {
+      children.classList.toggle("collapsed");
+    }
   }
 };
 toggleBtn.addEventListener("click", collapseCategories);
 
-const applyMode = () => {
-  const mode = localStorage.getItem("mode") || "dark";
+const applyMode = (): void => {
+  const mode: DocumentMode = localStorage.getItem("mode") || "dark";
   if (mode === "dark") {
     document.body.classList.add("dark");
     document.body.classList.remove("light");
@@ -56,7 +60,7 @@ const applyMode = () => {
   }
 };
 
-const toggleDarkMode = () => {
+const toggleDarkMode = (): void => {
   document.body.classList.toggle("dark");
   if (document.body.classList.contains("dark")) {
     document.body.classList.remove("light");
@@ -68,8 +72,9 @@ const toggleDarkMode = () => {
 };
 darkModeBtn.addEventListener("click", toggleDarkMode);
 
-const categoryInputButton = async () => {
-  const categoryBtn = document.querySelector(".category-btn");
+const categoryInputButton = async (): Promise<void> => {
+  const categoryBtn =
+    document.querySelector<HTMLButtonElement>(".category-btn")!;
   const input = document.createElement("input");
   input.type = "text";
   input.id = "category-input";
@@ -79,7 +84,7 @@ const categoryInputButton = async () => {
   input.replaceWith(categoryBtn);
   if (value) categoryToBeRendered(value);
 };
-categoryBtn.addEventListener("click", (e) => {
+categoryBtn!.addEventListener("click", (e: MouseEvent) => {
   e.stopPropagation();
   categoryInputButton();
 });

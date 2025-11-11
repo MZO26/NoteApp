@@ -2,9 +2,10 @@
   "name": "noteapp",
   "version": "1.0.0",
   "description": "Minimal Notetaking / ToDo App",
-  "main": "./src/main.js",
+  "main": "dist/main.js",
   "scripts": {
-    "start": "electron-forge start",
+    "compile": "npx tsc",
+    "start": "npm run compile && electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make"
   },
@@ -66,7 +67,10 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.10.2",
     "@electron-forge/plugin-fuses": "^7.10.2",
     "@electron/fuses": "^1.8.0",
-    "electron": "^39.1.0"
+    "@types/electron": "^1.6.12",
+    "@types/node": "^24.10.0",
+    "electron": "^39.1.1",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1"
