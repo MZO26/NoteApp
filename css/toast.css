@@ -39,6 +39,8 @@
   border-radius: 4px;
   max-width: 250px;
   opacity: 0;
+  font: inherit;
+  font-size: inherit;
 }
 
 .toast.show {

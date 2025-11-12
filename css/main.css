@@ -39,6 +39,9 @@ body {
   overflow-y: scroll;
   overflow-x: hidden;
   margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 20px;
+  line-height: 1.5;
 }
 
 p {
@@ -77,7 +80,6 @@ h2 {
 
 .signature {
   font-weight: bold;
-  font-size: 1.2rem;
   color: var(--bg-dark);
 }
 
@@ -102,6 +104,8 @@ h2 {
   overflow-y: auto;
   display: none;
   border-radius: 5px;
+  font: inherit;
+  font-size: 14px;
 }
 /** navbar styling end **/
 
@@ -172,12 +176,16 @@ h2 {
   width: 100%;
   padding: 5px;
   border-radius: 5px;
-  font-size: 1.4rem;
   resize: none;
-  transition:
-    font-size 0.3s,
-    height 0.3s;
+  transition: height 0.3s;
   margin-bottom: 10px;
+  font: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.todo-title {
+  flex-shrink: 0;
 }
 
 .title,
@@ -185,10 +193,6 @@ h2 {
   height: 2rem;
   background-color: var(--note);
   color: var(--bg-dark);
-}
-
-.todo-title {
-  flex-shrink: 0;
 }
 
 .note {
@@ -224,19 +228,18 @@ h2 {
   background-color: var(--note);
   border-radius: 5px;
   margin: 10px 0;
-  font-size: 1rem;
   z-index: 100;
 }
 
 .todo-input {
   min-height: 2rem;
-  font-size: 1.2rem;
   display: flex;
   gap: 0.5rem;
   align-items: center;
   color: var(--bg-dark);
   background-color: var(--btn-bg);
   border: 1px solid var(--btn-outline);
+  font-size: inherit;
 }
 
 .todo-input input[type="text"],
@@ -248,7 +251,6 @@ h2 {
   transition:
     background-color 0.1s ease,
     border-color 0.1s ease;
-  font-size: 1.5rem;
 }
 
 .todo-input input::placeholder,
@@ -274,20 +276,16 @@ h2 {
 }
 
 .task-list li {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 8px;
   border-radius: 8px;
-  font-size: 1.2rem;
   background: var(--btn-bg);
   color: var(--btn-text);
   border: 1px solid var(--btn-outline);
   box-sizing: border-box;
-}
-
-.task-list li {
-  position: relative;
 }
 
 .task-checkbox {
@@ -304,6 +302,9 @@ h2 {
 
 .task-list li > span {
   display: inline-block;
+  max-width: 10ch;
+  word-wrap: break-word;
+  white-space: normal;
   padding-left: 36px;
   position: relative;
   color: var(--btn-text);
@@ -384,7 +385,6 @@ h2 {
 #categoryItem {
   display: flex;
   align-items: center;
-  padding: 0.5rem, 1.5rem;
   margin-right: 10px;
   overflow: hidden;
   width: 180px;
@@ -394,7 +394,6 @@ h2 {
   background-color: var(--note);
   color: var(--text);
   border: 1px solid var(--bg-light);
-  font-size: 1.2rem;
   cursor: pointer;
   position: relative;
 }
@@ -424,6 +423,7 @@ h2 {
   box-sizing: border-box;
   overflow-x: hidden;
   overflow-y: scroll;
+  padding: 5px;
   background-color: var(--note);
   color: var(--text);
   cursor: pointer;
@@ -438,6 +438,7 @@ h2 {
   right: 0.4rem;
   height: 30px;
   width: 30px;
+  padding: 5px;
   border-radius: 15px;
   display: flex;
   justify-content: center;
@@ -448,7 +449,6 @@ h2 {
 .toDoItem p,
 #categoryItem p {
   margin: 10px;
-  font-size: 1.2rem;
   color: var(--bg-dark);
   overflow: hidden;
 }
@@ -473,12 +473,9 @@ h2 {
   transition: box-shadow 0.3s ease-in-out;
 }
 
-.toDoItemTemplateList {
-  font-size: 1.2rem;
-}
-
 .noteItemTemplateDate {
   justify-self: flex-start;
+  font-size: 14px;
 }
 /** noteItem / toDoItem styling end **/
 
@@ -500,6 +497,8 @@ h2 {
   transition:
     opacity 0.3s ease,
     visibility 0.3s ease;
+  font: inherit;
+  font-size: 16px;
 }
 
 .sidebar-overlay h3 {
@@ -561,9 +560,18 @@ textarea::-webkit-scrollbar-thumb,
     padding: 1.5rem;
     gap: 1.5rem;
   }
+  .title,
+  .todo-title,
+  .todo-input {
+    height: 1.7rem;
+  }
 }
 
 @media screen and (max-width: 700px) {
+  body {
+    font-size: 18px;
+    line-height: 1.5;
+  }
   .info-btn {
     visibility: hidden;
     pointer-events: none;
@@ -596,12 +604,9 @@ textarea::-webkit-scrollbar-thumb,
     padding: 1.5rem;
   }
   .title,
-  .todo-title {
-    font-size: 1.2rem;
-  }
-  .note {
-    height: 10rem;
-    font-size: 1.2rem;
+  .todo-title,
+  .todo-input {
+    height: 1.5rem;
   }
 }
 @media screen and (min-width: 480px), (max-width: 700px) {
@@ -624,9 +629,6 @@ textarea::-webkit-scrollbar-thumb,
   }
   .container {
     padding: 0.5rem 1rem;
-  }
-  #categoryItem {
-    height: 50px;
   }
   #categoryItem button {
     top: 0.5rem;
@@ -667,16 +669,6 @@ textarea::-webkit-scrollbar-thumb,
   .modal {
     width: 80vw;
     padding: 1rem;
-    font-size: 0.9rem;
-  }
-  .title,
-  .todo-title {
-    height: 1.8rem;
-    font-size: 1.2rem;
-  }
-  .note {
-    height: 8rem;
-    font-size: 1.2rem;
   }
   .overlay {
     backdrop-filter: blur(4px);

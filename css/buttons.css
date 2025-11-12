@@ -1,5 +1,6 @@
 button,
-select {
+select,
+input {
   cursor: pointer;
   background: var(--btn-bg);
   color: var(--btn-text);
@@ -8,6 +9,7 @@ select {
     background-color 0.1s ease,
     box-shadow 0.1s ease;
   font: inherit;
+  font-size: 15px;
 }
 
 input:hover,
@@ -142,7 +144,7 @@ button:hover {
 }
 
 .switch {
-  margin-top: 20px;
+  margin-top: 28px;
   display: inline-block;
 }
 
@@ -242,7 +244,6 @@ button:hover {
   z-index: 1000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
-
 @media screen and (max-width: 480px) {
   .button-collection {
     margin: 0;

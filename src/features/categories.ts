@@ -44,7 +44,7 @@ const categoryToBeRendered = (categoryName: string): void => {
 
   categoryArr.push(newCategory);
   localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
-  const truncate = (str: string, max = 15): string =>
+  const truncate = (str: string, max = 10): string =>
     str.length > max ? str.slice(0, max) + "..." : str;
 
   if (newCategory.isDefault) {
@@ -55,11 +55,11 @@ const categoryToBeRendered = (categoryName: string): void => {
   if (!categoryList) return;
   categoryList.appendChild(categoryItem);
   if (newCategory.name !== defaultCategory) {
-    showToast(`Added "${newCategory.name}"`);
+    showToast(`Added "${truncate(newCategory.name)}"`);
   }
   localStorage.setItem(
     "activeCategoryState",
-    JSON.stringify({ activeCategory: newCategory.name })
+    JSON.stringify({ activeCategory: truncate(newCategory.name) })
   );
   updateCategorySelect(categoryArr);
   categoryItemHandler(categoryItem);
