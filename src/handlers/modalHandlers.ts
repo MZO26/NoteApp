@@ -11,11 +11,7 @@ import type {
 } from "../types/storageTypes.js";
 import { changeOverlayInterface } from "../ui-components/renderModalUI.js";
 import { showToast } from "../utils/events.js";
-import {
-  saveTempNote,
-  saveTempToDo,
-  syncCategoriesWithNotes,
-} from "../utils/storage.js";
+import { saveTempNote, saveTempToDo } from "../utils/tempStorageService.js";
 
 const closeBtn = document.querySelector<HTMLButtonElement>(".closeModal-btn")!;
 const saveBtn = document.querySelector<HTMLButtonElement>(".add-btn")!;
@@ -70,7 +66,7 @@ const updateCategorySelect = (categoryArr: CategoryArray): void => {
 const handleNoteSave = (
   savedNoteId: SavedNoteID,
   notesArr: NoteArray,
-  selectedCategory: string
+  selectedCategory: string,
 ): void => {
   const title = document.querySelector<HTMLTextAreaElement>(".title");
   const note = document.querySelector<HTMLTextAreaElement>(".note");
@@ -84,7 +80,7 @@ const handleNoteSave = (
         : showToast("New note added");
     } else {
       const savedItem: NoteObject | undefined = notesArr.find(
-        (note) => note.id == savedNoteId
+        (note) => note.id == savedNoteId,
       );
       if (savedItem && savedItem.type === "note") {
         savedItem.title = title.value.trim() || "";
@@ -92,7 +88,6 @@ const handleNoteSave = (
         savedItem.data = noteDataToArr || [];
         savedItem.category = selectedCategory;
         localStorage.setItem("notesArr", JSON.stringify(notesArr));
-        syncCategoriesWithNotes();
         showToast("Note was saved");
         reloadNoteList();
       }
@@ -103,7 +98,7 @@ const handleNoteSave = (
 const handleToDoSave = (
   savedNoteId: SavedNoteID,
   notesArr: NoteArray,
-  selectedCategory: string
+  selectedCategory: string,
 ): void => {
   const storedTempToDoValue = localStorage.getItem("tempToDoValue");
   const tempToDoValue: TempToDoValue = storedTempToDoValue
@@ -130,7 +125,7 @@ const handleToDoSave = (
       selectedCategory,
       title.value || "Untitled",
       allTasks,
-      completedTasks
+      completedTasks,
     );
     title.value === "Hello there"
       ? showToast("General Kenobi")
@@ -143,7 +138,6 @@ const handleToDoSave = (
       savedItem.category = selectedCategory;
       localStorage.setItem("notesArr", JSON.stringify(notesArr));
       saveTempToDo();
-      syncCategoriesWithNotes();
       showToast("ToDo-list was saved");
       reloadNoteList();
     }
@@ -152,16 +146,16 @@ const handleToDoSave = (
 
 const saveButton = (): void => {
   const notesArr: NoteArray = JSON.parse(
-    localStorage.getItem("notesArr") || "[]"
+    localStorage.getItem("notesArr") || "[]",
   );
   const savedNoteId: SavedNoteID = JSON.parse(
-    sessionStorage.getItem("savedNoteId") || "null"
+    sessionStorage.getItem("savedNoteId") || "null",
   );
   const storedCategoryState = localStorage.getItem("activeCategoryState");
   const activeCategoryState: ActiveCategoryState = storedCategoryState
     ? JSON.parse(storedCategoryState)
     : { activeCategory: defaultCategory };
-  const storedModalState = localStorage.getItem("modal-state");
+  const storedModalState = localStorage.getItem("modalState");
   const modalState: ModalState = storedModalState
     ? JSON.parse(storedModalState)
     : {
@@ -185,7 +179,7 @@ saveBtn.addEventListener("click", () => {
 });
 
 const deleteButton = (): void => {
-  const storedModalState = localStorage.getItem("modal-state");
+  const storedModalState = localStorage.getItem("modalState");
   const modalState: ModalState = storedModalState
     ? JSON.parse(storedModalState)
     : {
@@ -210,7 +204,7 @@ const deleteButton = (): void => {
 deleteBtn.addEventListener("click", deleteButton);
 
 const closeModal = (): void => {
-  const storedModalState = localStorage.getItem("modal-state");
+  const storedModalState = localStorage.getItem("modalState");
   const modalState: ModalState = storedModalState
     ? JSON.parse(storedModalState)
     : {
@@ -243,7 +237,7 @@ const closeModal = (): void => {
 closeBtn.addEventListener("click", closeModal);
 
 const switchOverlayInterface = (): void => {
-  const storedModalState = localStorage.getItem("modal-state");
+  const storedModalState = localStorage.getItem("modalState");
   let modalState: ModalState = storedModalState
     ? JSON.parse(storedModalState)
     : {
@@ -251,7 +245,7 @@ const switchOverlayInterface = (): void => {
       };
   const isToDo = switchBtn?.checked;
   modalState = { interface: isToDo ? "toDo" : "note" };
-  localStorage.setItem("modal-state", JSON.stringify(modalState));
+  localStorage.setItem("modalState", JSON.stringify(modalState));
   changeOverlayInterface();
   if (isToDo && !reset) {
     resetToDoInterface();

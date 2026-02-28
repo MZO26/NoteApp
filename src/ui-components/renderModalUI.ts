@@ -1,7 +1,7 @@
 import type { NoteObject } from "../types/noteTypes.js";
 import type { ModalState, SavedNoteIdState } from "../types/stateTypes.js";
 import type { TempNoteValue, TempToDoValue } from "../types/storageTypes.js";
-import { saveTempNote, saveTempToDo } from "../utils/storage.js";
+import { saveTempNote, saveTempToDo } from "../utils/tempStorageService.js";
 import {
   createTaskItem,
   getToDoInterfaceElements,
@@ -10,7 +10,6 @@ import {
 const overlay = document.querySelector<HTMLDivElement>(".overlay");
 const modal = document.querySelector<HTMLDivElement>(".modal");
 const switchBtnVisibility = document.querySelector<HTMLLabelElement>(".switch");
-const modalState: ModalState = { interface: "note" };
 
 const openOverlay = (): void => {
   overlay?.classList.add("show");
@@ -19,7 +18,7 @@ const openOverlay = (): void => {
   const notes: HTMLCollection =
     document.querySelector<HTMLDivElement>(".notes-container")!.children;
   const savedNoteId: SavedNoteIdState = JSON.parse(
-    sessionStorage.getItem("savedNoteId") || "null"
+    sessionStorage.getItem("savedNoteId") || "null",
   );
   if (
     savedNoteId &&
@@ -35,7 +34,7 @@ const openOverlay = (): void => {
 };
 
 const changeOverlayInterface = () => {
-  const storedModalState = localStorage.getItem("modal-state");
+  const storedModalState = localStorage.getItem("modalState");
   const modalState: ModalState = storedModalState
     ? JSON.parse(storedModalState)
     : {
@@ -66,13 +65,13 @@ const addToDo = (taskList: HTMLUListElement, input: HTMLInputElement): void => {
 
 const reloadToDoList = (
   toDoData: Pick<NoteObject, "data">,
-  completedTasks: Array<string>
+  completedTasks: Array<string>,
 ): void => {
   const taskList = document.querySelector<HTMLUListElement>(".task-list");
   if (toDoData.data) {
     for (let i = 0; i < toDoData.data.length; i++) {
       const { li, checkbox, taskSpan, taskDeleteBtn } = createTaskItem(
-        toDoData.data && toDoData.data[i]!
+        toDoData.data && toDoData.data[i]!,
       );
       if (completedTasks && completedTasks.includes(toDoData.data[i]!)) {
         taskSpan.classList.add("task-completed");
@@ -87,7 +86,7 @@ const addEventListeners = (
   li: HTMLLIElement,
   checkbox: HTMLInputElement,
   taskSpan: HTMLSpanElement,
-  taskDeleteBtn: HTMLButtonElement
+  taskDeleteBtn: HTMLButtonElement,
 ) => {
   const onChange = () => {
     taskSpan.classList.toggle("task-completed", checkbox.checked);
@@ -178,10 +177,4 @@ const createFragmentElement = (modalState: ModalState): void => {
   }
 };
 
-export {
-  addToDo,
-  changeOverlayInterface,
-  modalState,
-  openOverlay,
-  reloadToDoList,
-};
+export { addToDo, changeOverlayInterface, openOverlay, reloadToDoList };

@@ -5,7 +5,12 @@ import type { CategoryArray, NoteArray } from "../types/storageTypes.js";
 import type { Category } from "../utils/classes.js";
 import { createNewCategory } from "../utils/classes.js";
 import { isActive, showToast } from "../utils/events.js";
-import { syncCategoriesWithNotes } from "../utils/storage.js";
+import {
+  getCategories,
+  getNotes,
+  updateCategories,
+  updateNotes,
+} from "../utils/storageService.js";
 import {
   categoryItemTemplate,
   defaultCategoryItemTemplate,
@@ -18,12 +23,8 @@ let activeCategoryState: ActiveCategoryState = {
 };
 
 const categoryToBeRendered = (categoryName: string): void => {
-  const notesArr: NoteArray = JSON.parse(
-    localStorage.getItem("notesArr") || "[]"
-  );
-  const categoryArr: CategoryArray = JSON.parse(
-    localStorage.getItem("categoryArr") || "[]"
-  );
+  const notesArr: NoteArray = getNotes();
+  const categoryArr: CategoryArray = getCategories();
   if (categoryArr.find((category) => category.name === categoryName)) {
     showToast("Category already exists");
     return;
@@ -31,7 +32,7 @@ const categoryToBeRendered = (categoryName: string): void => {
   const newCategory = createNewCategory(categoryName, notesArr);
   const categoryList = document.querySelector<HTMLDivElement>(".category-list");
   const doesDefaultExist: Category | undefined = categoryArr.find(
-    (category: Category) => category.name === defaultCategory
+    (category: Category) => category.name === defaultCategory,
   );
   let categoryItem: CategoryItem = document.createElement("div");
   categoryItem.id = "categoryItem";
@@ -42,8 +43,7 @@ const categoryToBeRendered = (categoryName: string): void => {
     categoryItem.setAttribute("category-id", String(newCategory.id));
   } else return;
 
-  categoryArr.push(newCategory);
-  localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
+  updateCategories((prevCategories) => [...prevCategories, newCategory]);
   const truncate = (str: string, max = 10): string =>
     str.length > max ? str.slice(0, max) + "..." : str;
 
@@ -59,11 +59,10 @@ const categoryToBeRendered = (categoryName: string): void => {
   }
   localStorage.setItem(
     "activeCategoryState",
-    JSON.stringify({ activeCategory: truncate(newCategory.name) })
+    JSON.stringify({ activeCategory: truncate(newCategory.name) }),
   );
   updateCategorySelect(categoryArr);
   categoryItemHandler(categoryItem);
-  syncCategoriesWithNotes();
 };
 
 const categoryItemHandler = (categoryItem: CategoryItem): void => {
@@ -71,9 +70,7 @@ const categoryItemHandler = (categoryItem: CategoryItem): void => {
     categoryItem.querySelector<HTMLButtonElement>("button");
   function selectCategory(): void {
     sessionStorage.setItem("savedNoteId", "null");
-    const categoryArr: CategoryArray = JSON.parse(
-      localStorage.getItem("categoryArr") || "[]"
-    );
+    const categoryArr: CategoryArray = getCategories();
     let id: number;
     if (categoryItem.getAttribute("default-category-id")) {
       id = Number(categoryItem.getAttribute("default-category-id"));
@@ -85,31 +82,26 @@ const categoryItemHandler = (categoryItem: CategoryItem): void => {
     else activeCategoryState.activeCategory = category.name;
     localStorage.setItem(
       "activeCategoryState",
-      JSON.stringify({ activeCategory: activeCategoryState.activeCategory })
+      JSON.stringify({ activeCategory: activeCategoryState.activeCategory }),
     );
     const categoryList =
       document.querySelector<HTMLDivElement>(".category-list")!;
     isActive(categoryItem, categoryList);
-    syncCategoriesWithNotes();
     reloadNoteList();
     updateCategorySelect(categoryArr);
   }
 
   function deleteCategory(event: Event): void {
     event.stopPropagation();
-    const categoryArr: CategoryArray = JSON.parse(
-      localStorage.getItem("categoryArr") || "[]"
-    );
-    const notesArr: NoteArray = JSON.parse(
-      localStorage.getItem("notesArr") || "[]"
-    );
+    const categoryArr: CategoryArray = getCategories();
+    const notesArr: NoteArray = getNotes();
     const id: string | null = categoryItem.getAttribute("category-id");
     const index = categoryArr.findIndex(
-      (category) => String(category.id) === id
+      (category) => String(category.id) === id,
     );
     if (index > -1) {
       let toBeDeleted = categoryArr.find(
-        (categories) => String(categories.id) === id
+        (categories) => String(categories.id) === id,
       );
       if (toBeDeleted && toBeDeleted.items.length > 0) {
         toBeDeleted.items.forEach((item) => {
@@ -124,19 +116,20 @@ const categoryItemHandler = (categoryItem: CategoryItem): void => {
           }
         });
       }
-      categoryArr.splice(index, 1);
+      updateNotes((prev) => [...prev]);
+      updateCategories((prev) =>
+        prev.filter((category) => String(category.id) !== id),
+      );
     }
+
     categoryItem.removeEventListener("click", selectCategory);
     categoryItemBtn?.removeEventListener("click", deleteCategory);
     categoryItem.remove();
-    localStorage.setItem("notesArr", JSON.stringify(notesArr));
-    localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
     localStorage.setItem(
       "activeCategoryState",
-      JSON.stringify({ activeCategory: defaultCategory })
+      JSON.stringify({ activeCategory: defaultCategory }),
     );
-    updateCategorySelect(categoryArr);
-    syncCategoriesWithNotes();
+    updateCategorySelect(getCategories());
     reloadCategoryList();
     reloadNoteList();
   }
@@ -149,9 +142,7 @@ const categoryItemHandler = (categoryItem: CategoryItem): void => {
 const reloadCategoryList = (): void => {
   const categoryList =
     document.querySelector<HTMLDivElement>(".category-list")!;
-  const categoryArr: CategoryArray = JSON.parse(
-    localStorage.getItem("categoryArr") || "[]"
-  );
+  const categoryArr: CategoryArray = getCategories();
   const storedState = localStorage.getItem("activeCategoryState");
   const activeCategoryState: ActiveCategoryState = storedState
     ? JSON.parse(storedState)
@@ -164,10 +155,10 @@ const reloadCategoryList = (): void => {
     if (categoryArr[i]!.isDefault) {
       categoryItem.setAttribute(
         "default-category-id",
-        String(categoryArr[i]!.id)
+        String(categoryArr[i]!.id),
       );
       categoryItem.innerHTML = defaultCategoryItemTemplate(
-        categoryArr[i]!.name
+        categoryArr[i]!.name,
       );
     } else {
       categoryItem.setAttribute("category-id", String(categoryArr[i]!.id));
@@ -187,5 +178,4 @@ export {
   categoryToBeRendered,
   defaultCategory,
   reloadCategoryList,
-  syncCategoriesWithNotes,
 };

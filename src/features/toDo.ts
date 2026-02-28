@@ -7,7 +7,8 @@ import {
 } from "../ui-components/renderModalUI.js";
 import { createNewNote, type Note } from "../utils/classes.js";
 import { isActive } from "../utils/events.js";
-import { saveTempToDo, syncCategoriesWithNotes } from "../utils/storage.js";
+import { getNotes } from "../utils/storageService.js";
+import { saveTempToDo } from "../utils/tempStorageService.js";
 import { toDoItemTemplate } from "../utils/templates.js";
 import { savedNoteIdState } from "./notes.js";
 
@@ -16,11 +17,11 @@ const toDoToBeRendered = (
   category: string,
   toDoTitle: string,
   toDoList: Array<string>,
-  completedTasks: Array<string>
+  completedTasks: Array<string>,
 ): void => {
   if (type !== "toDo") return;
   const notesArr: NoteArray = JSON.parse(
-    localStorage.getItem("notesArr") || "[]"
+    localStorage.getItem("notesArr") || "[]",
   );
   const storedTempToDoValue = localStorage.getItem("tempToDoValue");
   const tempToDoValue: TempToDoValue = storedTempToDoValue
@@ -39,21 +40,20 @@ const toDoToBeRendered = (
   saveTempToDo();
   notesContainer.appendChild(toDoItem);
   toDoItemHandler(toDoItem, newToDo, completedTasks);
-  syncCategoriesWithNotes();
 };
 
 const toDoItemHandler = (
   toDoItem: HTMLDivElement,
   newToDo: Note,
-  completedTasks: Array<string>
+  completedTasks: Array<string>,
 ): void => {
   const toDoItemBtn = toDoItem.querySelector("button");
   function viewToDo() {
-    localStorage.setItem("modal-state", JSON.stringify({ interface: "toDo" }));
+    localStorage.setItem("modalState", JSON.stringify({ interface: "toDo" }));
     savedNoteIdState.savedNoteId = toDoItem.getAttribute("data-id")!;
     sessionStorage.setItem(
       "savedNoteId",
-      JSON.stringify(savedNoteIdState.savedNoteId)
+      JSON.stringify(savedNoteIdState.savedNoteId),
     );
     const switchBtn =
       document.querySelector<HTMLInputElement>(".switch-checkbox");
@@ -81,7 +81,7 @@ const toDoItemHandler = (
             title: newToDo.title || tempToDoValue.title,
             data: newToDo.data || tempToDoValue.data,
             dataCompleted: completedTasks || tempToDoValue.dataCompleted,
-          })
+          }),
         );
       }
       reloadToDoList({ data: newToDo.data }, completedTasks);
@@ -120,9 +120,7 @@ const toDoItemHandler = (
 
   function deleteToDo(event: Event): void {
     event.stopPropagation();
-    const notesArr: NoteArray = JSON.parse(
-      localStorage.getItem("notesArr") || "[]"
-    );
+    const notesArr: NoteArray = getNotes();
     const id: number = Number(toDoItem.getAttribute("data-id"));
     const index = notesArr.findIndex((note) => note.id == id);
     if (index > -1) {
@@ -140,7 +138,6 @@ const toDoItemHandler = (
     toDoItemBtn?.removeEventListener("click", deleteToDo);
     toDoItem.removeEventListener("click", viewToDo);
     toDoItem.remove();
-    syncCategoriesWithNotes();
   }
   toDoItemBtn?.addEventListener("click", deleteToDo);
   toDoItem.addEventListener("click", viewToDo);

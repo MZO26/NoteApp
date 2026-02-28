@@ -4,75 +4,22 @@
   "description": "Minimal Notetaking / ToDo App",
   "main": "dist/main.js",
   "scripts": {
-    "compile": "npx tsc",
-    "start": "npm run compile && electron-forge start",
-    "package": "npm run compile && electron-forge package",
-    "make": "npm run compile && electron-forge make"
-  },
-  "config": {
-    "forge": {
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "authors": "Mewtu26",
-            "exe": "noteapp.exe"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ],
-          "config": {
-            "authors": "Mewtu26",
-            "exe": "noteapp.exe"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {
-            "authors": "Mewtu26",
-            "exe": "noteapp.exe"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {
-            "authors": "Mewtu26",
-            "exe": "noteapp.exe"
-          }
-        }
-      ]
-    }
+    "compile": "npx tsc"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Mewtu26/NoteApp.git"
+    "url": "git+https://github.com/MZO26/NoteApp.git"
   },
   "keywords": [],
-  "author": "Mewtu26",
+  "author": "MZO26",
   "license": "ISC",
   "type": "module",
   "bugs": {
-    "url": "https://github.com/Mewtu26/NoteApp/issues"
+    "url": "https://github.com/MZO26/NoteApp/issues"
   },
-  "homepage": "https://github.com/Mewtu26/NoteApp#readme",
+  "homepage": "https://github.com/MZO26/NoteApp#readme",
   "devDependencies": {
-    "@electron-forge/cli": "^7.10.2",
-    "@electron-forge/maker-deb": "^7.10.2",
-    "@electron-forge/maker-rpm": "^7.10.2",
-    "@electron-forge/maker-squirrel": "^7.10.2",
-    "@electron-forge/maker-zip": "^7.10.2",
-    "@electron-forge/plugin-auto-unpack-natives": "^7.10.2",
-    "@electron-forge/plugin-fuses": "^7.10.2",
-    "@electron/fuses": "^1.8.0",
-    "@types/electron": "^1.6.12",
     "@types/node": "^24.10.0",
-    "electron": "^39.1.1",
     "typescript": "^5.9.3"
-  },
-  "dependencies": {
-    "electron-squirrel-startup": "^1.0.1"
   }
 }

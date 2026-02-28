@@ -11,8 +11,9 @@ import type {
 import { openOverlay } from "../ui-components/renderModalUI.js";
 import { createNewNote } from "../utils/classes.js";
 import { isActive } from "../utils/events.js";
-import { saveTempNote, syncCategoriesWithNotes } from "../utils/storage.js";
+import { getNotes, updateNotes } from "../utils/storageService.js";
 import { noteItemTemplate, toDoItemTemplate } from "../utils/templates.js";
+import { saveTempNote } from "../utils/tempStorageService.js";
 import { defaultCategory } from "./categories.js";
 import { toDoItemHandler } from "./toDo.js";
 
@@ -22,12 +23,9 @@ const noteToBeRendered = (
   type: string,
   category: string,
   title: string,
-  data: Array<string>
+  data: Array<string>,
 ): void => {
   if (type !== "note") return;
-  const notesArr: NoteArray = JSON.parse(
-    localStorage.getItem("notesArr") || "[]"
-  );
   const notesContainer =
     document.querySelector<HTMLDivElement>(".notes-container")!;
   const noteItem = document.createElement("div");
@@ -35,22 +33,20 @@ const noteToBeRendered = (
   const newNote: NoteObject = createNewNote(type, category, title, data);
   noteItem.setAttribute("data-id", String(newNote.id));
   noteItem.innerHTML = noteItemTemplate(newNote);
-  notesArr.push(newNote);
-  localStorage.setItem("notesArr", JSON.stringify(notesArr));
+  updateNotes((prev) => [...prev, newNote]);
   notesContainer.appendChild(noteItem);
   noteItemHandler(noteItem, newNote);
-  syncCategoriesWithNotes();
 };
 
 const noteItemHandler = (noteItem: NoteItem, note: NoteObject): void => {
   const noteItemBtn = noteItem.querySelector<HTMLButtonElement>("button");
 
   function viewNote(): void {
-    localStorage.setItem("modal-state", JSON.stringify({ interface: "note" }));
+    localStorage.setItem("modalState", JSON.stringify({ interface: "note" }));
     savedNoteIdState.savedNoteId = noteItem.getAttribute("data-id")!;
     sessionStorage.setItem(
       "savedNoteId",
-      JSON.stringify(savedNoteIdState.savedNoteId)
+      JSON.stringify(savedNoteIdState.savedNoteId),
     );
     const switchBtn =
       document.querySelector<HTMLInputElement>(".switch-checkbox");
@@ -83,36 +79,27 @@ const noteItemHandler = (noteItem: NoteItem, note: NoteObject): void => {
   }
   function deleteNote(event: Event): void {
     event.stopPropagation();
-    const notesArr: NoteArray = JSON.parse(
-      localStorage.getItem("notesArr") || "[]"
-    );
-    const id: number = Number(noteItem.getAttribute("data-id"))!;
-    const index = notesArr.findIndex((note) => note.id === id);
-    if (index > -1) {
-      notesArr.splice(index, 1);
-      localStorage.setItem("notesArr", JSON.stringify(notesArr));
-    }
-    noteItemBtn!.removeEventListener("click", deleteNote);
-    noteItem.removeEventListener("click", viewNote);
-    noteItem.remove();
-    syncCategoriesWithNotes();
+    const id: number = Number(noteItem.getAttribute("data-id"));
+    if (!id) return;
+    updateNotes((prev) => prev.filter((note) => note.id !== id));
   }
+  noteItemBtn!.removeEventListener("click", deleteNote);
+  noteItem.removeEventListener("click", viewNote);
+  noteItem.remove();
   noteItem.addEventListener("click", viewNote);
   noteItemBtn!.addEventListener("click", deleteNote);
 };
 
-const reloadNoteList = (args?: []): void => {
+const reloadNoteList = (args?: NoteArray): void => {
   const notesContainer =
     document.querySelector<HTMLDivElement>(".notes-container")!;
-  const notesArr: NoteArray | [] = args
-    ? args
-    : JSON.parse(localStorage.getItem("notesArr") || "[]");
+  const notesArr: NoteArray = args || getNotes();
   const storedState = localStorage.getItem("activeCategoryState");
   const activeCategoryState: ActiveCategoryState = storedState
     ? JSON.parse(storedState)
     : { activeCategory: defaultCategory };
-  const activeCategoryItems: Array<NoteObject> = notesArr.filter(
-    (items) => items.category == activeCategoryState.activeCategory
+  const activeCategoryItems: NoteArray = notesArr.filter(
+    (items) => items.category == activeCategoryState.activeCategory,
   );
   notesContainer.innerHTML = "";
   if (notesArr.length === 0 || activeCategoryItems.length === 0) {
@@ -141,7 +128,7 @@ const reloadNoteList = (args?: []): void => {
     ) {
       noteItem.innerHTML = toDoItemTemplate(
         activeCategoryItems[i]!,
-        tempToDoValue.dataCompleted || []
+        tempToDoValue.dataCompleted || [],
       );
     }
     notesContainer.appendChild(noteItem);
@@ -157,11 +144,10 @@ const reloadNoteList = (args?: []): void => {
       toDoItemHandler(
         noteItem,
         activeCategoryItems[i]!,
-        tempToDoValue.dataCompleted || []
+        tempToDoValue.dataCompleted || [],
       );
     }
   }
-  syncCategoriesWithNotes();
 };
 
 export { noteItemHandler, noteToBeRendered, reloadNoteList, savedNoteIdState };

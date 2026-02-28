@@ -1,19 +1,3 @@
-import type { CategoryArray, NoteArray } from "../types/storageTypes";
-
-const syncCategoriesWithNotes = (): void => {
-  let categoryArr: CategoryArray = JSON.parse(
-    localStorage.getItem("categoryArr") || "[]"
-  );
-  let notesArr: NoteArray = JSON.parse(
-    localStorage.getItem("notesArr") || "[]"
-  );
-  categoryArr = categoryArr.map((category) => {
-    category.items = notesArr.filter((note) => note.category == category.name);
-    return category;
-  });
-  localStorage.setItem("categoryArr", JSON.stringify(categoryArr));
-};
-
 const saveTempToDo = (): void => {
   const toDoTitle = document.querySelector<HTMLTextAreaElement>(".todo-title")!;
   const currentToDo =
@@ -39,21 +23,22 @@ const saveTempToDo = (): void => {
       title: titleValue || "",
       data: toDoData || [],
       dataCompleted: completedTasks || [],
-    })
+    }),
   );
 };
 
 const saveTempNote = (): void => {
-  const noteTitle = document.querySelector<HTMLTextAreaElement>(".title")!;
-  const noteTextArea = document.querySelector<HTMLTextAreaElement>(".note")!;
-  const noteDataToArr = noteTextArea.value ? [noteTextArea.value] : [];
+  const noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
+  const noteTextArea = document.querySelector<HTMLTextAreaElement>(".note");
+  if (!noteTitle || !noteTextArea) return;
+  const data = noteTextArea.value ? [noteTextArea.value] : [];
   localStorage.setItem(
     "tempNoteValue",
     JSON.stringify({
-      title: noteTitle.value || "",
-      data: noteDataToArr,
-    })
+      title: noteTitle.value,
+      data,
+    }),
   );
 };
 
-export { saveTempNote, saveTempToDo, syncCategoriesWithNotes };
+export { saveTempNote, saveTempToDo };

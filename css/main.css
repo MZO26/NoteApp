@@ -179,20 +179,15 @@ h2 {
   resize: none;
   transition: height 0.3s;
   margin-bottom: 10px;
-  font: inherit;
-  font-size: inherit;
-  line-height: inherit;
-}
-
-.todo-title {
-  flex-shrink: 0;
 }
 
 .title,
 .todo-title {
-  height: 2rem;
   background-color: var(--note);
   color: var(--bg-dark);
+  overflow-y: hidden;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 .note {
@@ -244,7 +239,6 @@ h2 {
 
 .todo-input input[type="text"],
 .todo-input textarea {
-  padding: 6px 10px;
   border-radius: 8px;
   color: var(--bg-dark);
   box-sizing: border-box;
@@ -520,41 +514,21 @@ h2 {
 
 /** scrollbar styling start **/
 ::-webkit-scrollbar {
-  width: 5px;
-  background-color: var(--note);
+  width: 3px;
+  height: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
   background-color: var(--bg-dark);
 }
 
-textarea::-webkit-scrollbar,
-.task-list::-webkit-scrollbar,
-.noteItem::-webkit-scrollbar,
-.toDoItem::-webkit-scrollbar {
-  width: 3px;
-  background-color: var(--note);
-}
-
-textarea::-webkit-scrollbar-thumb,
-.task-list::-webkit-scrollbar-thumb,
-.noteItem::-webkit-scrollbar-thumb,
-.toDoItem::-webkit-scrollbar-thumb {
-  background-color: var(--bg-dark);
-}
-
-.category-list::-webkit-scrollbar {
-  height: 5px;
-  background-color: var(--note);
-}
-
-.category-list::-webkit-scrollbar-thumb {
-  background-color: var(--bg-dark);
-}
 /** scrollbar styling end **/
 
 /** smaller screen sizes styling start **/
-@media screen and (max-width: 1200px) {
+@media screen {
+  textarea {
+    font-size: 22px;
+  }
   .notes-container {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     padding: 1.5rem;
@@ -563,14 +537,13 @@ textarea::-webkit-scrollbar-thumb,
   .title,
   .todo-title,
   .todo-input {
-    height: 1.7rem;
+    height: 1.8rem;
   }
 }
 
 @media screen and (max-width: 700px) {
-  body {
-    font-size: 18px;
-    line-height: 1.5;
+  textarea {
+    font-size: 20px;
   }
   .info-btn {
     visibility: hidden;
@@ -606,7 +579,7 @@ textarea::-webkit-scrollbar-thumb,
   .title,
   .todo-title,
   .todo-input {
-    height: 1.5rem;
+    height: 1.6rem;
   }
 }
 @media screen and (min-width: 480px), (max-width: 700px) {
@@ -615,6 +588,9 @@ textarea::-webkit-scrollbar-thumb,
   }
 }
 @media screen and (max-width: 480px) {
+  textarea {
+    font-size: 18px;
+  }
   .todo-container {
     padding: 0.5rem;
     max-height: 10rem;

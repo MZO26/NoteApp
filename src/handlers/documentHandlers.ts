@@ -28,7 +28,7 @@ openInfoBtn?.addEventListener("click", (): void => {
 });
 
 const addNewNote = (): void => {
-  localStorage.setItem("modal-state", JSON.stringify({ interface: "note" }));
+  localStorage.setItem("modalState", JSON.stringify({ interface: "note" }));
   if (switchBtn) switchBtn.checked = false;
   changeOverlayInterface();
   resetNoteInterface();

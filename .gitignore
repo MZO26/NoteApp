@@ -3,6 +3,3 @@ node_modules/
 
 # Typescript build output
 dist/
-
-# Electron Forge build output
-out/
