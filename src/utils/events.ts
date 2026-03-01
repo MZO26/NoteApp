@@ -1,19 +1,19 @@
-import { savedNoteIdState } from "../features/notes.js";
+import { savedNoteIdState } from "../states/sharedStates.js";
 import type { NoteItem } from "../types/noteTypes.js";
 
-const showToast = (value: string, duration = 4000): void => {
+const showToast = (value: string, duration = 1500): void => {
   const container = document.querySelector<HTMLDivElement>(".toast-container")!;
   const toast = document.createElement("div");
   toast.className = "toast";
-  if (value.length > 15) {
-    value.slice(0, 15);
+  if (value.length > 50) {
+    value = value.slice(0, 50) + "...";
   }
   toast.textContent = value;
   container.appendChild(toast);
 
   setTimeout(() => {
     toast.classList.add("show");
-  }, 1000);
+  }, 300);
 
   setTimeout(() => {
     toast.classList.remove("show");
@@ -51,14 +51,11 @@ const inputListener = (input: HTMLInputElement): Promise<string> => {
 };
 
 function isActive(item: NoteItem, parentElement?: Element): void {
-  const targetParent = parentElement || document.body;
   item.classList.add("active");
   if (item._listener) document.removeEventListener("click", item._listener);
-  //no const declaration because own declaration of object property
-  //dom objects also seen as objects
   item._listener = (e: Event) => {
     const target = e.target as Element | null;
-    if (targetParent.contains(target) && e.target != item) {
+    if (parentElement && parentElement.contains(target) && e.target != item) {
       item.classList.remove("active");
       if (item._listener) {
         document.removeEventListener("click", item._listener);
@@ -72,9 +69,9 @@ function isActive(item: NoteItem, parentElement?: Element): void {
       () =>
         document.addEventListener(
           "click",
-          item._listener as (event: Event) => void
+          item._listener as (event: Event) => void,
         ),
-      0
+      0,
     );
   }
 }

@@ -1,8 +1,10 @@
+import { switchOverlayInterface } from "../handlers/modalHandlers.js";
+import {
+  activeCategoryState,
+  defaultCategory,
+  savedNoteIdState,
+} from "../states/sharedStates.js";
 import type { NoteItem, NoteObject } from "../types/noteTypes.js";
-import type {
-  ActiveCategoryState,
-  SavedNoteIdState,
-} from "../types/stateTypes.js";
 import type {
   NoteArray,
   TempNoteValue,
@@ -14,10 +16,7 @@ import { isActive } from "../utils/events.js";
 import { getNotes, updateNotes } from "../utils/storageService.js";
 import { noteItemTemplate, toDoItemTemplate } from "../utils/templates.js";
 import { saveTempNote } from "../utils/tempStorageService.js";
-import { defaultCategory } from "./categories.js";
 import { toDoItemHandler } from "./toDo.js";
-
-let savedNoteIdState: SavedNoteIdState = { savedNoteId: null };
 
 const noteToBeRendered = (
   type: string,
@@ -43,7 +42,7 @@ const noteItemHandler = (noteItem: NoteItem, note: NoteObject): void => {
 
   function viewNote(): void {
     localStorage.setItem("modalState", JSON.stringify({ interface: "note" }));
-    savedNoteIdState.savedNoteId = noteItem.getAttribute("data-id")!;
+    savedNoteIdState.savedNoteId = Number(noteItem.getAttribute("data-id"))!;
     sessionStorage.setItem(
       "savedNoteId",
       JSON.stringify(savedNoteIdState.savedNoteId),
@@ -56,6 +55,7 @@ const noteItemHandler = (noteItem: NoteItem, note: NoteObject): void => {
     }
     requestAnimationFrame(() => {
       openOverlay();
+      switchOverlayInterface();
       const storedTempNoteValue = localStorage.getItem("tempNoteValue");
       const tempNoteValue: TempNoteValue = storedTempNoteValue
         ? JSON.parse(storedTempNoteValue)
@@ -63,8 +63,6 @@ const noteItemHandler = (noteItem: NoteItem, note: NoteObject): void => {
             data: [],
             title: "Untitled",
           };
-      const notesContainer =
-        document.querySelector<HTMLDivElement>(".notes-container")!;
       const noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
       const noteTextArea = document.querySelector<HTMLTextAreaElement>(".note");
       if (!noteTitle || !noteTextArea) return;
@@ -72,9 +70,7 @@ const noteItemHandler = (noteItem: NoteItem, note: NoteObject): void => {
       noteTextArea.value =
         note.data.toString() || tempNoteValue.data.toString() || "";
       saveTempNote();
-      isActive(noteItem, notesContainer);
-      noteTitle.addEventListener("input", saveTempNote);
-      noteTextArea.addEventListener("input", saveTempNote);
+      isActive(noteItem);
     });
   }
   function deleteNote(event: Event): void {
@@ -82,38 +78,38 @@ const noteItemHandler = (noteItem: NoteItem, note: NoteObject): void => {
     const id: number = Number(noteItem.getAttribute("data-id"));
     if (!id) return;
     updateNotes((prev) => prev.filter((note) => note.id !== id));
+    noteItem.remove();
   }
   noteItemBtn!.removeEventListener("click", deleteNote);
   noteItem.removeEventListener("click", viewNote);
-  noteItem.remove();
   noteItem.addEventListener("click", viewNote);
   noteItemBtn!.addEventListener("click", deleteNote);
 };
 
-const reloadNoteList = (args?: NoteArray): void => {
+const reloadNoteList = (): void => {
   const notesContainer =
-    document.querySelector<HTMLDivElement>(".notes-container")!;
-  const notesArr: NoteArray = args || getNotes();
-  const storedState = localStorage.getItem("activeCategoryState");
-  const activeCategoryState: ActiveCategoryState = storedState
-    ? JSON.parse(storedState)
-    : { activeCategory: defaultCategory };
+    document.querySelector<HTMLDivElement>(".notes-container");
+  if (!notesContainer) return;
+  const notesArr: NoteArray = getNotes();
+  const activeCategory: string =
+    activeCategoryState.activeCategory || defaultCategory;
   const activeCategoryItems: NoteArray = notesArr.filter(
-    (items) => items.category == activeCategoryState.activeCategory,
+    (items) => items.category == activeCategory,
   );
-  notesContainer.innerHTML = "";
-  if (notesArr.length === 0 || activeCategoryItems.length === 0) {
-    noteToBeRendered("note", activeCategoryState.activeCategory, "First note", [
+  notesContainer!.innerHTML = "";
+  if (activeCategoryItems.length === 0) {
+    noteToBeRendered("note", activeCategory, "First note", [
       "This is your first note!",
     ]);
     return;
   }
-  if (!activeCategoryItems.length) return;
+
+  const storedTempToDoValue = localStorage.getItem("tempToDoValue");
+  const tempToDoValue: TempToDoValue = storedTempToDoValue
+    ? JSON.parse(storedTempToDoValue)
+    : { title: "", data: [], dataCompleted: [] };
+
   for (let i = 0; i < activeCategoryItems.length; i++) {
-    const storedTempToDoValue = localStorage.getItem("tempToDoValue");
-    const tempToDoValue: TempToDoValue = storedTempToDoValue
-      ? JSON.parse(storedTempToDoValue)
-      : { title: "", data: [], dataCompleted: [] };
     const noteItem = document.createElement("div");
     noteItem.setAttribute("data-id", String(activeCategoryItems[i]!.id));
     noteItem.className = `${activeCategoryItems[i]!.type}Item`;
@@ -131,7 +127,7 @@ const reloadNoteList = (args?: NoteArray): void => {
         tempToDoValue.dataCompleted || [],
       );
     }
-    notesContainer.appendChild(noteItem);
+    notesContainer!.appendChild(noteItem);
     if (
       noteItem.classList.contains("noteItem") &&
       activeCategoryItems[i]!.type === "note"
@@ -150,4 +146,4 @@ const reloadNoteList = (args?: NoteArray): void => {
   }
 };
 
-export { noteItemHandler, noteToBeRendered, reloadNoteList, savedNoteIdState };
+export { noteItemHandler, noteToBeRendered, reloadNoteList };

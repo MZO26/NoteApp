@@ -19,7 +19,9 @@ button:focus {
   transition: box-shadow 0.3s ease-in-out;
 }
 
-button:hover {
+button:hover,
+select:hover,
+input:hover {
   background-color: var(--btn-hover);
   transition: 0.1s ease-in-out;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -188,7 +190,6 @@ button:hover {
   left: 27px;
 }
 
-.add-btn,
 .delete-btn,
 .task-delete-btn {
   display: flex;
@@ -196,7 +197,15 @@ button:hover {
   justify-content: center;
   height: 35px;
   width: 35px;
-  margin-right: 10px;
+  margin: 10px;
+  border-radius: 18px;
+}
+.add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 55px;
+  height: 35px;
   border-radius: 18px;
 }
 

@@ -1,6 +1,6 @@
-import { defaultCategory } from "../features/categories.js";
 import { noteToBeRendered, reloadNoteList } from "../features/notes.js";
 import { toDoToBeRendered } from "../features/toDo.js";
+import { defaultCategory } from "../states/sharedStates.js";
 import type { NoteObject } from "../types/noteTypes.js";
 import type { ActiveCategoryState, ModalState } from "../types/stateTypes.js";
 import type {
@@ -11,6 +11,7 @@ import type {
 } from "../types/storageTypes.js";
 import { changeOverlayInterface } from "../ui-components/renderModalUI.js";
 import { showToast } from "../utils/events.js";
+import { getNotes, saveNotes } from "../utils/storageService.js";
 import { saveTempNote, saveTempToDo } from "../utils/tempStorageService.js";
 
 const closeBtn = document.querySelector<HTMLButtonElement>(".closeModal-btn")!;
@@ -20,7 +21,6 @@ const switchBtn = document.querySelector<HTMLInputElement>(".switch-checkbox");
 const overlay = document.querySelector<HTMLDivElement>(".overlay");
 const modal = document.querySelector<HTMLDivElement>(".modal");
 const switchBtnVisibility = document.querySelector<HTMLLabelElement>(".switch");
-let reset = false;
 
 const resetNoteInterface = (): void => {
   requestAnimationFrame(() => {
@@ -75,19 +75,17 @@ const handleNoteSave = (
       noteToBeRendered("note", selectedCategory, title.value || "Untitled", [
         note.value,
       ]);
-      title.value === "Hello there"
-        ? showToast("General Kenobi")
-        : showToast("New note added");
     } else {
       const savedItem: NoteObject | undefined = notesArr.find(
-        (note) => note.id == savedNoteId,
+        (note) => note.id === savedNoteId,
       );
       if (savedItem && savedItem.type === "note") {
         savedItem.title = title.value.trim() || "";
         const noteDataToArr: Array<string> = note.value ? [note.value] : [];
         savedItem.data = noteDataToArr || [];
         savedItem.category = selectedCategory;
-        localStorage.setItem("notesArr", JSON.stringify(notesArr));
+        saveNotes(notesArr);
+        saveTempNote();
         showToast("Note was saved");
         reloadNoteList();
       }
@@ -127,16 +125,13 @@ const handleToDoSave = (
       allTasks,
       completedTasks,
     );
-    title.value === "Hello there"
-      ? showToast("General Kenobi")
-      : showToast("New toDo-list added");
   } else {
     const savedItem = notesArr.find((note) => note.id == savedNoteId);
     if (savedItem && savedItem.type === "toDo") {
       savedItem.title = title.value.trim() || tempToDoValue.title || "Untitled";
       savedItem.data = allTasks;
       savedItem.category = selectedCategory;
-      localStorage.setItem("notesArr", JSON.stringify(notesArr));
+      saveNotes(notesArr);
       saveTempToDo();
       showToast("ToDo-list was saved");
       reloadNoteList();
@@ -145,9 +140,7 @@ const handleToDoSave = (
 };
 
 const saveButton = (): void => {
-  const notesArr: NoteArray = JSON.parse(
-    localStorage.getItem("notesArr") || "[]",
-  );
+  const notesArr: NoteArray = getNotes();
   const savedNoteId: SavedNoteID = JSON.parse(
     sessionStorage.getItem("savedNoteId") || "null",
   );
@@ -237,21 +230,22 @@ const closeModal = (): void => {
 closeBtn.addEventListener("click", closeModal);
 
 const switchOverlayInterface = (): void => {
-  const storedModalState = localStorage.getItem("modalState");
-  let modalState: ModalState = storedModalState
-    ? JSON.parse(storedModalState)
-    : {
-        interface: "note",
-      };
-  const isToDo = switchBtn?.checked;
-  modalState = { interface: isToDo ? "toDo" : "note" };
+  const isToDo = switchBtn?.checked || false;
+  const modalState: ModalState = {
+    interface: isToDo ? "toDo" : "note",
+  };
   localStorage.setItem("modalState", JSON.stringify(modalState));
-  changeOverlayInterface();
-  if (isToDo && !reset) {
-    resetToDoInterface();
-    reset = true;
-  }
+  requestAnimationFrame(() => {
+    changeOverlayInterface();
+  });
 };
-switchBtn?.addEventListener("change", switchOverlayInterface);
+switchBtn?.addEventListener("click", () => {
+  switchOverlayInterface();
+});
 
-export { resetNoteInterface, resetToDoInterface, updateCategorySelect };
+export {
+  resetNoteInterface,
+  resetToDoInterface,
+  switchOverlayInterface,
+  updateCategorySelect,
+};

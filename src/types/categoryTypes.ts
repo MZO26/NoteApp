@@ -1,4 +1,4 @@
-import type { NoteObject } from "./noteTypes";
+import type { NoteObject } from "./noteTypes.js";
 
 type CategoryObject = {
   id: number;

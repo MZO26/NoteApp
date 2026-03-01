@@ -1,4 +1,8 @@
 import { updateCategorySelect } from "../handlers/modalHandlers.js";
+import {
+  activeCategoryState,
+  defaultCategory,
+} from "../states/sharedStates.js";
 import type { CategoryItem } from "../types/categoryTypes.js";
 import type { ActiveCategoryState } from "../types/stateTypes.js";
 import type { CategoryArray, NoteArray } from "../types/storageTypes.js";
@@ -16,11 +20,6 @@ import {
   defaultCategoryItemTemplate,
 } from "../utils/templates.js";
 import { reloadNoteList } from "./notes.js";
-
-let defaultCategory: string = "Without category";
-let activeCategoryState: ActiveCategoryState = {
-  activeCategory: defaultCategory,
-};
 
 const categoryToBeRendered = (categoryName: string): void => {
   const notesArr: NoteArray = getNotes();
@@ -68,7 +67,11 @@ const categoryToBeRendered = (categoryName: string): void => {
 const categoryItemHandler = (categoryItem: CategoryItem): void => {
   const categoryItemBtn =
     categoryItem.querySelector<HTMLButtonElement>("button");
+
   function selectCategory(): void {
+    document.querySelectorAll("#categoryItem").forEach((item) => {
+      item.classList.remove("active");
+    });
     sessionStorage.setItem("savedNoteId", "null");
     const categoryArr: CategoryArray = getCategories();
     let id: number;
@@ -77,16 +80,15 @@ const categoryItemHandler = (categoryItem: CategoryItem): void => {
     } else {
       id = Number(categoryItem.getAttribute("category-id"));
     }
-    const category = categoryArr.find((c) => c.id == id);
+    const category = categoryArr.find((c) => c.id === id);
     if (!category) activeCategoryState.activeCategory = defaultCategory;
     else activeCategoryState.activeCategory = category.name;
     localStorage.setItem(
       "activeCategoryState",
       JSON.stringify({ activeCategory: activeCategoryState.activeCategory }),
     );
-    const categoryList =
-      document.querySelector<HTMLDivElement>(".category-list")!;
-    isActive(categoryItem, categoryList);
+    isActive(categoryItem);
+    showToast(`Switched to "${activeCategoryState.activeCategory}"`);
     reloadNoteList();
     updateCategorySelect(categoryArr);
   }
@@ -165,17 +167,11 @@ const reloadCategoryList = (): void => {
       categoryItem.innerHTML = categoryItemTemplate(categoryArr[i]!.name);
     }
     if (activeCategoryState.activeCategory == categoryArr[i]!.name) {
-      isActive(categoryItem, categoryList);
+      isActive(categoryItem);
     }
     categoryList.appendChild(categoryItem);
     categoryItemHandler(categoryItem);
   }
 };
 
-export {
-  activeCategoryState,
-  categoryItemHandler,
-  categoryToBeRendered,
-  defaultCategory,
-  reloadCategoryList,
-};
+export { categoryItemHandler, categoryToBeRendered, reloadCategoryList };

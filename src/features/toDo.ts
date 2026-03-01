@@ -1,3 +1,5 @@
+import { switchOverlayInterface } from "../handlers/modalHandlers.js";
+import { savedNoteIdState } from "../states/sharedStates.js";
 import type { NoteArray, TempToDoValue } from "../types/storageTypes.js";
 import type { AddToDoButton } from "../types/toDoTypes.js";
 import {
@@ -7,10 +9,9 @@ import {
 } from "../ui-components/renderModalUI.js";
 import { createNewNote, type Note } from "../utils/classes.js";
 import { isActive } from "../utils/events.js";
-import { getNotes } from "../utils/storageService.js";
+import { getNotes, saveNotes, updateNotes } from "../utils/storageService.js";
 import { saveTempToDo } from "../utils/tempStorageService.js";
 import { toDoItemTemplate } from "../utils/templates.js";
-import { savedNoteIdState } from "./notes.js";
 
 const toDoToBeRendered = (
   type: string,
@@ -20,9 +21,7 @@ const toDoToBeRendered = (
   completedTasks: Array<string>,
 ): void => {
   if (type !== "toDo") return;
-  const notesArr: NoteArray = JSON.parse(
-    localStorage.getItem("notesArr") || "[]",
-  );
+  const notesArr: NoteArray = getNotes();
   const storedTempToDoValue = localStorage.getItem("tempToDoValue");
   const tempToDoValue: TempToDoValue = storedTempToDoValue
     ? JSON.parse(storedTempToDoValue)
@@ -36,7 +35,7 @@ const toDoToBeRendered = (
   toDoItem.setAttribute("data-id", String(newToDo.id));
   toDoItem.innerHTML = toDoItemTemplate(newToDo, completedTasks);
   notesArr.push(newToDo);
-  localStorage.setItem("notesArr", JSON.stringify(notesArr));
+  saveNotes(notesArr);
   saveTempToDo();
   notesContainer.appendChild(toDoItem);
   toDoItemHandler(toDoItem, newToDo, completedTasks);
@@ -47,10 +46,10 @@ const toDoItemHandler = (
   newToDo: Note,
   completedTasks: Array<string>,
 ): void => {
-  const toDoItemBtn = toDoItem.querySelector("button");
+  const toDoItemBtn = toDoItem.querySelector<HTMLButtonElement>("button");
   function viewToDo() {
     localStorage.setItem("modalState", JSON.stringify({ interface: "toDo" }));
-    savedNoteIdState.savedNoteId = toDoItem.getAttribute("data-id")!;
+    savedNoteIdState.savedNoteId = Number(toDoItem.getAttribute("data-id"))!;
     sessionStorage.setItem(
       "savedNoteId",
       JSON.stringify(savedNoteIdState.savedNoteId),
@@ -64,6 +63,7 @@ const toDoItemHandler = (
     }
     requestAnimationFrame(() => {
       openOverlay();
+      switchOverlayInterface();
       const storedTempToDoValue = localStorage.getItem("tempToDoValue");
       const tempToDoValue: TempToDoValue = storedTempToDoValue
         ? JSON.parse(storedTempToDoValue)
@@ -74,16 +74,15 @@ const toDoItemHandler = (
         document.querySelector<HTMLTextAreaElement>(".todo-title");
       if (toDoTitle) {
         toDoTitle.value = newToDo.title || tempToDoValue.title;
-      } else {
-        localStorage.setItem(
-          "tempToDoValue",
-          JSON.stringify({
-            title: newToDo.title || tempToDoValue.title,
-            data: newToDo.data || tempToDoValue.data,
-            dataCompleted: completedTasks || tempToDoValue.dataCompleted,
-          }),
-        );
       }
+      localStorage.setItem(
+        "tempToDoValue",
+        JSON.stringify({
+          title: newToDo.title || tempToDoValue.title,
+          data: newToDo.data || tempToDoValue.data,
+          dataCompleted: completedTasks || tempToDoValue.dataCompleted,
+        }),
+      );
       reloadToDoList({ data: newToDo.data }, completedTasks);
       saveTempToDo();
       isActive(toDoItem, notesContainer);
@@ -95,8 +94,6 @@ const toDoItemHandler = (
       const input = container.querySelector<HTMLInputElement>(".todo-input")!;
       const taskCheckboxes: NodeList =
         document.querySelectorAll<HTMLInputElement>(".task-checkbox");
-      if (toDoTitle) toDoTitle.addEventListener("input", saveTempToDo);
-      if (input) input.addEventListener("input", saveTempToDo);
       for (const checkbox of taskCheckboxes) {
         const element = checkbox as HTMLInputElement;
         const listContainer = element.closest("li");
@@ -120,20 +117,16 @@ const toDoItemHandler = (
 
   function deleteToDo(event: Event): void {
     event.stopPropagation();
-    const notesArr: NoteArray = getNotes();
     const id: number = Number(toDoItem.getAttribute("data-id"));
-    const index = notesArr.findIndex((note) => note.id == id);
-    if (index > -1) {
-      notesArr.splice(index, 1);
-      localStorage.setItem("notesArr", JSON.stringify(notesArr));
-    }
+    updateNotes((prev) => prev.filter((note) => note.id !== id));
     const container = document.querySelector<HTMLDivElement>(".todo-container");
-    if (!container) return;
-    const addBtn: AddToDoButton =
-      container?.querySelector<HTMLButtonElement>(".todo-btn")!;
-    if (addBtn && addBtn._addHandlerRef) {
-      addBtn.removeEventListener("click", addBtn._addHandlerRef);
-      delete addBtn._addHandlerRef;
+    if (container) {
+      const addBtn: AddToDoButton =
+        container?.querySelector<HTMLButtonElement>(".todo-btn")!;
+      if (addBtn && addBtn._addHandlerRef) {
+        addBtn.removeEventListener("click", addBtn._addHandlerRef);
+        delete addBtn._addHandlerRef;
+      }
     }
     toDoItemBtn?.removeEventListener("click", deleteToDo);
     toDoItem.removeEventListener("click", viewToDo);

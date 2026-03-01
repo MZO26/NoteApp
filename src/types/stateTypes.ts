@@ -7,7 +7,7 @@ type ModalState = {
 };
 
 type SavedNoteIdState = {
-  savedNoteId: string | null;
+  savedNoteId: number | null;
 };
 
 export type { ActiveCategoryState, ModalState, SavedNoteIdState };

@@ -1,4 +1,4 @@
-import { defaultCategory } from "../features/categories.js";
+import { defaultCategory } from "../states/sharedStates.js";
 import type { CategoryObject } from "../types/categoryTypes.js";
 import type { NoteObject } from "../types/noteTypes.js";
 import type { ActiveCategoryState } from "../types/stateTypes.js";
@@ -35,7 +35,7 @@ class Note implements NoteInterface {
     category: string,
     title: string,
     data: Array<string>,
-    formattedDate: string
+    formattedDate: string,
   ) {
     this.id = id;
     this.type = type;
@@ -48,7 +48,7 @@ class Note implements NoteInterface {
 
 const createNewCategory: (
   categoryName: string,
-  notesArr: NoteArray
+  notesArr: NoteArray,
 ) => Category = (categoryName, notesArr) => {
   const categoryItems =
     notesArr.filter((notes) => notes.category == categoryName) || [];
@@ -56,7 +56,7 @@ const createNewCategory: (
     Date.now() + Math.random(),
     categoryItems,
     categoryName,
-    false
+    false,
   );
 };
 
@@ -64,7 +64,7 @@ const createNewNote: (
   type: string,
   category: string | null,
   title: string,
-  data: Array<string>
+  data: Array<string>,
 ) => Note = (type, category, title, data) => {
   const storedState = localStorage.getItem("activeCategoryState");
   const activeCategoryState: ActiveCategoryState = storedState
@@ -76,7 +76,7 @@ const createNewNote: (
     category || activeCategoryState.activeCategory,
     title,
     data,
-    dateTemplate()
+    dateTemplate(),
   );
 };
 

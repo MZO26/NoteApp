@@ -19,7 +19,7 @@ The application is perfect for users who want quick access to their notes / to-d
 ## Prerequisites
 
 - Node.js and npm
-- VS Code (recommended for Live Server extension: `https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer`)
+- VS Code (recommended for Live Server extension: https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)
 
 ## Installation
 
@@ -31,7 +31,7 @@ The application is perfect for users who want quick access to their notes / to-d
 
 4. Install dependencies: Install the project dependencies with: `npm install`
 
-5. Compile TypeScript: `npm run build` (or `tsc` if using tsconfig.json directly)
+5. Compile TypeScript: `npm run compile` (or `tsc` if using tsconfig.json directly)
 
 6. Start live server
 
@@ -41,8 +41,7 @@ The application is perfect for users who want quick access to their notes / to-d
 
 ## License
 
-This project is licensed under the MIT License.  
-The Bootstrap Icons included are also licensed under the MIT License. See `NOTICE.txt` for details.
+The Bootstrap Icons included are licensed under the MIT License. See `NOTICE.txt` for details.
 
 ## Contact
 

@@ -1,5 +1,5 @@
-import type { Category, Note } from "../utils/classes";
-import type { NoteObject } from "./noteTypes";
+import type { Category, Note } from "../utils/classes.js";
+import type { NoteObject } from "./noteTypes.js";
 
 type NoteArray = Array<Note>;
 type CategoryArray = Array<Category>;

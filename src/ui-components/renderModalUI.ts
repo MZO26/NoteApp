@@ -1,6 +1,7 @@
 import type { NoteObject } from "../types/noteTypes.js";
-import type { ModalState, SavedNoteIdState } from "../types/stateTypes.js";
+import type { ModalState } from "../types/stateTypes.js";
 import type { TempNoteValue, TempToDoValue } from "../types/storageTypes.js";
+import { getNotes } from "../utils/storageService.js";
 import { saveTempNote, saveTempToDo } from "../utils/tempStorageService.js";
 import {
   createTaskItem,
@@ -17,9 +18,11 @@ const openOverlay = (): void => {
   localStorage.setItem("modal-status", "open");
   const notes: HTMLCollection =
     document.querySelector<HTMLDivElement>(".notes-container")!.children;
-  const savedNoteId: SavedNoteIdState = JSON.parse(
-    sessionStorage.getItem("savedNoteId") || "null",
-  );
+  const savedNoteIdStr: string | null = sessionStorage.getItem("savedNoteId");
+  const savedNoteId: number | null =
+    savedNoteIdStr && savedNoteIdStr !== "null"
+      ? Number(JSON.parse(savedNoteIdStr))
+      : null;
   if (
     savedNoteId &&
     switchBtnVisibility &&
@@ -111,34 +114,56 @@ const addEventListeners = (
 };
 
 const renderNoteUI = (): void => {
-  const currentToDoTitle =
-    document.querySelector<HTMLTextAreaElement>(".todo-title");
-  const currentToDo =
-    document.querySelector<HTMLTextAreaElement>(".todo-container");
-  if (!currentToDoTitle || !currentToDo) return;
+  let noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
+  let noteContent = document.querySelector<HTMLTextAreaElement>(".note");
+
+  if (!noteTitle || !noteContent) {
+    const currentToDoTitle =
+      document.querySelector<HTMLTextAreaElement>(".todo-title");
+    const currentToDo =
+      document.querySelector<HTMLTextAreaElement>(".todo-container");
+    if (!currentToDoTitle || !currentToDo) return;
+    const titleElem = document.createElement("textarea");
+    const noteElem = document.createElement("textarea");
+    titleElem.className = "title";
+    titleElem.name = "title-textarea";
+    noteElem.className = "note";
+    noteElem.name = "note-textarea";
+    saveTempToDo();
+    const titleFrag = document.createDocumentFragment();
+    const noteFrag = document.createDocumentFragment();
+    titleFrag.appendChild(titleElem);
+    noteFrag.appendChild(noteElem);
+    currentToDoTitle.replaceWith(titleFrag);
+    currentToDo.replaceWith(noteFrag);
+    noteTitle = titleElem;
+    noteContent = noteElem;
+  }
+
   const storedTempNoteValue = localStorage.getItem("tempNoteValue");
-  const tempNoteValue: TempNoteValue = storedTempNoteValue
+  let tempNoteValue: TempNoteValue = storedTempNoteValue
     ? JSON.parse(storedTempNoteValue)
-    : {
-        title: "Untitled",
-        data: [],
+    : { title: "", data: [] };
+
+  const savedId = sessionStorage.getItem("savedNoteId");
+  if (savedId && savedId !== "null") {
+    const notesArr: NoteObject[] = getNotes();
+    const noteId: number = Number(JSON.parse(savedId));
+    const existing = notesArr.find(
+      (n: NoteObject) => n.id === noteId && n.type === "note",
+    );
+    if (existing) {
+      tempNoteValue = {
+        title: existing.title || "",
+        data: existing.data || [],
       };
-  saveTempToDo();
-  const note = document.createElement("textarea");
-  const title = document.createElement("textarea");
-  note.className = "note";
-  note.name = "note-textarea";
-  title.className = "title";
-  title.name = "title-textarea";
-  const titleFragment = document.createDocumentFragment();
-  const noteFragment = document.createDocumentFragment();
-  titleFragment.appendChild(title);
-  noteFragment.appendChild(note);
-  currentToDoTitle.replaceWith(titleFragment);
-  currentToDo.replaceWith(noteFragment);
+    }
+  }
   requestAnimationFrame(() => {
-    title.value = tempNoteValue.title;
-    note.value = tempNoteValue.data.length ? tempNoteValue.data.toString() : "";
+    noteTitle!.value = tempNoteValue.title;
+    noteContent!.value = tempNoteValue.data.length
+      ? tempNoteValue.data.toString()
+      : "";
   });
 };
 
