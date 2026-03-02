@@ -6,8 +6,7 @@ import {
 import type { CategoryItem } from "../types/categoryTypes.js";
 import type { ActiveCategoryState } from "../types/stateTypes.js";
 import type { CategoryArray, NoteArray } from "../types/storageTypes.js";
-import type { Category } from "../utils/classes.js";
-import { createNewCategory } from "../utils/classes.js";
+import { Category, createNewCategory } from "../utils/classes.js";
 import { isActive, showToast } from "../utils/events.js";
 import {
   getCategories,
@@ -142,32 +141,29 @@ const categoryItemHandler = (categoryItem: CategoryItem): void => {
 };
 
 const reloadCategoryList = (): void => {
-  const categoryList =
-    document.querySelector<HTMLDivElement>(".category-list")!;
+  const categoryList = document.querySelector<HTMLDivElement>(".category-list");
   const categoryArr: CategoryArray = getCategories();
   const storedState = localStorage.getItem("activeCategoryState");
   const activeCategoryState: ActiveCategoryState = storedState
     ? JSON.parse(storedState)
     : { activeCategory: defaultCategory };
-  if (!categoryArr.length) return;
+  if (!categoryArr.length || !categoryList) return;
   categoryList.innerHTML = "";
   for (let i = 0; i < categoryArr.length; i++) {
+    const category: Category | undefined = categoryArr[i];
+    if (!category) continue;
     const categoryItem = document.createElement("div");
     categoryItem.id = "categoryItem";
-    if (categoryArr[i]!.isDefault) {
-      categoryItem.setAttribute(
-        "default-category-id",
-        String(categoryArr[i]!.id),
-      );
-      categoryItem.innerHTML = defaultCategoryItemTemplate(
-        categoryArr[i]!.name,
-      );
+    if (category.isDefault) {
+      categoryItem.setAttribute("default-category-id", String(category.id));
+      categoryItem.innerHTML = defaultCategoryItemTemplate(category.name);
     } else {
-      categoryItem.setAttribute("category-id", String(categoryArr[i]!.id));
-      categoryItem.innerHTML = categoryItemTemplate(categoryArr[i]!.name);
+      categoryItem.setAttribute("category-id", String(category.id));
+      categoryItem.innerHTML = categoryItemTemplate(category.name);
     }
-    if (activeCategoryState.activeCategory == categoryArr[i]!.name) {
+    if (activeCategoryState.activeCategory === category.name) {
       isActive(categoryItem);
+      reloadNoteList();
     }
     categoryList.appendChild(categoryItem);
     categoryItemHandler(categoryItem);

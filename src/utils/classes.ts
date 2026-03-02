@@ -5,7 +5,7 @@ import type { ActiveCategoryState } from "../types/stateTypes.js";
 import type { NoteArray } from "../types/storageTypes.js";
 import { dateTemplate } from "./templates.js";
 
-interface CategoryInterface extends CategoryObject {}
+export interface CategoryInterface extends CategoryObject {}
 
 class Category implements CategoryInterface {
   id: number;
@@ -20,13 +20,14 @@ class Category implements CategoryInterface {
   }
 }
 
-interface NoteInterface extends NoteObject {}
+export interface NoteInterface extends NoteObject {}
 
 class Note implements NoteInterface {
   id: number;
   type: string;
   category: string;
   data: Array<string>;
+  dataCompleted?: Array<string>;
   title: string;
   formattedDate: string;
   constructor(
@@ -35,6 +36,7 @@ class Note implements NoteInterface {
     category: string,
     title: string,
     data: Array<string>,
+    dataCompleted: Array<string> | undefined,
     formattedDate: string,
   ) {
     this.id = id;
@@ -42,6 +44,9 @@ class Note implements NoteInterface {
     this.category = category;
     this.title = title;
     this.data = data;
+    if (dataCompleted) {
+      this.dataCompleted = dataCompleted;
+    }
     this.formattedDate = formattedDate;
   }
 }
@@ -65,7 +70,8 @@ const createNewNote: (
   category: string | null,
   title: string,
   data: Array<string>,
-) => Note = (type, category, title, data) => {
+  dataCompleted?: Array<string>,
+) => Note = (type, category, title, data, dataCompleted) => {
   const storedState = localStorage.getItem("activeCategoryState");
   const activeCategoryState: ActiveCategoryState = storedState
     ? JSON.parse(storedState)
@@ -76,8 +82,9 @@ const createNewNote: (
     category || activeCategoryState.activeCategory,
     title,
     data,
+    dataCompleted,
     dateTemplate(),
   );
 };
 
-export { createNewCategory, createNewNote, type Category, type Note };
+export { Category, createNewCategory, createNewNote, Note };

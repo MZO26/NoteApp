@@ -1,21 +1,18 @@
 import { switchOverlayInterface } from "../handlers/modalHandlers.js";
-import {
-  activeCategoryState,
-  defaultCategory,
-  savedNoteIdState,
-} from "../states/sharedStates.js";
-import type { NoteItem, NoteObject } from "../types/noteTypes.js";
-import type {
-  NoteArray,
-  TempNoteValue,
-  TempToDoValue,
-} from "../types/storageTypes.js";
+import { savedNoteIdState } from "../states/sharedStates.js";
+import type { NoteItem } from "../types/noteTypes.js";
+import type { NoteArray } from "../types/storageTypes.js";
 import { openOverlay } from "../ui-components/renderModalUI.js";
-import { createNewNote } from "../utils/classes.js";
+import { createNewNote, Note } from "../utils/classes.js";
 import { isActive } from "../utils/events.js";
-import { getNotes, updateNotes } from "../utils/storageService.js";
+import {
+  clearTempNote,
+  getNotes,
+  saveNotes,
+  saveTempNote,
+  updateNotes,
+} from "../utils/storageService.js";
 import { noteItemTemplate, toDoItemTemplate } from "../utils/templates.js";
-import { saveTempNote } from "../utils/tempStorageService.js";
 import { toDoItemHandler } from "./toDo.js";
 
 const noteToBeRendered = (
@@ -23,21 +20,30 @@ const noteToBeRendered = (
   category: string,
   title: string,
   data: Array<string>,
+  dataCompleted?: Array<string>,
 ): void => {
   if (type !== "note") return;
+  const notesArr: NoteArray = getNotes();
   const notesContainer =
     document.querySelector<HTMLDivElement>(".notes-container")!;
   const noteItem = document.createElement("div");
   noteItem.className = "noteItem";
-  const newNote: NoteObject = createNewNote(type, category, title, data);
+  const newNote: Note = createNewNote(
+    type,
+    category,
+    title,
+    data,
+    dataCompleted,
+  );
   noteItem.setAttribute("data-id", String(newNote.id));
   noteItem.innerHTML = noteItemTemplate(newNote);
-  updateNotes((prev) => [...prev, newNote]);
+  notesArr.push(newNote);
+  saveNotes(notesArr);
   notesContainer.appendChild(noteItem);
   noteItemHandler(noteItem, newNote);
 };
 
-const noteItemHandler = (noteItem: NoteItem, note: NoteObject): void => {
+const noteItemHandler = (noteItem: NoteItem, note: Note): void => {
   const noteItemBtn = noteItem.querySelector<HTMLButtonElement>("button");
 
   function viewNote(): void {
@@ -56,34 +62,32 @@ const noteItemHandler = (noteItem: NoteItem, note: NoteObject): void => {
     requestAnimationFrame(() => {
       openOverlay();
       switchOverlayInterface();
-      const storedTempNoteValue = localStorage.getItem("tempNoteValue");
-      const tempNoteValue: TempNoteValue = storedTempNoteValue
-        ? JSON.parse(storedTempNoteValue)
-        : {
-            data: [],
-            title: "Untitled",
-          };
+    });
+    setTimeout(() => {
       const noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
       const noteTextArea = document.querySelector<HTMLTextAreaElement>(".note");
       if (!noteTitle || !noteTextArea) return;
-      noteTitle.value = note.title || tempNoteValue.title;
-      noteTextArea.value =
-        note.data.toString() || tempNoteValue.data.toString() || "";
-      saveTempNote();
+      noteTitle.value = note.title || "";
+      noteTextArea.value = note.data.toString() || "";
+      saveTempNote({
+        title: noteTitle.value,
+        data: noteTextArea.value ? [noteTextArea.value] : [],
+      });
       isActive(noteItem);
-    });
+    }, 100);
   }
   function deleteNote(event: Event): void {
     event.stopPropagation();
     const id: number = Number(noteItem.getAttribute("data-id"));
     if (!id) return;
     updateNotes((prev) => prev.filter((note) => note.id !== id));
+    clearTempNote();
     noteItem.remove();
   }
-  noteItemBtn!.removeEventListener("click", deleteNote);
+  noteItemBtn?.removeEventListener("click", deleteNote);
   noteItem.removeEventListener("click", viewNote);
   noteItem.addEventListener("click", viewNote);
-  noteItemBtn!.addEventListener("click", deleteNote);
+  noteItemBtn?.addEventListener("click", deleteNote);
 };
 
 const reloadNoteList = (): void => {
@@ -91,58 +95,29 @@ const reloadNoteList = (): void => {
     document.querySelector<HTMLDivElement>(".notes-container");
   if (!notesContainer) return;
   const notesArr: NoteArray = getNotes();
-  const activeCategory: string =
-    activeCategoryState.activeCategory || defaultCategory;
+  console.log("notesArr in reloadNoteList:", notesArr);
+  const activeCategory: string = JSON.parse(
+    localStorage.getItem("activeCategoryState") ||
+      '{"activeCategory": "defaultCategory"}',
+  ).activeCategory;
   const activeCategoryItems: NoteArray = notesArr.filter(
-    (items) => items.category == activeCategory,
+    (items) => items.category === activeCategory,
   );
-  notesContainer!.innerHTML = "";
-  if (activeCategoryItems.length === 0) {
-    noteToBeRendered("note", activeCategory, "First note", [
-      "This is your first note!",
-    ]);
-    return;
-  }
-
-  const storedTempToDoValue = localStorage.getItem("tempToDoValue");
-  const tempToDoValue: TempToDoValue = storedTempToDoValue
-    ? JSON.parse(storedTempToDoValue)
-    : { title: "", data: [], dataCompleted: [] };
-
+  notesContainer.innerHTML = "";
   for (let i = 0; i < activeCategoryItems.length; i++) {
+    const items = activeCategoryItems[i];
+    if (!items) continue;
     const noteItem = document.createElement("div");
-    noteItem.setAttribute("data-id", String(activeCategoryItems[i]!.id));
-    noteItem.className = `${activeCategoryItems[i]!.type}Item`;
-    if (
-      noteItem.classList.contains("noteItem") &&
-      activeCategoryItems[i]!.type === "note"
-    ) {
-      noteItem.innerHTML = noteItemTemplate(activeCategoryItems[i]!);
-    } else if (
-      noteItem.classList.contains("toDoItem") &&
-      activeCategoryItems[i]!.type === "toDo"
-    ) {
-      noteItem.innerHTML = toDoItemTemplate(
-        activeCategoryItems[i]!,
-        tempToDoValue.dataCompleted || [],
-      );
+    noteItem.setAttribute("data-id", String(items.id));
+    noteItem.className = `${items.type}Item`;
+    if (items.type === "note") {
+      noteItem.innerHTML = noteItemTemplate(items);
+      noteItemHandler(noteItem, items);
+    } else if (items.type === "toDo") {
+      noteItem.innerHTML = toDoItemTemplate(items, items.dataCompleted || []);
+      toDoItemHandler(noteItem, items);
     }
-    notesContainer!.appendChild(noteItem);
-    if (
-      noteItem.classList.contains("noteItem") &&
-      activeCategoryItems[i]!.type === "note"
-    ) {
-      noteItemHandler(noteItem, activeCategoryItems[i]!);
-    } else if (
-      noteItem.classList.contains("toDoItem") &&
-      activeCategoryItems[i]!.type === "toDo"
-    ) {
-      toDoItemHandler(
-        noteItem,
-        activeCategoryItems[i]!,
-        tempToDoValue.dataCompleted || [],
-      );
-    }
+    notesContainer.appendChild(noteItem);
   }
 };
 

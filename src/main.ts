@@ -2,16 +2,14 @@ import {
   categoryToBeRendered,
   reloadCategoryList,
 } from "./features/categories.js";
-import { reloadNoteList } from "./features/notes.js";
 import { applyMode } from "./handlers/documentHandlers.js";
 import { updateCategorySelect } from "./handlers/modalHandlers.js";
-import { activeCategoryState } from "./states/sharedStates.js";
+import { defaultCategory } from "./states/sharedStates.js";
 import type { CategoryArray } from "./types/storageTypes.js";
 import {
   changeOverlayInterface,
   openOverlay,
 } from "./ui-components/renderModalUI.js";
-import { showToast } from "./utils/events.js";
 import { getCategories } from "./utils/storageService.js";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -20,6 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
     requestAnimationFrame(() => {
       openOverlay();
       changeOverlayInterface();
+      document.querySelectorAll("#categoryItem").forEach((item) => {
+        item.classList.remove("active");
+      });
     });
   }
   const categoryArr: CategoryArray = getCategories();
@@ -28,12 +29,8 @@ document.addEventListener("DOMContentLoaded", () => {
     updateCategorySelect(categoryArr);
   }
   if (categoryArr.length === 0) {
-    categoryToBeRendered(activeCategoryState.activeCategory);
+    categoryToBeRendered(defaultCategory);
+    updateCategorySelect(getCategories());
   }
-  document.querySelectorAll("#categoryItem").forEach((item) => {
-    item.classList.remove("active");
-  });
-  showToast("Switched to default Category");
-  reloadNoteList();
   applyMode();
 });

@@ -1,4 +1,3 @@
-import type { NoteObject } from "../types/noteTypes";
 import type { TaskItems, ToDoInterfaceElements } from "../types/toDoTypes";
 import type { Note } from "./classes";
 
@@ -18,14 +17,14 @@ const noteItemTemplate = (noteData: Note): string => {
 };
 
 const toDoItemTemplate = (
-  toDoData: NoteObject,
-  completedTasks: Array<string>
+  toDoData: Note,
+  completedTasks: Array<string>,
 ): string => {
   const htmlString: string = toDoData.data
     .map((task) =>
       completedTasks && completedTasks.includes(task)
         ? `<li><span class="task-completed">${task}</span></li>`
-        : `<li><span>${task}</span></li>`
+        : `<li><span>${task}</span></li>`,
     )
     .join("");
   return `<button class="btn" title="delete toDo-list">       <svg
@@ -141,7 +140,7 @@ const dateTemplate = (): string => {
   const year = now.getFullYear();
 
   const formattedDate = `${String(day).padStart(2, "0")}.${String(
-    month
+    month,
   ).padStart(2, "0")}.${year}`;
   return formattedDate;
 };

@@ -1,8 +1,11 @@
 import type { NoteObject } from "../types/noteTypes.js";
 import type { ModalState } from "../types/stateTypes.js";
-import type { TempNoteValue, TempToDoValue } from "../types/storageTypes.js";
-import { getNotes } from "../utils/storageService.js";
-import { saveTempNote, saveTempToDo } from "../utils/tempStorageService.js";
+import { autoSaveTempNote, autoSaveTempToDo } from "../utils/autoSave.js";
+import {
+  getTempNote,
+  getTempToDo,
+  saveTempToDo,
+} from "../utils/storageService.js";
 import {
   createTaskItem,
   getToDoInterfaceElements,
@@ -54,32 +57,55 @@ const changeOverlayInterface = () => {
     modalHeadingElement.textContent = "New toDo list";
     modalNoteElement.textContent = "Add toDo's";
   }
-  createFragmentElement(modalState);
+  renderUI(modalState);
 };
 
-const addToDo = (taskList: HTMLUListElement, input: HTMLInputElement): void => {
+const addToDo = (
+  taskList: HTMLUListElement,
+  input: HTMLInputElement,
+  title: HTMLTextAreaElement,
+): void => {
+  if (!input || !input.value) return;
   const taskText = input.value.trim();
   if (!taskText) return;
   const { li, checkbox, taskSpan, taskDeleteBtn } = createTaskItem(taskText);
   taskList.appendChild(li);
   input.value = "";
+  saveTempToDo({
+    title: title.value,
+    data: Array.from(taskList.querySelectorAll("span")).map(
+      (span) => span.textContent || "",
+    ),
+    dataCompleted: Array.from(
+      taskList.querySelectorAll("span.task-completed"),
+    ).map((span) => span.textContent || ""),
+  });
+  title.removeEventListener("input", autoSaveTempToDo);
+  input.removeEventListener("input", autoSaveTempToDo);
+
+  title.addEventListener("input", autoSaveTempToDo);
+  input.addEventListener("input", autoSaveTempToDo);
   addEventListeners(li, checkbox, taskSpan, taskDeleteBtn);
 };
 
 const reloadToDoList = (
+  taskList: HTMLUListElement,
   toDoData: Pick<NoteObject, "data">,
   completedTasks: Array<string>,
 ): void => {
-  const taskList = document.querySelector<HTMLUListElement>(".task-list");
+  if (!taskList) return;
+  taskList.innerHTML = "";
   if (toDoData.data) {
     for (let i = 0; i < toDoData.data.length; i++) {
-      const { li, checkbox, taskSpan, taskDeleteBtn } = createTaskItem(
-        toDoData.data && toDoData.data[i]!,
-      );
-      if (completedTasks && completedTasks.includes(toDoData.data[i]!)) {
+      const taskText: string | undefined = toDoData.data[i];
+      if (!taskText) continue;
+      const { li, checkbox, taskSpan, taskDeleteBtn } =
+        createTaskItem(taskText);
+      if (completedTasks && completedTasks.includes(taskText)) {
         taskSpan.classList.add("task-completed");
+        checkbox.checked = true;
       }
-      taskList!.appendChild(li);
+      taskList.appendChild(li);
       addEventListeners(li, checkbox, taskSpan, taskDeleteBtn);
     }
   }
@@ -100,6 +126,7 @@ const addEventListeners = (
   };
   const onButtonClick = () => {
     li.remove();
+    autoSaveTempToDo();
   };
 
   checkbox.addEventListener("change", onChange);
@@ -123,78 +150,77 @@ const renderNoteUI = (): void => {
     const currentToDo =
       document.querySelector<HTMLTextAreaElement>(".todo-container");
     if (!currentToDoTitle || !currentToDo) return;
-    const titleElem = document.createElement("textarea");
-    const noteElem = document.createElement("textarea");
-    titleElem.className = "title";
-    titleElem.name = "title-textarea";
-    noteElem.className = "note";
-    noteElem.name = "note-textarea";
-    saveTempToDo();
-    const titleFrag = document.createDocumentFragment();
-    const noteFrag = document.createDocumentFragment();
-    titleFrag.appendChild(titleElem);
-    noteFrag.appendChild(noteElem);
-    currentToDoTitle.replaceWith(titleFrag);
-    currentToDo.replaceWith(noteFrag);
-    noteTitle = titleElem;
-    noteContent = noteElem;
-  }
-
-  const storedTempNoteValue = localStorage.getItem("tempNoteValue");
-  let tempNoteValue: TempNoteValue = storedTempNoteValue
-    ? JSON.parse(storedTempNoteValue)
-    : { title: "", data: [] };
-
-  const savedId = sessionStorage.getItem("savedNoteId");
-  if (savedId && savedId !== "null") {
-    const notesArr: NoteObject[] = getNotes();
-    const noteId: number = Number(JSON.parse(savedId));
-    const existing = notesArr.find(
-      (n: NoteObject) => n.id === noteId && n.type === "note",
-    );
-    if (existing) {
-      tempNoteValue = {
-        title: existing.title || "",
-        data: existing.data || [],
-      };
-    }
+    const titleElement = document.createElement("textarea");
+    const noteElement = document.createElement("textarea");
+    titleElement.className = "title";
+    titleElement.name = "title-textarea";
+    noteElement.className = "note";
+    noteElement.name = "note-textarea";
+    currentToDoTitle.replaceWith(titleElement);
+    currentToDo.replaceWith(noteElement);
+    noteTitle = titleElement;
+    noteContent = noteElement;
   }
   requestAnimationFrame(() => {
-    noteTitle!.value = tempNoteValue.title;
-    noteContent!.value = tempNoteValue.data.length
-      ? tempNoteValue.data.toString()
-      : "";
+    const tempNoteValue = getTempNote();
+    if (tempNoteValue) {
+      noteTitle.value = tempNoteValue.title;
+      noteContent.value = tempNoteValue.data[0] || "";
+    } else {
+      noteTitle.value = "";
+      noteContent.value = "";
+    }
   });
+  noteTitle.removeEventListener("input", autoSaveTempNote);
+  noteContent.removeEventListener("input", autoSaveTempNote);
+
+  noteTitle.addEventListener("input", autoSaveTempNote);
+  noteContent.addEventListener("input", autoSaveTempNote);
 };
 
 const renderToDoUI = () => {
-  const currentTitle = document.querySelector<HTMLTextAreaElement>(".title");
-  const currentNote = document.querySelector<HTMLTextAreaElement>(".note");
-  if (!currentTitle || !currentNote) return;
+  const currentTitle = document.querySelector<HTMLTextAreaElement>(".title")!;
+  const currentNote = document.querySelector<HTMLTextAreaElement>(".note")!;
   const { todoDiv, addBtn, taskList, input, title } =
     getToDoInterfaceElements();
-  const storedTempToDoValue = localStorage.getItem("tempToDoValue");
-  const tempToDoValue: TempToDoValue = storedTempToDoValue
-    ? JSON.parse(storedTempToDoValue)
-    : { title: "", data: [], dataCompleted: [] };
-  saveTempNote();
-  const titleFragment = document.createDocumentFragment();
-  const noteFragment = document.createDocumentFragment();
-  titleFragment.appendChild(title);
-  noteFragment.appendChild(todoDiv);
-  currentTitle.replaceWith(titleFragment);
-  currentNote.replaceWith(noteFragment);
-  const toDoData = tempToDoValue.data;
+  if (currentTitle && currentNote) {
+    currentTitle.replaceWith(title);
+    currentNote.replaceWith(todoDiv);
+  } else {
+    const currentToDoTitle =
+      document.querySelector<HTMLTextAreaElement>(".todo-title");
+    const currentToDo =
+      document.querySelector<HTMLTextAreaElement>(".todo-container");
+    if (!currentToDoTitle || !currentToDo) return;
+    currentToDoTitle.replaceWith(title);
+    currentToDo.replaceWith(todoDiv);
+  }
+
+  const tempToDoValue = getTempToDo();
   requestAnimationFrame(() => {
-    title.value = tempToDoValue.title;
-    if (toDoData && toDoData.length) {
-      reloadToDoList({ data: tempToDoValue.data }, tempToDoValue.dataCompleted);
+    if (tempToDoValue) {
+      title.value = tempToDoValue.title;
+      reloadToDoList(
+        taskList,
+        { data: tempToDoValue.data },
+        tempToDoValue.dataCompleted,
+      );
+    } else {
+      title.value = "";
+      taskList.innerHTML = "";
+      input.value = "";
     }
-    addBtn.addEventListener("click", () => addToDo(taskList, input));
+    addBtn.addEventListener("click", () => addToDo(taskList, input, title));
   });
+
+  title.removeEventListener("input", autoSaveTempToDo);
+  input.removeEventListener("input", autoSaveTempToDo);
+
+  title.addEventListener("input", autoSaveTempToDo);
+  input.addEventListener("input", autoSaveTempToDo);
 };
 
-const createFragmentElement = (modalState: ModalState): void => {
+const renderUI = (modalState: ModalState): void => {
   if (modalState.interface === "note") {
     renderNoteUI();
   } else if (modalState.interface === "toDo") {

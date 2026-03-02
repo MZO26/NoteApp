@@ -1,5 +1,6 @@
-import type { CategoryObject } from "../types/categoryTypes";
-import type { NoteObject } from "../types/noteTypes";
+import type { CategoryObject } from "../types/categoryTypes.ts";
+import type { NoteObject } from "../types/noteTypes.ts";
+import type { TempNote, TempToDo } from "../types/storageTypes.js";
 
 type Listener<T> = (value: T) => void;
 
@@ -100,11 +101,57 @@ function updateCategories(
   return next;
 }
 
+function getTempNote(): TempNote | null {
+  try {
+    const json = localStorage.getItem("tempNoteValue");
+    if (json) {
+      return JSON.parse(json) as TempNote;
+    } else return null;
+  } catch (error) {
+    console.error("Failed to parse temp note", error);
+    return null;
+  }
+}
+
+function saveTempNote(data: TempNote): void {
+  localStorage.setItem("tempNoteValue", JSON.stringify(data));
+}
+
+function clearTempNote(): void {
+  localStorage.removeItem("tempNoteValue");
+}
+
+function getTempToDo(): TempToDo | null {
+  try {
+    const json = localStorage.getItem("tempToDoValue");
+    if (json) {
+      return JSON.parse(json) as TempToDo;
+    } else return null;
+  } catch (error) {
+    console.error("Failed to parse temp todo", error);
+    return null;
+  }
+}
+
+function saveTempToDo(data: TempToDo): void {
+  localStorage.setItem("tempToDoValue", JSON.stringify(data));
+}
+
+function clearTempToDo(): void {
+  localStorage.removeItem("tempToDoValue");
+}
+
 export {
+  clearTempNote,
+  clearTempToDo,
   getCategories,
   getNotes,
+  getTempNote,
+  getTempToDo,
   saveCategories,
   saveNotes,
+  saveTempNote,
+  saveTempToDo,
   updateCategories,
   updateNotes,
 };

@@ -1,18 +1,22 @@
 import { noteToBeRendered, reloadNoteList } from "../features/notes.js";
 import { toDoToBeRendered } from "../features/toDo.js";
 import { defaultCategory } from "../states/sharedStates.js";
-import type { NoteObject } from "../types/noteTypes.js";
 import type { ActiveCategoryState, ModalState } from "../types/stateTypes.js";
 import type {
   CategoryArray,
   NoteArray,
   SavedNoteID,
-  TempToDoValue,
 } from "../types/storageTypes.js";
 import { changeOverlayInterface } from "../ui-components/renderModalUI.js";
+import { Note } from "../utils/classes.js";
 import { showToast } from "../utils/events.js";
-import { getNotes, saveNotes } from "../utils/storageService.js";
-import { saveTempNote, saveTempToDo } from "../utils/tempStorageService.js";
+import {
+  clearTempNote,
+  clearTempToDo,
+  getNotes,
+  saveNotes,
+  updateNotes,
+} from "../utils/storageService.js";
 
 const closeBtn = document.querySelector<HTMLButtonElement>(".closeModal-btn")!;
 const saveBtn = document.querySelector<HTMLButtonElement>(".add-btn")!;
@@ -28,6 +32,7 @@ const resetNoteInterface = (): void => {
     const noteContent = document.querySelector<HTMLTextAreaElement>(".note");
     if (noteTitle) noteTitle.value = "";
     if (noteContent) noteContent.value = "";
+    clearTempNote();
   });
 };
 
@@ -38,6 +43,7 @@ const resetToDoInterface = (): void => {
     const todoContent = document.querySelector<HTMLDivElement>(".task-list");
     if (todoTitle) todoTitle.value = "";
     if (todoContent) todoContent.innerHTML = "";
+    clearTempToDo();
   });
 };
 
@@ -72,25 +78,30 @@ const handleNoteSave = (
   const note = document.querySelector<HTMLTextAreaElement>(".note");
   if (note && title) {
     if (!savedNoteId) {
-      noteToBeRendered("note", selectedCategory, title.value || "Untitled", [
-        note.value,
-      ]);
+      noteToBeRendered(
+        "note",
+        selectedCategory,
+        title.value || "",
+        [note.value],
+        undefined,
+      );
     } else {
-      const savedItem: NoteObject | undefined = notesArr.find(
+      const savedItem: Note | undefined = notesArr.find(
         (note) => note.id === savedNoteId,
       );
       if (savedItem && savedItem.type === "note") {
         savedItem.title = title.value.trim() || "";
         const noteDataToArr: Array<string> = note.value ? [note.value] : [];
-        savedItem.data = noteDataToArr || [];
+        savedItem.data = noteDataToArr;
         savedItem.category = selectedCategory;
-        saveNotes(notesArr);
-        saveTempNote();
+        updateNotes((prev) => [...prev, savedItem]);
         showToast("Note was saved");
         reloadNoteList();
       }
     }
   }
+  console.log(notesArr);
+  clearTempNote();
 };
 
 const handleToDoSave = (
@@ -98,45 +109,45 @@ const handleToDoSave = (
   notesArr: NoteArray,
   selectedCategory: string,
 ): void => {
-  const storedTempToDoValue = localStorage.getItem("tempToDoValue");
-  const tempToDoValue: TempToDoValue = storedTempToDoValue
-    ? JSON.parse(storedTempToDoValue)
-    : { title: "", toDoData: [], dataCompleted: [] };
   const spans: NodeList =
     document.querySelectorAll<HTMLSpanElement>(".task-list li span");
-  const completedTasks: Array<string> =
-    Array.from(spans)
-      .filter((spans) => {
-        const elements = spans as HTMLSpanElement;
-        return elements.classList.contains("task-completed");
-      })
-      .map((element) => {
-        return (element as HTMLSpanElement).textContent || "";
-      }) || tempToDoValue.dataCompleted;
+  const completedTasks: Array<string> = Array.from(spans)
+    .filter((spans) => {
+      const elements = spans as HTMLSpanElement;
+      return elements.classList.contains("task-completed");
+    })
+    .map((element) => {
+      return (element as HTMLSpanElement).textContent || "";
+    });
   const allTasks: Array<string> = Array.from(spans).map((spans) => {
     return (spans as HTMLSpanElement).textContent || "";
   });
-  const title = document.querySelector<HTMLTextAreaElement>(".todo-title")!;
+  const title = document.querySelector<HTMLTextAreaElement>(".todo-title");
   if (!savedNoteId) {
     toDoToBeRendered(
       "toDo",
       selectedCategory,
-      title.value || "Untitled",
+      title?.value || "",
       allTasks,
       completedTasks,
     );
   } else {
-    const savedItem = notesArr.find((note) => note.id == savedNoteId);
+    const savedItem = notesArr.find((note) => note.id === savedNoteId);
     if (savedItem && savedItem.type === "toDo") {
-      savedItem.title = title.value.trim() || tempToDoValue.title || "Untitled";
+      savedItem.title = title?.value.trim() || "";
       savedItem.data = allTasks;
+      savedItem.dataCompleted = completedTasks;
       savedItem.category = selectedCategory;
-      saveNotes(notesArr);
-      saveTempToDo();
+      notesArr[notesArr.findIndex((note) => note.id === savedNoteId)] =
+        savedItem;
+
       showToast("ToDo-list was saved");
       reloadNoteList();
     }
   }
+  saveNotes(notesArr);
+  console.log(notesArr);
+  clearTempToDo();
 };
 
 const saveButton = (): void => {
@@ -164,6 +175,8 @@ const saveButton = (): void => {
     handleNoteSave(savedNoteId, notesArr, selectedCategory);
   }
   sessionStorage.removeItem("savedNoteId");
+  clearTempNote();
+  clearTempToDo();
 };
 
 saveBtn.addEventListener("click", () => {
@@ -193,6 +206,8 @@ const deleteButton = (): void => {
       content.innerHTML = "";
     }
   }
+  clearTempNote();
+  clearTempToDo();
 };
 deleteBtn.addEventListener("click", deleteButton);
 
@@ -203,12 +218,6 @@ const closeModal = (): void => {
     : {
         interface: "note",
       };
-  const noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
-  const noteTextArea = document.querySelector<HTMLTextAreaElement>(".note");
-  if (noteTitle) noteTitle.removeEventListener("input", saveTempNote);
-  if (noteTextArea) noteTextArea.removeEventListener("input", saveTempNote);
-  localStorage.removeItem("tempNoteValue");
-  localStorage.removeItem("tempToDoValue");
   overlay?.classList.remove("show");
   modal?.classList.remove("show");
   if (modalState.interface === "note") {
@@ -216,7 +225,6 @@ const closeModal = (): void => {
   } else {
     resetToDoInterface();
   }
-  sessionStorage.removeItem("savedNoteId");
   localStorage.setItem("modal-status", "closed");
   setTimeout(() => {
     if (

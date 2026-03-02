@@ -3,6 +3,7 @@ type NoteObject = {
   type: string;
   category: string;
   data: Array<string>;
+  dataCompleted?: Array<string>;
   title: string;
   formattedDate: string;
 };
