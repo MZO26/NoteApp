@@ -6,7 +6,7 @@ import {
   openOverlay,
 } from "../ui-components/renderModalUI.js";
 import { inputListener } from "../utils/events.js";
-import { resetNoteInterface } from "./modalHandlers.js";
+import { clearTempNote, clearTempToDo } from "../utils/storageService.js";
 
 const filterInput = document.querySelector<HTMLInputElement>(".search-input")!;
 const switchBtn = document.querySelector<HTMLInputElement>(".switch-checkbox");
@@ -28,12 +28,15 @@ openInfoBtn?.addEventListener("click", (): void => {
 });
 
 const addNewNote = (): void => {
+  clearTempNote();
+  clearTempToDo();
   localStorage.setItem("modalState", JSON.stringify({ interface: "note" }));
   if (switchBtn) switchBtn.checked = false;
-  changeOverlayInterface();
-  resetNoteInterface();
-  openOverlay();
-  if (switchBtnVisibility) switchBtnVisibility.classList.remove("hidden");
+  requestAnimationFrame(() => {
+    changeOverlayInterface();
+    openOverlay();
+    if (switchBtnVisibility) switchBtnVisibility.classList.remove("hidden");
+  });
 };
 showBtn.addEventListener("click", addNewNote);
 
@@ -84,7 +87,7 @@ const categoryInputButton = async (): Promise<void> => {
   input.replaceWith(categoryBtn);
   if (value) categoryToBeRendered(value);
 };
-categoryBtn!.addEventListener("click", (e: MouseEvent) => {
+categoryBtn?.addEventListener("click", (e: MouseEvent) => {
   e.stopPropagation();
   categoryInputButton();
 });

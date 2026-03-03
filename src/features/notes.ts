@@ -8,8 +8,8 @@ import { isActive } from "../utils/events.js";
 import {
   clearTempNote,
   getNotes,
+  getTempNote,
   saveNotes,
-  saveTempNote,
   updateNotes,
 } from "../utils/storageService.js";
 import { noteItemTemplate, toDoItemTemplate } from "../utils/templates.js";
@@ -67,12 +67,15 @@ const noteItemHandler = (noteItem: NoteItem, note: Note): void => {
       const noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
       const noteTextArea = document.querySelector<HTMLTextAreaElement>(".note");
       if (!noteTitle || !noteTextArea) return;
-      noteTitle.value = note.title || "";
-      noteTextArea.value = note.data.toString() || "";
-      saveTempNote({
-        title: noteTitle.value,
-        data: noteTextArea.value ? [noteTextArea.value] : [],
-      });
+      const tempNoteValue = getTempNote();
+      const savedNoteId = Number(sessionStorage.getItem("savedNoteId"));
+      if (tempNoteValue && savedNoteId) {
+        noteTitle.value = tempNoteValue.title;
+        noteTextArea.value = tempNoteValue.data.toString();
+      } else {
+        noteTitle.value = note.title;
+        noteTextArea.value = note.data.toString();
+      }
       isActive(noteItem);
     }, 100);
   }

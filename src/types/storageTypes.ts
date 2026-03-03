@@ -6,11 +6,11 @@ type CategoryArray = Array<Category>;
 type DocumentMode = string;
 type SavedNoteID = number;
 type TempToDo = Partial<NoteObject> &
-  Pick<NoteObject, "title" | "data"> & {
+  Pick<NoteObject, "id" | "title" | "data"> & {
     dataCompleted: Array<string>;
   };
 
-type TempNote = Partial<NoteObject> & Pick<NoteObject, "title" | "data">;
+type TempNote = Partial<NoteObject> & Pick<NoteObject, "id" | "title" | "data">;
 
 export type {
   CategoryArray,

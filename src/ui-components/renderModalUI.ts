@@ -1,11 +1,7 @@
 import type { NoteObject } from "../types/noteTypes.js";
 import type { ModalState } from "../types/stateTypes.js";
 import { autoSaveTempNote, autoSaveTempToDo } from "../utils/autoSave.js";
-import {
-  getTempNote,
-  getTempToDo,
-  saveTempToDo,
-} from "../utils/storageService.js";
+import { getTempNote, getTempToDo } from "../utils/storageService.js";
 import {
   createTaskItem,
   getToDoInterfaceElements,
@@ -14,13 +10,13 @@ import {
 const overlay = document.querySelector<HTMLDivElement>(".overlay");
 const modal = document.querySelector<HTMLDivElement>(".modal");
 const switchBtnVisibility = document.querySelector<HTMLLabelElement>(".switch");
+export let isInitializing = true;
 
 const openOverlay = (): void => {
   overlay?.classList.add("show");
   modal?.classList.add("show");
-  localStorage.setItem("modal-status", "open");
-  const notes: HTMLCollection =
-    document.querySelector<HTMLDivElement>(".notes-container")!.children;
+  const notes: HTMLCollection | undefined =
+    document.querySelector<HTMLDivElement>(".notes-container")?.children;
   const savedNoteIdStr: string | null = sessionStorage.getItem("savedNoteId");
   const savedNoteId: number | null =
     savedNoteIdStr && savedNoteIdStr !== "null"
@@ -33,10 +29,12 @@ const openOverlay = (): void => {
   ) {
     switchBtnVisibility.classList.add("hidden");
   }
-  Array.from(notes).forEach((element) => {
-    if (element.classList.contains("active"))
-      element.classList.remove("active");
-  });
+  if (notes) {
+    Array.from(notes).forEach((element) => {
+      if (element.classList.contains("active"))
+        element.classList.remove("active");
+    });
+  }
 };
 
 const changeOverlayInterface = () => {
@@ -47,16 +45,18 @@ const changeOverlayInterface = () => {
         interface: "note",
       };
   const modalHeadingElement =
-    document.querySelector<HTMLHeadingElement>(".modal-heading")!;
+    document.querySelector<HTMLHeadingElement>(".modal-heading");
   const modalNoteElement =
-    document.querySelector<HTMLParagraphElement>(".modal-note")!;
-  if (modalState.interface === "note") {
-    modalHeadingElement.textContent = "New note";
-    modalNoteElement.textContent = "Add note";
-  } else if (modalState.interface === "toDo") {
-    modalHeadingElement.textContent = "New toDo list";
-    modalNoteElement.textContent = "Add toDo's";
-  }
+    document.querySelector<HTMLParagraphElement>(".modal-note");
+  if (modalHeadingElement && modalNoteElement) {
+    if (modalState.interface === "note") {
+      modalHeadingElement.textContent = "New note";
+      modalNoteElement.textContent = "Add note";
+    } else if (modalState.interface === "toDo") {
+      modalHeadingElement.textContent = "New toDo list";
+      modalNoteElement.textContent = "Add toDo's";
+    }
+  } else return;
   renderUI(modalState);
 };
 
@@ -71,20 +71,12 @@ const addToDo = (
   const { li, checkbox, taskSpan, taskDeleteBtn } = createTaskItem(taskText);
   taskList.appendChild(li);
   input.value = "";
-  saveTempToDo({
-    title: title.value,
-    data: Array.from(taskList.querySelectorAll("span")).map(
-      (span) => span.textContent || "",
-    ),
-    dataCompleted: Array.from(
-      taskList.querySelectorAll("span.task-completed"),
-    ).map((span) => span.textContent || ""),
-  });
   title.removeEventListener("input", autoSaveTempToDo);
   input.removeEventListener("input", autoSaveTempToDo);
 
   title.addEventListener("input", autoSaveTempToDo);
-  input.addEventListener("input", autoSaveTempToDo);
+  const addBtn = document.querySelector<HTMLButtonElement>(".todo-btn");
+  addBtn?.addEventListener("input", autoSaveTempToDo);
   addEventListeners(li, checkbox, taskSpan, taskDeleteBtn);
 };
 
@@ -141,6 +133,7 @@ const addEventListeners = (
 };
 
 const renderNoteUI = (): void => {
+  isInitializing = true;
   let noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
   let noteContent = document.querySelector<HTMLTextAreaElement>(".note");
 
@@ -161,26 +154,29 @@ const renderNoteUI = (): void => {
     noteTitle = titleElement;
     noteContent = noteElement;
   }
-  requestAnimationFrame(() => {
-    const tempNoteValue = getTempNote();
-    if (tempNoteValue) {
-      noteTitle.value = tempNoteValue.title;
-      noteContent.value = tempNoteValue.data[0] || "";
-    } else {
-      noteTitle.value = "";
-      noteContent.value = "";
-    }
-  });
+  const tempNoteValue = getTempNote();
+  if (tempNoteValue) {
+    noteTitle.value = tempNoteValue.title;
+    noteContent.value = tempNoteValue.data[0] || "";
+  } else {
+    noteTitle.value = "";
+    noteContent.value = "";
+  }
+
   noteTitle.removeEventListener("input", autoSaveTempNote);
   noteContent.removeEventListener("input", autoSaveTempNote);
 
   noteTitle.addEventListener("input", autoSaveTempNote);
   noteContent.addEventListener("input", autoSaveTempNote);
+  setTimeout(() => {
+    isInitializing = false;
+  }, 100);
 };
 
 const renderToDoUI = () => {
-  const currentTitle = document.querySelector<HTMLTextAreaElement>(".title")!;
-  const currentNote = document.querySelector<HTMLTextAreaElement>(".note")!;
+  isInitializing = true;
+  const currentTitle = document.querySelector<HTMLTextAreaElement>(".title");
+  const currentNote = document.querySelector<HTMLTextAreaElement>(".note");
   const { todoDiv, addBtn, taskList, input, title } =
     getToDoInterfaceElements();
   if (currentTitle && currentNote) {
@@ -191,33 +187,34 @@ const renderToDoUI = () => {
       document.querySelector<HTMLTextAreaElement>(".todo-title");
     const currentToDo =
       document.querySelector<HTMLTextAreaElement>(".todo-container");
-    if (!currentToDoTitle || !currentToDo) return;
-    currentToDoTitle.replaceWith(title);
-    currentToDo.replaceWith(todoDiv);
-  }
-
-  const tempToDoValue = getTempToDo();
-  requestAnimationFrame(() => {
-    if (tempToDoValue) {
-      title.value = tempToDoValue.title;
-      reloadToDoList(
-        taskList,
-        { data: tempToDoValue.data },
-        tempToDoValue.dataCompleted,
-      );
-    } else {
-      title.value = "";
-      taskList.innerHTML = "";
-      input.value = "";
+    if (currentToDoTitle && currentToDo) {
+      currentToDoTitle.replaceWith(title);
+      currentToDo.replaceWith(todoDiv);
     }
-    addBtn.addEventListener("click", () => addToDo(taskList, input, title));
-  });
+  }
+  const tempToDoValue = getTempToDo();
+  if (tempToDoValue) {
+    title.value = tempToDoValue.title;
+    reloadToDoList(
+      taskList,
+      { data: tempToDoValue.data },
+      tempToDoValue.dataCompleted,
+    );
+  } else {
+    title.value = "";
+    taskList.innerHTML = "";
+    input.value = "";
+  }
+  addBtn.addEventListener("click", () => addToDo(taskList, input, title));
 
   title.removeEventListener("input", autoSaveTempToDo);
   input.removeEventListener("input", autoSaveTempToDo);
 
   title.addEventListener("input", autoSaveTempToDo);
-  input.addEventListener("input", autoSaveTempToDo);
+  addBtn.addEventListener("click", autoSaveTempToDo);
+  setTimeout(() => {
+    isInitializing = false;
+  }, 100);
 };
 
 const renderUI = (modalState: ModalState): void => {

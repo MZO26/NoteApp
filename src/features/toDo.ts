@@ -9,8 +9,8 @@ import { isActive } from "../utils/events.js";
 import {
   clearTempToDo,
   getNotes,
+  getTempToDo,
   saveNotes,
-  saveTempToDo,
   updateNotes,
 } from "../utils/storageService.js";
 import { toDoItemTemplate } from "../utils/templates.js";
@@ -36,7 +36,6 @@ const toDoToBeRendered = (
     completedTasks,
   );
   toDoItem.setAttribute("data-id", String(newToDo.id));
-  console.log("completedTasks in toDoToBeRendered:", completedTasks);
   toDoItem.innerHTML = toDoItemTemplate(newToDo, completedTasks);
   notesArr.push(newToDo);
   saveNotes(notesArr);
@@ -69,44 +68,44 @@ const toDoItemHandler = (
     setTimeout(() => {
       const notesContainer =
         document.querySelector<HTMLDivElement>(".notes-container");
-      if (notesContainer) {
-        isActive(toDoItem, notesContainer);
-      }
       const toDoTitle =
         document.querySelector<HTMLTextAreaElement>(".todo-title");
-      if (toDoTitle) {
-        toDoTitle.value = newToDo.title || "";
-      }
       const taskList = document.querySelector<HTMLUListElement>(".task-list");
-      if (taskList) {
+      const tempToDoValue = getTempToDo();
+      if (!notesContainer || !toDoTitle || !taskList) return;
+      const savedNoteId = Number(sessionStorage.getItem("savedNoteId"));
+      console.log(tempToDoValue, savedNoteId);
+      if (tempToDoValue && tempToDoValue.id === savedNoteId) {
+        console.log("temp to do active");
+        toDoTitle.value = tempToDoValue.title || "";
+        reloadToDoList(
+          taskList,
+          { data: tempToDoValue.data },
+          tempToDoValue.dataCompleted,
+        );
+      } else {
+        console.log("not active");
+        toDoTitle.value = newToDo.title;
         reloadToDoList(
           taskList,
           { data: newToDo.data },
           newToDo.dataCompleted || [],
         );
-        const taskCheckboxes =
-          taskList.querySelectorAll<HTMLInputElement>(".task-checkbox");
-        for (const checkbox of taskCheckboxes) {
-          const element = checkbox as HTMLInputElement;
-          const listContainer = element.closest("li");
-          const span = listContainer?.querySelector<HTMLSpanElement>("span");
-          const hasTaskCompletedClass =
-            span?.classList.contains("task-completed");
-
-          if (!element.checked && hasTaskCompletedClass) {
-            element.checked = true;
-          }
-        }
-        saveTempToDo({
-          title: toDoTitle?.value || "",
-          data: Array.from(taskList?.querySelectorAll("span")).map(
-            (span) => span.textContent,
-          ),
-          dataCompleted: Array.from(
-            taskList.querySelectorAll("span.task-completed"),
-          ).map((span) => span.textContent),
-        });
       }
+      const taskCheckboxes =
+        taskList.querySelectorAll<HTMLInputElement>(".task-checkbox");
+      for (const checkbox of taskCheckboxes) {
+        const element = checkbox as HTMLInputElement;
+        const listContainer = element.closest("li");
+        const span = listContainer?.querySelector<HTMLSpanElement>("span");
+        const hasTaskCompletedClass =
+          span?.classList.contains("task-completed");
+
+        if (!element.checked && hasTaskCompletedClass) {
+          element.checked = true;
+        }
+      }
+      isActive(toDoItem, notesContainer);
     }, 100);
   }
 
@@ -114,7 +113,6 @@ const toDoItemHandler = (
     event.stopPropagation();
     const id: number = Number(toDoItem.getAttribute("data-id"));
     updateNotes((prev) => prev.filter((note) => note.id !== id));
-    clearTempToDo();
     const container = document.querySelector<HTMLDivElement>(".todo-container");
     if (container) {
       const addBtn: AddToDoButton =
@@ -127,10 +125,10 @@ const toDoItemHandler = (
     toDoItemBtn?.removeEventListener("click", deleteToDo);
     toDoItem.removeEventListener("click", viewToDo);
     toDoItem.remove();
+    clearTempToDo();
   }
   toDoItemBtn?.addEventListener("click", deleteToDo);
   toDoItem.addEventListener("click", viewToDo);
-  clearTempToDo();
 };
 
 export { toDoItemHandler, toDoToBeRendered };

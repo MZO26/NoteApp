@@ -14,7 +14,6 @@ import {
   clearTempNote,
   clearTempToDo,
   getNotes,
-  saveNotes,
   updateNotes,
 } from "../utils/storageService.js";
 
@@ -25,27 +24,6 @@ const switchBtn = document.querySelector<HTMLInputElement>(".switch-checkbox");
 const overlay = document.querySelector<HTMLDivElement>(".overlay");
 const modal = document.querySelector<HTMLDivElement>(".modal");
 const switchBtnVisibility = document.querySelector<HTMLLabelElement>(".switch");
-
-const resetNoteInterface = (): void => {
-  requestAnimationFrame(() => {
-    const noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
-    const noteContent = document.querySelector<HTMLTextAreaElement>(".note");
-    if (noteTitle) noteTitle.value = "";
-    if (noteContent) noteContent.value = "";
-    clearTempNote();
-  });
-};
-
-const resetToDoInterface = (): void => {
-  requestAnimationFrame(() => {
-    const todoTitle =
-      document.querySelector<HTMLTextAreaElement>(".todo-title");
-    const todoContent = document.querySelector<HTMLDivElement>(".task-list");
-    if (todoTitle) todoTitle.value = "";
-    if (todoContent) todoContent.innerHTML = "";
-    clearTempToDo();
-  });
-};
 
 const updateCategorySelect = (categoryArr: CategoryArray): void => {
   const select = document.querySelector<HTMLSelectElement>(".category-select");
@@ -74,27 +52,34 @@ const handleNoteSave = (
   notesArr: NoteArray,
   selectedCategory: string,
 ): void => {
-  const title = document.querySelector<HTMLTextAreaElement>(".title");
-  const note = document.querySelector<HTMLTextAreaElement>(".note");
-  if (note && title) {
+  const titleElement = document.querySelector<HTMLTextAreaElement>(".title");
+  const noteElement = document.querySelector<HTMLTextAreaElement>(".note");
+  if (noteElement && titleElement) {
+    const titleValue = titleElement.value.trim();
+    const noteValue = noteElement.value.trim();
+    const noteDataToArr: string[] = noteValue ? [noteValue] : [];
     if (!savedNoteId) {
       noteToBeRendered(
         "note",
         selectedCategory,
-        title.value || "",
-        [note.value],
+        titleValue,
+        noteDataToArr,
         undefined,
       );
     } else {
       const savedItem: Note | undefined = notesArr.find(
-        (note) => note.id === savedNoteId,
+        (n) => n.id === savedNoteId,
       );
       if (savedItem && savedItem.type === "note") {
-        savedItem.title = title.value.trim() || "";
-        const noteDataToArr: Array<string> = note.value ? [note.value] : [];
-        savedItem.data = noteDataToArr;
-        savedItem.category = selectedCategory;
-        updateNotes((prev) => [...prev, savedItem]);
+        const updatedItem = {
+          ...savedItem,
+          title: titleValue,
+          data: noteDataToArr,
+          category: selectedCategory,
+        };
+        updateNotes((prev) =>
+          prev.map((n) => (n.id === savedNoteId ? updatedItem : n)),
+        );
         showToast("Note was saved");
         reloadNoteList();
       }
@@ -109,43 +94,44 @@ const handleToDoSave = (
   notesArr: NoteArray,
   selectedCategory: string,
 ): void => {
-  const spans: NodeList =
+  const spans =
     document.querySelectorAll<HTMLSpanElement>(".task-list li span");
-  const completedTasks: Array<string> = Array.from(spans)
-    .filter((spans) => {
-      const elements = spans as HTMLSpanElement;
-      return elements.classList.contains("task-completed");
-    })
-    .map((element) => {
-      return (element as HTMLSpanElement).textContent || "";
-    });
-  const allTasks: Array<string> = Array.from(spans).map((spans) => {
-    return (spans as HTMLSpanElement).textContent || "";
+  const spanArray = Array.from(spans);
+  const completedTasks: string[] = spanArray
+    .filter((span) => span.classList.contains("task-completed"))
+    .map((span) => span.textContent || "");
+  const allTasks: string[] = spanArray.map((span) => {
+    return span.textContent || "";
   });
   const title = document.querySelector<HTMLTextAreaElement>(".todo-title");
+  const titleValue = title?.value.trim() || "";
   if (!savedNoteId) {
     toDoToBeRendered(
       "toDo",
       selectedCategory,
-      title?.value || "",
+      titleValue,
       allTasks,
       completedTasks,
     );
   } else {
     const savedItem = notesArr.find((note) => note.id === savedNoteId);
     if (savedItem && savedItem.type === "toDo") {
-      savedItem.title = title?.value.trim() || "";
-      savedItem.data = allTasks;
-      savedItem.dataCompleted = completedTasks;
-      savedItem.category = selectedCategory;
+      const updatedItem = {
+        ...savedItem,
+        title: titleValue,
+        data: allTasks,
+        dataCompleted: completedTasks,
+        category: selectedCategory,
+      };
       notesArr[notesArr.findIndex((note) => note.id === savedNoteId)] =
         savedItem;
-
+      updateNotes((prev) =>
+        prev.map((note) => (note.id === savedNoteId ? updatedItem : note)),
+      );
       showToast("ToDo-list was saved");
       reloadNoteList();
     }
   }
-  saveNotes(notesArr);
   console.log(notesArr);
   clearTempToDo();
 };
@@ -212,20 +198,8 @@ const deleteButton = (): void => {
 deleteBtn.addEventListener("click", deleteButton);
 
 const closeModal = (): void => {
-  const storedModalState = localStorage.getItem("modalState");
-  const modalState: ModalState = storedModalState
-    ? JSON.parse(storedModalState)
-    : {
-        interface: "note",
-      };
   overlay?.classList.remove("show");
   modal?.classList.remove("show");
-  if (modalState.interface === "note") {
-    resetNoteInterface();
-  } else {
-    resetToDoInterface();
-  }
-  localStorage.setItem("modal-status", "closed");
   setTimeout(() => {
     if (
       switchBtnVisibility &&
@@ -234,6 +208,8 @@ const closeModal = (): void => {
       switchBtnVisibility.classList.remove("hidden");
     }
   }, 300);
+  clearTempNote();
+  clearTempToDo();
 };
 closeBtn.addEventListener("click", closeModal);
 
@@ -251,9 +227,4 @@ switchBtn?.addEventListener("click", () => {
   switchOverlayInterface();
 });
 
-export {
-  resetNoteInterface,
-  resetToDoInterface,
-  switchOverlayInterface,
-  updateCategorySelect,
-};
+export { switchOverlayInterface, updateCategorySelect };
