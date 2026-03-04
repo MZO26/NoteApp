@@ -1,7 +1,7 @@
 import { activeCategoryState } from "../states/sharedStates.js";
-import type { NoteItem } from "../types/noteTypes.js";
+import type { NoteItem } from "../types/featureTypes.js";
 import type { NoteArray } from "../types/storageTypes.js";
-import type { Note } from "../utils/classes.js";
+import { Note } from "../utils/classes.js";
 import { isActive } from "../utils/events.js";
 import { getNotes } from "../utils/storageService.js";
 import { reloadNoteList } from "./notes.js";
@@ -36,7 +36,7 @@ const filter = () => {
     (div) => div.textContent?.trim().includes(result.category),
   );
   if (targetCategory) {
-    document.querySelectorAll("#categoryItem").forEach((item) => {
+    document.querySelectorAll(".categoryItem").forEach((item) => {
       item.classList.remove("active");
     });
     isActive(targetCategory);

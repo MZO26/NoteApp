@@ -2,11 +2,7 @@ import { noteToBeRendered, reloadNoteList } from "../features/notes.js";
 import { toDoToBeRendered } from "../features/toDo.js";
 import { defaultCategory } from "../states/sharedStates.js";
 import type { ActiveCategoryState, ModalState } from "../types/stateTypes.js";
-import type {
-  CategoryArray,
-  NoteArray,
-  SavedNoteID,
-} from "../types/storageTypes.js";
+import type { CategoryArray, NoteArray } from "../types/storageTypes.js";
 import { changeOverlayInterface } from "../ui-components/renderModalUI.js";
 import { Note } from "../utils/classes.js";
 import { showToast } from "../utils/events.js";
@@ -48,7 +44,7 @@ const updateCategorySelect = (categoryArr: CategoryArray): void => {
 };
 
 const handleNoteSave = (
-  savedNoteId: SavedNoteID,
+  savedNoteId: number,
   notesArr: NoteArray,
   selectedCategory: string,
 ): void => {
@@ -90,7 +86,7 @@ const handleNoteSave = (
 };
 
 const handleToDoSave = (
-  savedNoteId: SavedNoteID,
+  savedNoteId: number,
   notesArr: NoteArray,
   selectedCategory: string,
 ): void => {
@@ -138,7 +134,7 @@ const handleToDoSave = (
 
 const saveButton = (): void => {
   const notesArr: NoteArray = getNotes();
-  const savedNoteId: SavedNoteID = JSON.parse(
+  const savedNoteId: number = JSON.parse(
     sessionStorage.getItem("savedNoteId") || "null",
   );
   const storedCategoryState = localStorage.getItem("activeCategoryState");

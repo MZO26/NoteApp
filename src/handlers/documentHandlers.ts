@@ -1,6 +1,5 @@
 import { categoryToBeRendered } from "../features/categories.js";
 import { filter } from "../features/filter.js";
-import type { DocumentMode } from "../types/storageTypes.js";
 import {
   changeOverlayInterface,
   openOverlay,
@@ -53,7 +52,7 @@ const collapseCategories = (): void => {
 toggleBtn.addEventListener("click", collapseCategories);
 
 const applyMode = (): void => {
-  const mode: DocumentMode = localStorage.getItem("mode") || "dark";
+  const mode: string = localStorage.getItem("mode") || "dark";
   if (mode === "dark") {
     document.body.classList.add("dark");
     document.body.classList.remove("light");
@@ -77,10 +76,11 @@ darkModeBtn.addEventListener("click", toggleDarkMode);
 
 const categoryInputButton = async (): Promise<void> => {
   const categoryBtn =
-    document.querySelector<HTMLButtonElement>(".category-btn")!;
+    document.querySelector<HTMLButtonElement>(".category-btn");
+  if (!categoryBtn) return;
   const input = document.createElement("input");
   input.type = "text";
-  input.id = "category-input";
+  input.className = "category-input";
   input.placeholder = "Input category name";
   categoryBtn.replaceWith(input);
   const value = await inputListener(input);

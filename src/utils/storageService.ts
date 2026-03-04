@@ -1,6 +1,5 @@
-import type { CategoryObject } from "../types/categoryTypes.ts";
-import type { NoteObject } from "../types/noteTypes.ts";
 import type { TempNote, TempToDo } from "../types/storageTypes.js";
+import { Category, Note } from "./classes.js";
 
 type Listener<T> = (value: T) => void;
 
@@ -67,34 +66,32 @@ function notifyListeners<T>(key: Key, value: T): void {
   });
 }
 
-function getNotes(): NoteObject[] {
-  return getValue(KEYS.NOTES, [] as NoteObject[]);
+function getNotes(): Note[] {
+  return getValue(KEYS.NOTES, [] as Note[]);
 }
 
-function saveNotes(notes: NoteObject[]): void {
+function saveNotes(notes: Note[]): void {
   setValue(KEYS.NOTES, notes);
 }
 
-function updateNotes(
-  updater: (prev: NoteObject[]) => NoteObject[],
-): NoteObject[] {
+function updateNotes(updater: (prev: Note[]) => Note[]): Note[] {
   const prev = getNotes();
   const next = updater(prev);
   saveNotes(next);
   return next;
 }
 
-function getCategories(): CategoryObject[] {
-  return getValue(KEYS.CATEGORIES, [] as CategoryObject[]);
+function getCategories(): Category[] {
+  return getValue(KEYS.CATEGORIES, [] as Category[]);
 }
 
-function saveCategories(categories: CategoryObject[]): void {
+function saveCategories(categories: Category[]): void {
   setValue(KEYS.CATEGORIES, categories);
 }
 
 function updateCategories(
-  updater: (prev: CategoryObject[]) => CategoryObject[],
-): CategoryObject[] {
+  updater: (prev: Category[]) => Category[],
+): Category[] {
   const prev = getCategories();
   const next = updater(prev);
   saveCategories(next);

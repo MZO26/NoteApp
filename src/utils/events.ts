@@ -1,5 +1,5 @@
 import { savedNoteIdState } from "../states/sharedStates.js";
-import type { NoteItem } from "../types/noteTypes.js";
+import type { NoteItem } from "../types/featureTypes.js";
 
 const showToast = (value: string, duration = 1500): void => {
   const container = document.querySelector<HTMLDivElement>(".toast-container")!;

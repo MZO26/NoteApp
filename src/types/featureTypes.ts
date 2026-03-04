@@ -1,3 +1,11 @@
+type CategoryItem = HTMLDivElement & {
+  _listener?: ((event: Event) => void) | null;
+};
+
+type NoteItem = HTMLDivElement & {
+  _listener?: ((event: Event) => void) | null;
+};
+
 type AddToDoButton = HTMLButtonElement & {
   _addHandlerRef?: any;
 };
@@ -17,4 +25,10 @@ type TaskItems = {
   taskDeleteBtn: HTMLButtonElement;
 };
 
-export type { AddToDoButton, TaskItems, ToDoInterfaceElements };
+export type {
+  AddToDoButton,
+  CategoryItem,
+  NoteItem,
+  TaskItems,
+  ToDoInterfaceElements,
+};

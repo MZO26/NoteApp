@@ -1,22 +1,12 @@
 import type { Category, Note } from "../utils/classes.js";
-import type { NoteObject } from "./noteTypes.js";
 
 type NoteArray = Array<Note>;
 type CategoryArray = Array<Category>;
-type DocumentMode = string;
-type SavedNoteID = number;
-type TempToDo = Partial<NoteObject> &
-  Pick<NoteObject, "id" | "title" | "data"> & {
+type TempToDo = Partial<Note> &
+  Pick<Note, "id" | "title" | "data"> & {
     dataCompleted: Array<string>;
   };
 
-type TempNote = Partial<NoteObject> & Pick<NoteObject, "id" | "title" | "data">;
+type TempNote = Partial<Note> & Pick<Note, "id" | "title" | "data">;
 
-export type {
-  CategoryArray,
-  DocumentMode,
-  NoteArray,
-  SavedNoteID,
-  TempNote,
-  TempToDo,
-};
+export type { CategoryArray, NoteArray, TempNote, TempToDo };

@@ -1,10 +1,9 @@
 import { switchOverlayInterface } from "../handlers/modalHandlers.js";
 import { savedNoteIdState } from "../states/sharedStates.js";
-import type { NoteObject } from "../types/noteTypes.js";
+import type { AddToDoButton } from "../types/featureTypes.js";
 import type { NoteArray } from "../types/storageTypes.js";
-import type { AddToDoButton } from "../types/toDoTypes.js";
 import { openOverlay, reloadToDoList } from "../ui-components/renderModalUI.js";
-import { createNewNote, type Note } from "../utils/classes.js";
+import { createNewNote, Note } from "../utils/classes.js";
 import { isActive } from "../utils/events.js";
 import {
   clearTempToDo,
@@ -43,10 +42,7 @@ const toDoToBeRendered = (
   toDoItemHandler(toDoItem, newToDo);
 };
 
-const toDoItemHandler = (
-  toDoItem: HTMLDivElement,
-  newToDo: NoteObject,
-): void => {
+const toDoItemHandler = (toDoItem: HTMLDivElement, newToDo: Note): void => {
   const toDoItemBtn = toDoItem.querySelector<HTMLButtonElement>("button");
 
   function viewToDo() {

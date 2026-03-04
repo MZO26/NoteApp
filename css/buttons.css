@@ -42,7 +42,7 @@ input:hover {
 }
 
 .category-btn,
-#category-input {
+.category-input {
   border-radius: 10px;
   height: 40px;
   padding: 6px 12px;
@@ -58,11 +58,11 @@ input:hover {
   transition: padding 0.2s ease-in-out;
 }
 
-#category-input:hover {
+.category-input:hover {
   background: var(--btn-hover);
 }
 
-#category-input::placeholder {
+.category-input::placeholder {
   color: var(--text-muted);
   transition: padding 0.2s ease-in-out;
 }

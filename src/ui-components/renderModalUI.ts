@@ -1,6 +1,6 @@
-import type { NoteObject } from "../types/noteTypes.js";
 import type { ModalState } from "../types/stateTypes.js";
 import { autoSaveTempNote, autoSaveTempToDo } from "../utils/autoSave.js";
+import { Note } from "../utils/classes.js";
 import { getTempNote, getTempToDo } from "../utils/storageService.js";
 import {
   createTaskItem,
@@ -82,7 +82,7 @@ const addToDo = (
 
 const reloadToDoList = (
   taskList: HTMLUListElement,
-  toDoData: Pick<NoteObject, "data">,
+  toDoData: Pick<Note, "data">,
   completedTasks: Array<string>,
 ): void => {
   if (!taskList) return;

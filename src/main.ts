@@ -10,7 +10,7 @@ import { getCategories } from "./utils/storageService.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const categoryArr: CategoryArray = getCategories();
-  reloadCategoryList();
+  reloadCategoryList(categoryArr);
   if (categoryArr.length) {
     updateCategorySelect(categoryArr);
   }

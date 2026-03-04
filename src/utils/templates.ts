@@ -1,5 +1,8 @@
-import type { TaskItems, ToDoInterfaceElements } from "../types/toDoTypes";
-import type { Note } from "./classes";
+import type {
+  TaskItems,
+  ToDoInterfaceElements,
+} from "../types/featureTypes.js";
+import { Note } from "./classes.js";
 
 const noteItemTemplate = (noteData: Note): string => {
   return `<button class="btn" title="delete note">       <svg

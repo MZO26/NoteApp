@@ -1,6 +1,6 @@
 import { switchOverlayInterface } from "../handlers/modalHandlers.js";
 import { savedNoteIdState } from "../states/sharedStates.js";
-import type { NoteItem } from "../types/noteTypes.js";
+import type { NoteItem } from "../types/featureTypes.js";
 import type { NoteArray } from "../types/storageTypes.js";
 import { openOverlay } from "../ui-components/renderModalUI.js";
 import { createNewNote, Note } from "../utils/classes.js";

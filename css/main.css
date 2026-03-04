@@ -378,7 +378,7 @@ h2 {
     padding 0.3s ease;
 }
 
-#categoryItem {
+.categoryItem {
   display: flex;
   align-items: center;
   margin-right: 10px;
@@ -394,7 +394,7 @@ h2 {
   position: relative;
 }
 
-#categoryItem.collapsed {
+.categoryItem.collapsed {
   overflow: hidden;
 }
 /** categoryList / categoryItem styling end **/
@@ -429,7 +429,7 @@ h2 {
 
 .noteItem button,
 .toDoItem button,
-#categoryItem button {
+.categoryItem button {
   position: absolute;
   top: 1.2rem;
   right: 0.4rem;
@@ -444,7 +444,7 @@ h2 {
 
 .noteItem p,
 .toDoItem p,
-#categoryItem p {
+.categoryItem p {
   margin: 10px;
   color: var(--bg-dark);
   overflow: hidden;
@@ -456,7 +456,7 @@ h2 {
 
 .noteItem.active,
 .toDoItem.active,
-#categoryItem.active {
+.categoryItem.active {
   background-color: var(--active-bg);
   color: var(--active-text);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -465,7 +465,7 @@ h2 {
 
 .noteItem:hover,
 .toDoItem:hover,
-#categoryItem:hover {
+.categoryItem:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: box-shadow 0.3s ease-in-out;
 }
@@ -572,7 +572,7 @@ h2 {
   .category-list {
     overflow-x: auto;
   }
-  #categoryItem {
+  .categoryItem {
     min-width: 150px;
   }
   .modal {
@@ -609,7 +609,7 @@ h2 {
   .container {
     padding: 0.5rem 1rem;
   }
-  #categoryItem button {
+  .categoryItem button {
     top: 0.5rem;
   }
   .navbar {

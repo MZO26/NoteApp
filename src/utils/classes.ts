@@ -1,11 +1,14 @@
 import { defaultCategory } from "../states/sharedStates.js";
-import type { CategoryObject } from "../types/categoryTypes.js";
-import type { NoteObject } from "../types/noteTypes.js";
 import type { ActiveCategoryState } from "../types/stateTypes.js";
 import type { NoteArray } from "../types/storageTypes.js";
 import { dateTemplate } from "./templates.js";
 
-export interface CategoryInterface extends CategoryObject {}
+export interface CategoryInterface {
+  id: number;
+  items: Array<Note>;
+  name: string;
+  isDefault?: boolean;
+}
 
 class Category implements CategoryInterface {
   id: number;
@@ -20,7 +23,15 @@ class Category implements CategoryInterface {
   }
 }
 
-export interface NoteInterface extends NoteObject {}
+export interface NoteInterface {
+  id: number;
+  type: string;
+  category: string;
+  data: Array<string>;
+  dataCompleted?: Array<string>;
+  title: string;
+  formattedDate: string;
+}
 
 class Note implements NoteInterface {
   id: number;
