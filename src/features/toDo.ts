@@ -70,9 +70,7 @@ const toDoItemHandler = (toDoItem: HTMLDivElement, newToDo: Note): void => {
       const tempToDoValue = getTempToDo();
       if (!notesContainer || !toDoTitle || !taskList) return;
       const savedNoteId = Number(sessionStorage.getItem("savedNoteId"));
-      console.log(tempToDoValue, savedNoteId);
       if (tempToDoValue && tempToDoValue.id === savedNoteId) {
-        console.log("temp to do active");
         toDoTitle.value = tempToDoValue.title || "";
         reloadToDoList(
           taskList,
@@ -80,7 +78,6 @@ const toDoItemHandler = (toDoItem: HTMLDivElement, newToDo: Note): void => {
           tempToDoValue.dataCompleted,
         );
       } else {
-        console.log("not active");
         toDoTitle.value = newToDo.title;
         reloadToDoList(
           taskList,

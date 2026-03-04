@@ -48,14 +48,15 @@ const categoryToBeRendered = (categoryName: string): void => {
     categoryItem.setAttribute("category-id", String(newCategory.id));
   } else return;
   const updatedCategories = [...categoryArr, newCategory];
+  const displayTitle = truncate(newCategory.name);
   updateCategories(() => updatedCategories);
   if (newCategory.isDefault) {
     categoryItem.innerHTML = defaultCategoryItemTemplate(newCategory.name);
   } else {
-    categoryItem.innerHTML = categoryItemTemplate(truncate(newCategory.name));
+    categoryItem.innerHTML = categoryItemTemplate(displayTitle);
   }
   categoryList.appendChild(categoryItem);
-  const displayTitle = truncate(newCategory.name);
+
   if (!newCategory.isDefault) {
     showToast(`Added "${displayTitle}"`);
   }
@@ -115,7 +116,6 @@ const categoryItemHandler = (categoryItem: CategoryItem): void => {
     updateCategories(() => newCategoryArr);
     categoryItem.removeEventListener("click", selectCategory);
     categoryItemBtn?.removeEventListener("click", deleteCategory);
-    console.log("delete triggered for categoryItem", categoryItem);
     categoryItem.remove();
     localStorage.setItem(
       "activeCategoryState",
@@ -133,7 +133,6 @@ const categoryItemHandler = (categoryItem: CategoryItem): void => {
 const reloadCategoryList = (categories: CategoryArray): void => {
   const categoryList = document.querySelector<HTMLDivElement>(".category-list");
   const categoryArr: CategoryArray = categories || getCategories();
-  console.log("categoryList reloading...", categoryArr);
   const storedState = localStorage.getItem("activeCategoryState");
   const activeCategoryState: ActiveCategoryState = storedState
     ? JSON.parse(storedState)

@@ -5,7 +5,7 @@ import type {
 import { Note } from "./classes.js";
 
 const noteItemTemplate = (noteData: Note): string => {
-  return `<button class="btn" title="delete note">       <svg
+  return `<button class="deleteNoteItem-btn" data-status="success" title="delete note">       <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
                   height="16"
@@ -30,7 +30,7 @@ const toDoItemTemplate = (
         : `<li><span>${task}</span></li>`,
     )
     .join("");
-  return `<button class="btn" title="delete toDo-list">       <svg
+  return `<button class="deleteNoteItem-btn" data-status="success" title="delete toDo-list">       <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
                   height="16"
@@ -45,7 +45,7 @@ const toDoItemTemplate = (
 };
 
 const categoryItemTemplate = (value: string): string => {
-  return `<button class="btn" title="delete category">       <svg
+  return `<button class="deleteCategoryItem-btn" data-status="success" title="delete category">       <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
                 height="16"

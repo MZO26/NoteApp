@@ -98,7 +98,6 @@ const reloadNoteList = (): void => {
     document.querySelector<HTMLDivElement>(".notes-container");
   if (!notesContainer) return;
   const notesArr: NoteArray = getNotes();
-  console.log("notesArr in reloadNoteList:", notesArr);
   const activeCategory: string = JSON.parse(
     localStorage.getItem("activeCategoryState") ||
       '{"activeCategory": "defaultCategory"}',

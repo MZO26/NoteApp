@@ -200,6 +200,7 @@ input:hover {
   margin: 10px;
   border-radius: 18px;
 }
+
 .add-btn {
   display: flex;
   align-items: center;
@@ -214,6 +215,8 @@ input:hover {
   right: 0;
   border: 1px solid var(--btn-border);
   z-index: 10;
+  background-color: var(--btn-border);
+  color: red;
 }
 
 .todo-btn {
@@ -253,8 +256,24 @@ input:hover {
   z-index: 1000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
+
+.deleteNoteItem-btn[data-status="success"] {
+  background-color: var(--btn-border);
+  color: red;
+}
+.deleteCategoryItem-btn[data-status="success"] {
+  background-color: var(--btn-border);
+  color: red;
+}
+
 @media screen and (max-width: 480px) {
   .button-collection {
     margin: 0;
+  }
+  .deleteNoteItem-btn[data-status="success"] {
+    margin-top: -15px;
+  }
+  .deleteCategoryItem-btn[data-status="success"] {
+    margin-top: 10px;
   }
 }

@@ -105,7 +105,6 @@ function getTempNote(): TempNote | null {
       return JSON.parse(json) as TempNote;
     } else return null;
   } catch (error) {
-    console.error("Failed to parse temp note", error);
     return null;
   }
 }
@@ -125,7 +124,6 @@ function getTempToDo(): TempToDo | null {
       return JSON.parse(json) as TempToDo;
     } else return null;
   } catch (error) {
-    console.error("Failed to parse temp todo", error);
     return null;
   }
 }

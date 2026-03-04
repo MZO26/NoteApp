@@ -18,7 +18,6 @@ const autoSaveTempNote = (): void => {
       data: noteTextArea.value ? [noteTextArea.value] : [],
     });
   }, 500);
-  console.log("autosaved");
 };
 
 const autoSaveTempToDo = (): void => {
@@ -47,7 +46,6 @@ const autoSaveTempToDo = (): void => {
       data: toDoData,
       dataCompleted: completedTasks,
     });
-    console.log("autosaved", toDoData);
   }, 500);
 };
 

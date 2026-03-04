@@ -44,6 +44,14 @@ body {
   line-height: 1.5;
 }
 
+input,
+textarea,
+button,
+p {
+  font-family: inherit;
+  font-size: inherit;
+}
+
 p {
   color: var(--bg-dark);
 }
@@ -179,6 +187,7 @@ h2 {
   padding: 5px;
   border-radius: 5px;
   resize: none;
+  min-height: 35px;
   transition: height 0.3s;
   margin-bottom: 10px;
 }
@@ -225,11 +234,9 @@ h2 {
   background-color: var(--note);
   border-radius: 5px;
   margin: 10px 0;
-  z-index: 100;
 }
 
 .todo-input {
-  min-height: 2rem;
   display: flex;
   gap: 0.5rem;
   align-items: center;
@@ -237,16 +244,6 @@ h2 {
   background-color: var(--btn-bg);
   border: 1px solid var(--btn-outline);
   font-size: inherit;
-}
-
-.todo-input input[type="text"],
-.todo-input textarea {
-  border-radius: 8px;
-  color: var(--bg-dark);
-  box-sizing: border-box;
-  transition:
-    background-color 0.1s ease,
-    border-color 0.1s ease;
 }
 
 .todo-input input::placeholder,
@@ -297,11 +294,11 @@ h2 {
 }
 
 .task-list li > span {
+  max-width: 25ch;
   display: inline-block;
-  max-width: 10ch;
   word-wrap: break-word;
   white-space: normal;
-  padding-left: 36px;
+  padding-left: 38px;
   position: relative;
   color: var(--btn-text);
 }
@@ -529,9 +526,6 @@ h2 {
 
 /** smaller screen sizes styling start **/
 @media screen {
-  textarea {
-    font-size: 22px;
-  }
   .notes-container {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     padding: 1.5rem;
@@ -540,14 +534,11 @@ h2 {
   .title,
   .todo-title,
   .todo-input {
-    height: 1.6rem;
+    min-height: 28px;
   }
 }
 
 @media screen and (max-width: 700px) {
-  textarea {
-    font-size: 20px;
-  }
   .info-btn {
     visibility: hidden;
     pointer-events: none;
@@ -579,11 +570,6 @@ h2 {
     width: 70vw;
     padding: 1.5rem;
   }
-  .title,
-  .todo-title,
-  .todo-input {
-    height: 1.6rem;
-  }
 }
 @media screen and (min-width: 480px), (max-width: 700px) {
   .modal {
@@ -591,8 +577,8 @@ h2 {
   }
 }
 @media screen and (max-width: 480px) {
-  textarea {
-    font-size: 18px;
+  .task-list li > span {
+    max-width: 20ch;
   }
   .todo-container {
     padding: 0.5rem;
@@ -651,6 +637,11 @@ h2 {
   }
   .overlay {
     backdrop-filter: blur(4px);
+  }
+  .title,
+  .todo-title,
+  .todo-input {
+    min-height: 25px;
   }
   .category-list {
     height: 10vh;

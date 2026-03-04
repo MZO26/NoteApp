@@ -81,7 +81,6 @@ const handleNoteSave = (
       }
     }
   }
-  console.log(notesArr);
   clearTempNote();
 };
 
@@ -128,7 +127,6 @@ const handleToDoSave = (
       reloadNoteList();
     }
   }
-  console.log(notesArr);
   clearTempToDo();
 };
 
@@ -167,6 +165,8 @@ saveBtn.addEventListener("click", () => {
 });
 
 const deleteButton = (): void => {
+  const isConfirmed = window.confirm("Clear all content?");
+  if (!isConfirmed) return;
   const storedModalState = localStorage.getItem("modalState");
   const modalState: ModalState = storedModalState
     ? JSON.parse(storedModalState)
