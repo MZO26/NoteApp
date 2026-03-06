@@ -199,6 +199,7 @@ h2 {
   overflow-y: hidden;
   overflow-x: auto;
   white-space: nowrap;
+  max-height: 30px;
 }
 
 .note {

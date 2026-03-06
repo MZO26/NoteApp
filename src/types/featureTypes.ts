@@ -1,8 +1,4 @@
-type CategoryItem = HTMLDivElement & {
-  _listener?: ((event: Event) => void) | null;
-};
-
-type NoteItem = HTMLDivElement & {
+type RenderedItem = HTMLDivElement & {
   _listener?: ((event: Event) => void) | null;
 };
 
@@ -25,10 +21,4 @@ type TaskItems = {
   taskDeleteBtn: HTMLButtonElement;
 };
 
-export type {
-  AddToDoButton,
-  CategoryItem,
-  NoteItem,
-  TaskItems,
-  ToDoInterfaceElements,
-};
+export type { AddToDoButton, RenderedItem, TaskItems, ToDoInterfaceElements };

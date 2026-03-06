@@ -1,16 +1,15 @@
 import { updateCategorySelect } from "../handlers/modalHandlers.js";
 import {
-  activeCategoryState,
-  defaultCategory,
+  clearSavedNoteId,
+  getActiveCategory,
+  setActiveCategory,
 } from "../states/sharedStates.js";
-import type { CategoryItem } from "../types/featureTypes.js";
-import type { ActiveCategoryState } from "../types/stateTypes.js";
-import type { CategoryArray, NoteArray } from "../types/storageTypes.js";
+import type { RenderedItem } from "../types/featureTypes.js";
+import type { CategoryArray } from "../types/storageTypes.js";
 import { Category, createNewCategory } from "../utils/classes.js";
-import { isActive, showToast } from "../utils/events.js";
+import { isActive, showToast, truncate } from "../utils/events.js";
 import {
   getCategories,
-  getNotes,
   updateCategories,
   updateNotes,
 } from "../utils/storageService.js";
@@ -20,55 +19,64 @@ import {
 } from "../utils/templates.js";
 import { reloadNoteList } from "./notes.js";
 
-const truncate = (str: string, max = 10): string => {
-  if (str.length > max) {
-    return str.slice(0, max) + "...";
-  } else return str;
+const defaultCategory = "Without Category";
+
+const createCategoryItem = (category: Category): RenderedItem => {
+  const categoryItem = document.createElement("div");
+  categoryItem.className = "categoryItem";
+  if (category.isDefault) {
+    categoryItem.setAttribute("default-category-id", String(category.id));
+    categoryItem.innerHTML = defaultCategoryItemTemplate(category.name);
+  } else {
+    categoryItem.setAttribute("category-id", String(category.id));
+    categoryItem.innerHTML = categoryItemTemplate(category.name);
+  }
+  return categoryItem;
+};
+
+const getCategoryId = (categoryItem: RenderedItem): number => {
+  let id: number;
+  if (categoryItem.getAttribute("default-category-id")) {
+    id = Number(categoryItem.getAttribute("default-category-id"));
+  } else {
+    id = Number(categoryItem.getAttribute("category-id"));
+  }
+  return id;
 };
 
 const categoryToBeRendered = (categoryName: string): void => {
   const categoryList = document.querySelector<HTMLDivElement>(".category-list");
   if (!categoryList) return;
-  const notesArr: NoteArray = getNotes();
   const categoryArr: CategoryArray = getCategories();
   if (categoryArr.find((category) => category.name === categoryName)) {
-    showToast("Category already exists");
+    showToast("Category already exists. Please enter new name");
     return;
   }
-  const newCategory = createNewCategory(categoryName, notesArr);
+  const newCategory = createNewCategory(categoryName);
   const doesDefaultExist: Category | undefined = categoryArr.find(
     (category: Category) => category.name === defaultCategory,
   );
-  let categoryItem = document.createElement("div");
-  categoryItem.className = "categoryItem";
-  if (newCategory.name === defaultCategory && !doesDefaultExist) {
+  if (newCategory.name === defaultCategory && !doesDefaultExist)
     newCategory.isDefault = true;
-    categoryItem.setAttribute("default-category-id", String(newCategory.id));
-  } else if (newCategory.name !== defaultCategory && doesDefaultExist) {
-    categoryItem.setAttribute("category-id", String(newCategory.id));
-  } else return;
+  const categoryItem = createCategoryItem(newCategory);
   const updatedCategories = [...categoryArr, newCategory];
-  const displayTitle = truncate(newCategory.name);
   updateCategories(() => updatedCategories);
-  if (newCategory.isDefault) {
-    categoryItem.innerHTML = defaultCategoryItemTemplate(newCategory.name);
-  } else {
-    categoryItem.innerHTML = categoryItemTemplate(displayTitle);
-  }
   categoryList.appendChild(categoryItem);
-
   if (!newCategory.isDefault) {
+    const displayTitle = truncate(newCategory.name);
     showToast(`Added "${displayTitle}"`);
   }
-  localStorage.setItem(
-    "activeCategoryState",
-    JSON.stringify({ activeCategory: newCategory.name }),
-  );
-  updateCategorySelect(categoryArr);
+  setActiveCategory(newCategory.name);
+  updateCategorySelect(updatedCategories);
   categoryItemHandler(categoryItem);
+  setTimeout(() => {
+    if (newCategory.isDefault) {
+      categoryItem.click();
+    }
+  }, 50);
 };
 
-const categoryItemHandler = (categoryItem: CategoryItem): void => {
+const categoryItemHandler = (categoryItem: RenderedItem): void => {
   const categoryItemBtn =
     categoryItem.querySelector<HTMLButtonElement>("button");
 
@@ -76,32 +84,26 @@ const categoryItemHandler = (categoryItem: CategoryItem): void => {
     document.querySelectorAll(".categoryItem").forEach((item) => {
       item.classList.remove("active");
     });
-    sessionStorage.setItem("savedNoteId", "null");
+    clearSavedNoteId();
     const categoryArr: CategoryArray = getCategories();
-    let id: number;
-    if (categoryItem.getAttribute("default-category-id")) {
-      id = Number(categoryItem.getAttribute("default-category-id"));
-    } else {
-      id = Number(categoryItem.getAttribute("category-id"));
-    }
+    const id = getCategoryId(categoryItem);
     const category = categoryArr.find((c) => c.id === id);
-    if (!category) activeCategoryState.activeCategory = defaultCategory;
-    else activeCategoryState.activeCategory = category.name;
-    localStorage.setItem(
-      "activeCategoryState",
-      JSON.stringify({ activeCategory: activeCategoryState.activeCategory }),
-    );
+    if (!category) {
+      setActiveCategory(defaultCategory);
+    } else {
+      setActiveCategory(category.name);
+    }
     isActive(categoryItem);
-    showToast(`Switched to "${activeCategoryState.activeCategory}"`);
     reloadNoteList();
     updateCategorySelect(categoryArr);
   }
+
   function deleteCategory(event: Event): void {
     event.stopPropagation();
     const categoryArr = getCategories();
     const id: string | null = categoryItem.getAttribute("category-id");
     const index = categoryArr.findIndex((c) => String(c.id) === id);
-    if (!id || index === -1) return;
+    if (id === null || index === -1) return;
     const toBeDeleted = categoryArr[index];
     if (!toBeDeleted) return;
     updateNotes((prev) => {
@@ -117,13 +119,11 @@ const categoryItemHandler = (categoryItem: CategoryItem): void => {
     categoryItem.removeEventListener("click", selectCategory);
     categoryItemBtn?.removeEventListener("click", deleteCategory);
     categoryItem.remove();
-    localStorage.setItem(
-      "activeCategoryState",
-      JSON.stringify({ activeCategory: defaultCategory }),
-    );
+    setActiveCategory(defaultCategory);
     updateCategorySelect(newCategoryArr);
     reloadCategoryList(newCategoryArr);
   }
+
   if (!categoryItem.getAttribute("default-category-id")) {
     categoryItemBtn?.addEventListener("click", deleteCategory);
   }
@@ -133,25 +133,14 @@ const categoryItemHandler = (categoryItem: CategoryItem): void => {
 const reloadCategoryList = (categories: CategoryArray): void => {
   const categoryList = document.querySelector<HTMLDivElement>(".category-list");
   const categoryArr: CategoryArray = categories || getCategories();
-  const storedState = localStorage.getItem("activeCategoryState");
-  const activeCategoryState: ActiveCategoryState = storedState
-    ? JSON.parse(storedState)
-    : { activeCategory: defaultCategory };
+  const activeCategory = getActiveCategory();
   if (!categoryArr.length || !categoryList) return;
   categoryList.innerHTML = "";
   for (let i = 0; i < categoryArr.length; i++) {
     const category: Category | undefined = categoryArr[i];
     if (!category) continue;
-    const categoryItem = document.createElement("div");
-    categoryItem.className = "categoryItem";
-    if (category.isDefault) {
-      categoryItem.setAttribute("default-category-id", String(category.id));
-      categoryItem.innerHTML = defaultCategoryItemTemplate(category.name);
-    } else {
-      categoryItem.setAttribute("category-id", String(category.id));
-      categoryItem.innerHTML = categoryItemTemplate(category.name);
-    }
-    if (activeCategoryState.activeCategory === category.name) {
+    const categoryItem = createCategoryItem(category);
+    if (activeCategory === category.name) {
       isActive(categoryItem);
       reloadNoteList();
     }

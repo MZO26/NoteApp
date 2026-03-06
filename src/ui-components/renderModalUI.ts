@@ -1,4 +1,3 @@
-import type { ModalState } from "../types/stateTypes.js";
 import { autoSaveTempNote, autoSaveTempToDo } from "../utils/autoSave.js";
 import { Note } from "../utils/classes.js";
 import { getTempNote, getTempToDo } from "../utils/storageService.js";
@@ -10,18 +9,12 @@ import {
 const overlay = document.querySelector<HTMLDivElement>(".overlay");
 const modal = document.querySelector<HTMLDivElement>(".modal");
 const switchBtnVisibility = document.querySelector<HTMLLabelElement>(".switch");
-export let isInitializing = true;
 
-const openOverlay = (): void => {
+const openOverlay = (savedNoteId: number | null): void => {
   overlay?.classList.add("show");
   modal?.classList.add("show");
   const notes: HTMLCollection | undefined =
     document.querySelector<HTMLDivElement>(".notes-container")?.children;
-  const savedNoteIdStr: string | null = sessionStorage.getItem("savedNoteId");
-  const savedNoteId: number | null =
-    savedNoteIdStr && savedNoteIdStr !== "null"
-      ? Number(JSON.parse(savedNoteIdStr))
-      : null;
   if (
     savedNoteId &&
     switchBtnVisibility &&
@@ -35,29 +28,6 @@ const openOverlay = (): void => {
         element.classList.remove("active");
     });
   }
-};
-
-const changeOverlayInterface = () => {
-  const storedModalState = localStorage.getItem("modalState");
-  const modalState: ModalState = storedModalState
-    ? JSON.parse(storedModalState)
-    : {
-        interface: "note",
-      };
-  const modalHeadingElement =
-    document.querySelector<HTMLHeadingElement>(".modal-heading");
-  const modalNoteElement =
-    document.querySelector<HTMLParagraphElement>(".modal-note");
-  if (modalHeadingElement && modalNoteElement) {
-    if (modalState.interface === "note") {
-      modalHeadingElement.textContent = "New note";
-      modalNoteElement.textContent = "Add note";
-    } else if (modalState.interface === "toDo") {
-      modalHeadingElement.textContent = "New toDo list";
-      modalNoteElement.textContent = "Add toDo's";
-    }
-  } else return;
-  renderUI(modalState);
 };
 
 const addToDo = (
@@ -133,7 +103,6 @@ const addEventListeners = (
 };
 
 const renderNoteUI = (): void => {
-  isInitializing = true;
   let noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
   let noteContent = document.querySelector<HTMLTextAreaElement>(".note");
 
@@ -168,13 +137,9 @@ const renderNoteUI = (): void => {
 
   noteTitle.addEventListener("input", autoSaveTempNote);
   noteContent.addEventListener("input", autoSaveTempNote);
-  setTimeout(() => {
-    isInitializing = false;
-  }, 100);
 };
 
 const renderToDoUI = () => {
-  isInitializing = true;
   const currentTitle = document.querySelector<HTMLTextAreaElement>(".title");
   const currentNote = document.querySelector<HTMLTextAreaElement>(".note");
   const { todoDiv, addBtn, taskList, input, title } =
@@ -212,17 +177,14 @@ const renderToDoUI = () => {
 
   title.addEventListener("input", autoSaveTempToDo);
   addBtn.addEventListener("click", autoSaveTempToDo);
-  setTimeout(() => {
-    isInitializing = false;
-  }, 100);
 };
 
-const renderUI = (modalState: ModalState): void => {
-  if (modalState.interface === "note") {
+const renderUI = (modalState: string): void => {
+  if (modalState === "note") {
     renderNoteUI();
-  } else if (modalState.interface === "toDo") {
+  } else if (modalState === "toDo") {
     renderToDoUI();
   }
 };
 
-export { addToDo, changeOverlayInterface, openOverlay, reloadToDoList };
+export { addToDo, openOverlay, reloadToDoList, renderUI };

@@ -1,6 +1,11 @@
 import { switchOverlayInterface } from "../handlers/modalHandlers.js";
-import { savedNoteIdState } from "../states/sharedStates.js";
-import type { NoteItem } from "../types/featureTypes.js";
+import {
+  clearSavedNoteId,
+  getActiveCategory,
+  setModalState,
+  setSavedNoteId,
+} from "../states/sharedStates.js";
+import type { RenderedItem } from "../types/featureTypes.js";
 import type { NoteArray } from "../types/storageTypes.js";
 import { openOverlay } from "../ui-components/renderModalUI.js";
 import { createNewNote, Note } from "../utils/classes.js";
@@ -15,6 +20,14 @@ import {
 import { noteItemTemplate, toDoItemTemplate } from "../utils/templates.js";
 import { toDoItemHandler } from "./toDo.js";
 
+const checkId = (item: RenderedItem): number | null => {
+  const rawId = item.getAttribute("data-id");
+  if (!rawId) return null;
+  const parsedId = parseFloat(rawId);
+  if (Number.isNaN(parsedId)) return null;
+  return parsedId;
+};
+
 const noteToBeRendered = (
   type: string,
   category: string,
@@ -25,7 +38,8 @@ const noteToBeRendered = (
   if (type !== "note") return;
   const notesArr: NoteArray = getNotes();
   const notesContainer =
-    document.querySelector<HTMLDivElement>(".notes-container")!;
+    document.querySelector<HTMLDivElement>(".notes-container");
+  if (!notesContainer) return;
   const noteItem = document.createElement("div");
   noteItem.className = "noteItem";
   const newNote: Note = createNewNote(
@@ -43,47 +57,44 @@ const noteToBeRendered = (
   noteItemHandler(noteItem, newNote);
 };
 
-const noteItemHandler = (noteItem: NoteItem, note: Note): void => {
+const noteItemHandler = (noteItem: RenderedItem, note: Note): void => {
   const noteItemBtn = noteItem.querySelector<HTMLButtonElement>("button");
 
-  function viewNote(): void {
-    localStorage.setItem("modalState", JSON.stringify({ interface: "note" }));
-    savedNoteIdState.savedNoteId = Number(noteItem.getAttribute("data-id"))!;
-    sessionStorage.setItem(
-      "savedNoteId",
-      JSON.stringify(savedNoteIdState.savedNoteId),
-    );
+  async function viewNote() {
+    setModalState("note");
+    const parsedId = checkId(noteItem);
+    setSavedNoteId(parsedId);
+    console.log("noteId: ", parsedId);
     const switchBtn =
       document.querySelector<HTMLInputElement>(".switch-checkbox");
     if (switchBtn) {
       switchBtn.checked = false;
       switchBtn.dispatchEvent(new Event("change"));
     }
-    requestAnimationFrame(() => {
-      openOverlay();
-      switchOverlayInterface();
-    });
-    setTimeout(() => {
-      const noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
-      const noteTextArea = document.querySelector<HTMLTextAreaElement>(".note");
-      if (!noteTitle || !noteTextArea) return;
-      const tempNoteValue = getTempNote();
-      const savedNoteId = Number(sessionStorage.getItem("savedNoteId"));
-      if (tempNoteValue && savedNoteId) {
-        noteTitle.value = tempNoteValue.title;
-        noteTextArea.value = tempNoteValue.data.toString();
-      } else {
-        noteTitle.value = note.title;
-        noteTextArea.value = note.data.toString();
-      }
-      isActive(noteItem);
-    }, 100);
+    openOverlay(parsedId);
+    await switchOverlayInterface();
+    const noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
+    const noteTextArea = document.querySelector<HTMLTextAreaElement>(".note");
+    if (!noteTitle || !noteTextArea) return;
+    const tempNoteValue = getTempNote();
+    const savedNoteId = parsedId;
+    if (tempNoteValue && savedNoteId) {
+      noteTitle.value = tempNoteValue.title;
+      noteTextArea.value = tempNoteValue.data.toString();
+    } else {
+      noteTitle.value = note.title;
+      noteTextArea.value = note.data.toString();
+    }
+    isActive(noteItem);
   }
+
   function deleteNote(event: Event): void {
     event.stopPropagation();
-    const id: number = Number(noteItem.getAttribute("data-id"));
-    if (!id) return;
-    updateNotes((prev) => prev.filter((note) => note.id !== id));
+    const parsedId = checkId(noteItem);
+    console.log(parsedId);
+    if (parsedId === null) return;
+    updateNotes((prev) => prev.filter((note) => note.id !== parsedId));
+    clearSavedNoteId();
     clearTempNote();
     noteItem.remove();
   }
@@ -93,34 +104,37 @@ const noteItemHandler = (noteItem: NoteItem, note: Note): void => {
   noteItemBtn?.addEventListener("click", deleteNote);
 };
 
-const reloadNoteList = (): void => {
+const createNoteItem = (note: Note) => {
+  const noteItem = document.createElement("div");
+  noteItem.setAttribute("data-id", String(note.id));
+  noteItem.className = `${note.type}Item`;
+  if (note.type === "note") {
+    noteItem.innerHTML = noteItemTemplate(note);
+    noteItemHandler(noteItem, note);
+  } else if (note.type === "toDo") {
+    noteItem.innerHTML = toDoItemTemplate(note, note.dataCompleted || []);
+    toDoItemHandler(noteItem, note);
+  }
+  return noteItem;
+};
+
+const reloadNoteList = (updatedArray?: NoteArray): void => {
   const notesContainer =
     document.querySelector<HTMLDivElement>(".notes-container");
   if (!notesContainer) return;
-  const notesArr: NoteArray = getNotes();
-  const activeCategory: string = JSON.parse(
-    localStorage.getItem("activeCategoryState") ||
-      '{"activeCategory": "defaultCategory"}',
-  ).activeCategory;
+  const notesArr: NoteArray = updatedArray || getNotes();
+  const activeCategory = getActiveCategory();
   const activeCategoryItems: NoteArray = notesArr.filter(
-    (items) => items.category === activeCategory,
+    (notes) => notes.category === activeCategory,
   );
+  console.log("reloaded Note List");
   notesContainer.innerHTML = "";
   for (let i = 0; i < activeCategoryItems.length; i++) {
-    const items = activeCategoryItems[i];
-    if (!items) continue;
-    const noteItem = document.createElement("div");
-    noteItem.setAttribute("data-id", String(items.id));
-    noteItem.className = `${items.type}Item`;
-    if (items.type === "note") {
-      noteItem.innerHTML = noteItemTemplate(items);
-      noteItemHandler(noteItem, items);
-    } else if (items.type === "toDo") {
-      noteItem.innerHTML = toDoItemTemplate(items, items.dataCompleted || []);
-      toDoItemHandler(noteItem, items);
-    }
+    const note = activeCategoryItems[i];
+    if (!note) continue;
+    const noteItem = createNoteItem(note);
     notesContainer.appendChild(noteItem);
   }
 };
 
-export { noteItemHandler, noteToBeRendered, reloadNoteList };
+export { checkId, noteItemHandler, noteToBeRendered, reloadNoteList };

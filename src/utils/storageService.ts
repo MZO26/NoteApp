@@ -123,7 +123,7 @@ function getTempToDo(): TempToDo | null {
     if (json) {
       return JSON.parse(json) as TempToDo;
     } else return null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

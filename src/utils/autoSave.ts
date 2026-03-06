@@ -1,17 +1,29 @@
-import { isInitializing } from "../ui-components/renderModalUI.js";
+import { getSavedNoteId } from "../states/sharedStates.js";
 import { saveTempNote, saveTempToDo } from "./storageService.js";
 
-let noteTimeout: ReturnType<typeof setTimeout>;
-let toDoTimeout: ReturnType<typeof setTimeout>;
+let noteTimeout: ReturnType<typeof setTimeout> | undefined;
+let toDoTimeout: ReturnType<typeof setTimeout> | undefined;
+
+const cancelAutoSave = (): void => {
+  if (noteTimeout) {
+    clearTimeout(noteTimeout);
+    noteTimeout = undefined;
+    console.log("autosave cancelled");
+  } else if (toDoTimeout) {
+    clearTimeout(toDoTimeout);
+    toDoTimeout = undefined;
+    console.log("autosave cancelled");
+  }
+};
 
 const autoSaveTempNote = (): void => {
-  if (isInitializing) return;
   clearTimeout(noteTimeout);
   noteTimeout = setTimeout(() => {
     const noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
     const noteTextArea = document.querySelector<HTMLTextAreaElement>(".note");
-    if (!noteTitle || !noteTextArea) return;
-    const savedNoteId = Number(sessionStorage.getItem("savedNoteId"));
+    const savedNoteId = getSavedNoteId();
+    console.log("autosaved for id: ", savedNoteId);
+    if (!noteTitle || !noteTextArea || savedNoteId === null) return;
     saveTempNote({
       id: savedNoteId,
       title: noteTitle.value,
@@ -21,14 +33,14 @@ const autoSaveTempNote = (): void => {
 };
 
 const autoSaveTempToDo = (): void => {
-  if (isInitializing) return;
   clearTimeout(toDoTimeout);
   toDoTimeout = setTimeout(() => {
     const toDoTitle =
       document.querySelector<HTMLTextAreaElement>(".todo-title");
     const taskList = document.querySelector<HTMLDivElement>(".task-list");
-    if (!toDoTitle || !taskList) return;
-    const savedNoteId = Number(sessionStorage.getItem("savedNoteId"));
+    const savedNoteId = getSavedNoteId();
+    console.log("autosaved for id: ", savedNoteId);
+    if (!toDoTitle || !taskList || savedNoteId === null) return;
     const toDoList = taskList.querySelectorAll<HTMLSpanElement>("li span");
     const titleValue = toDoTitle.value || "";
     const toDoData: string[] = [];
@@ -49,4 +61,4 @@ const autoSaveTempToDo = (): void => {
   }, 500);
 };
 
-export { autoSaveTempNote, autoSaveTempToDo };
+export { autoSaveTempNote, autoSaveTempToDo, cancelAutoSave };

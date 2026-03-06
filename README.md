@@ -1,5 +1,9 @@
 # Note App Project
 
+**Work in Progress**
+
+![Status: WIP](https://img.shields.io/badge/status-WIP-orange.svg)
+
 A note-taking desktop application built with Typescript.
 It offers the ability to create simple notes as well as to-do lists.
 You can create, view, and manage your notes and tasks on your desktop.
@@ -45,4 +49,4 @@ The Bootstrap Icons included are licensed under the MIT License. See `NOTICE.txt
 
 ## Contact
 
-For questions or feedback, please open an issue in this repository.
+I'm always looking to improve this project. If you discover a bug, have a feature suggestion, or just want to share some feedback, please open an issue. Let me know what you think!

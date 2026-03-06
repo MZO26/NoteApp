@@ -1,9 +1,15 @@
 import { noteToBeRendered, reloadNoteList } from "../features/notes.js";
 import { toDoToBeRendered } from "../features/toDo.js";
-import { defaultCategory } from "../states/sharedStates.js";
-import type { ActiveCategoryState, ModalState } from "../types/stateTypes.js";
+import {
+  clearSavedNoteId,
+  getActiveCategory,
+  getModalState,
+  getSavedNoteId,
+  setModalState,
+} from "../states/sharedStates.js";
 import type { CategoryArray, NoteArray } from "../types/storageTypes.js";
-import { changeOverlayInterface } from "../ui-components/renderModalUI.js";
+import { renderUI } from "../ui-components/renderModalUI.js";
+import { cancelAutoSave } from "../utils/autoSave.js";
 import { Note } from "../utils/classes.js";
 import { showToast } from "../utils/events.js";
 import {
@@ -23,10 +29,7 @@ const switchBtnVisibility = document.querySelector<HTMLLabelElement>(".switch");
 
 const updateCategorySelect = (categoryArr: CategoryArray): void => {
   const select = document.querySelector<HTMLSelectElement>(".category-select");
-  const storedState = localStorage.getItem("activeCategoryState");
-  const activeCategoryState: ActiveCategoryState = storedState
-    ? JSON.parse(storedState)
-    : { activeCategory: defaultCategory };
+  const activeCategory = getActiveCategory();
   if (!select) return;
   select.innerHTML = "";
   categoryArr.forEach((category) => {
@@ -36,125 +39,158 @@ const updateCategorySelect = (categoryArr: CategoryArray): void => {
     if (option.textContent.length > 20) {
       option.textContent = option.textContent.slice(0, 20) + "...";
     }
-    if (category.name == activeCategoryState.activeCategory) {
+    if (category.name === activeCategory) {
       option.selected = true;
     }
     select.appendChild(option);
   });
 };
 
-const handleNoteSave = (
+const getNoteFormData = () => {
+  const titleElement = document.querySelector<HTMLTextAreaElement>(".title");
+  const noteElement = document.querySelector<HTMLTextAreaElement>(".note");
+  if (!titleElement || !noteElement) return;
+  const titleValue = titleElement.value.trim();
+  const noteValue = noteElement.value.trim();
+  const noteDataToArr: string[] = noteValue ? [noteValue] : [];
+  return { titleValue, noteDataToArr };
+};
+
+const getToDoFormData = () => {
+  const spans = Array.from(
+    document.querySelectorAll<HTMLSpanElement>(".task-list li span"),
+  );
+  if (!spans) return;
+  const completedTasks: string[] = spans
+    .filter((span) => span.classList.contains("task-completed"))
+    .map((span) => span.textContent || "");
+  const allTasks: string[] = spans.map((span) => {
+    return span.textContent || "";
+  });
+  const title = document.querySelector<HTMLTextAreaElement>(".todo-title");
+  const titleValue = title?.value.trim() || "";
+  return { completedTasks, allTasks, titleValue };
+};
+
+const syncNoteState = (
+  savedNoteId: number,
+  updatedItem: Note,
+  notesArr: NoteArray,
+): NoteArray => {
+  updateNotes((prev) =>
+    prev.map((note) => (note.id === savedNoteId ? updatedItem : note)),
+  );
+  const updatedNotesArray = notesArr.map((note) =>
+    note.id === savedNoteId ? updatedItem : note,
+  );
+  return updatedNotesArray;
+};
+
+const updateExistingNote = (
   savedNoteId: number,
   notesArr: NoteArray,
   selectedCategory: string,
+  formData: ReturnType<typeof getNoteFormData>,
+) => {
+  if (!formData) return;
+  const savedItem: Note | undefined = notesArr.find(
+    (n) => n.id === savedNoteId,
+  );
+  if (savedItem && savedItem.type === "note") {
+    const updatedItem = {
+      ...savedItem,
+      title: formData.titleValue,
+      data: formData.noteDataToArr,
+      category: selectedCategory,
+    };
+    const updatedArray = syncNoteState(savedNoteId, updatedItem, notesArr);
+    showToast("Note was saved");
+    reloadNoteList(updatedArray);
+  }
+};
+
+const updateExistingToDo = (
+  savedNoteId: number,
+  notesArr: NoteArray,
+  selectedCategory: string,
+  formData: ReturnType<typeof getToDoFormData>,
 ): void => {
-  const titleElement = document.querySelector<HTMLTextAreaElement>(".title");
-  const noteElement = document.querySelector<HTMLTextAreaElement>(".note");
-  if (noteElement && titleElement) {
-    const titleValue = titleElement.value.trim();
-    const noteValue = noteElement.value.trim();
-    const noteDataToArr: string[] = noteValue ? [noteValue] : [];
-    if (!savedNoteId) {
-      noteToBeRendered(
-        "note",
-        selectedCategory,
-        titleValue,
-        noteDataToArr,
-        undefined,
-      );
-    } else {
-      const savedItem: Note | undefined = notesArr.find(
-        (n) => n.id === savedNoteId,
-      );
-      if (savedItem && savedItem.type === "note") {
-        const updatedItem = {
-          ...savedItem,
-          title: titleValue,
-          data: noteDataToArr,
-          category: selectedCategory,
-        };
-        updateNotes((prev) =>
-          prev.map((n) => (n.id === savedNoteId ? updatedItem : n)),
-        );
-        showToast("Note was saved");
-        reloadNoteList();
-      }
-    }
+  if (!formData) return;
+  const savedItem = notesArr.find((note) => note.id === savedNoteId);
+  if (savedItem && savedItem.type === "toDo") {
+    const updatedItem = {
+      ...savedItem,
+      title: formData.titleValue,
+      data: formData.allTasks,
+      dataCompleted: formData.completedTasks,
+      category: selectedCategory,
+    };
+    const updatedArray = syncNoteState(savedNoteId, updatedItem, notesArr);
+    showToast("ToDo-list was saved");
+    reloadNoteList(updatedArray);
+  }
+};
+
+const handleNoteSave = (
+  savedNoteId: number | null,
+  notesArr: NoteArray,
+  selectedCategory: string,
+): void => {
+  const formData = getNoteFormData();
+  if (!formData) return;
+  if (savedNoteId === null) {
+    noteToBeRendered(
+      "note",
+      selectedCategory,
+      formData.titleValue,
+      formData.noteDataToArr,
+      undefined,
+    );
+  } else {
+    updateExistingNote(savedNoteId, notesArr, selectedCategory, formData);
   }
   clearTempNote();
 };
 
 const handleToDoSave = (
-  savedNoteId: number,
+  savedNoteId: number | null,
   notesArr: NoteArray,
   selectedCategory: string,
 ): void => {
-  const spans =
-    document.querySelectorAll<HTMLSpanElement>(".task-list li span");
-  const spanArray = Array.from(spans);
-  const completedTasks: string[] = spanArray
-    .filter((span) => span.classList.contains("task-completed"))
-    .map((span) => span.textContent || "");
-  const allTasks: string[] = spanArray.map((span) => {
-    return span.textContent || "";
-  });
-  const title = document.querySelector<HTMLTextAreaElement>(".todo-title");
-  const titleValue = title?.value.trim() || "";
-  if (!savedNoteId) {
+  const formData = getToDoFormData();
+  if (!formData) return;
+  if (savedNoteId === null) {
     toDoToBeRendered(
       "toDo",
       selectedCategory,
-      titleValue,
-      allTasks,
-      completedTasks,
+      formData.titleValue,
+      formData.allTasks,
+      formData.completedTasks,
     );
   } else {
-    const savedItem = notesArr.find((note) => note.id === savedNoteId);
-    if (savedItem && savedItem.type === "toDo") {
-      const updatedItem = {
-        ...savedItem,
-        title: titleValue,
-        data: allTasks,
-        dataCompleted: completedTasks,
-        category: selectedCategory,
-      };
-      notesArr[notesArr.findIndex((note) => note.id === savedNoteId)] =
-        savedItem;
-      updateNotes((prev) =>
-        prev.map((note) => (note.id === savedNoteId ? updatedItem : note)),
-      );
-      showToast("ToDo-list was saved");
-      reloadNoteList();
-    }
+    updateExistingToDo(savedNoteId, notesArr, selectedCategory, formData);
   }
   clearTempToDo();
 };
 
 const saveButton = (): void => {
+  cancelAutoSave();
   const notesArr: NoteArray = getNotes();
-  const savedNoteId: number = JSON.parse(
-    sessionStorage.getItem("savedNoteId") || "null",
-  );
-  const storedCategoryState = localStorage.getItem("activeCategoryState");
-  const activeCategoryState: ActiveCategoryState = storedCategoryState
-    ? JSON.parse(storedCategoryState)
-    : { activeCategory: defaultCategory };
-  const storedModalState = localStorage.getItem("modalState");
-  const modalState: ModalState = storedModalState
-    ? JSON.parse(storedModalState)
-    : {
-        interface: "note",
-      };
+  const savedNoteId = getSavedNoteId();
+  console.log("current savedNoteId: ", savedNoteId);
+  const activeCategory = getActiveCategory();
+  const modalState = getModalState();
   const select = document.querySelector<HTMLSelectElement>(".category-select");
-  const selectedCategory: string = select
-    ? select.options[select.selectedIndex]!.textContent
-    : activeCategoryState.activeCategory;
-  if (modalState.interface === "toDo") {
+  const selectedCategory: string | undefined = select
+    ? select.options[select.selectedIndex]?.textContent
+    : activeCategory;
+  if (modalState === "toDo" && selectedCategory) {
+    console.log("savedNoteId: ", savedNoteId);
     handleToDoSave(savedNoteId, notesArr, selectedCategory);
-  } else if (modalState.interface === "note") {
+  } else if (modalState === "note" && selectedCategory) {
+    console.log("savedNoteId: ", savedNoteId);
     handleNoteSave(savedNoteId, notesArr, selectedCategory);
   }
-  sessionStorage.removeItem("savedNoteId");
   clearTempNote();
   clearTempToDo();
 };
@@ -167,20 +203,15 @@ saveBtn.addEventListener("click", () => {
 const deleteButton = (): void => {
   const isConfirmed = window.confirm("Clear all content?");
   if (!isConfirmed) return;
-  const storedModalState = localStorage.getItem("modalState");
-  const modalState: ModalState = storedModalState
-    ? JSON.parse(storedModalState)
-    : {
-        interface: "note",
-      };
-  if (modalState.interface === "note") {
+  const modalState = getModalState();
+  if (modalState === "note") {
     const title = document.querySelector<HTMLTextAreaElement>(".title");
     const content = document.querySelector<HTMLTextAreaElement>(".note");
     if (title && content) {
       title.value = "";
       content.value = "";
     }
-  } else if (modalState.interface === "toDo") {
+  } else if (modalState === "toDo") {
     const title = document.querySelector<HTMLTextAreaElement>(".todo-title");
     const content = document.querySelector<HTMLDivElement>(".task-list");
     if (title && content) {
@@ -204,19 +235,34 @@ const closeModal = (): void => {
       switchBtnVisibility.classList.remove("hidden");
     }
   }, 300);
+  clearSavedNoteId();
   clearTempNote();
   clearTempToDo();
 };
 closeBtn.addEventListener("click", closeModal);
 
-const switchOverlayInterface = (): void => {
-  const isToDo = switchBtn?.checked || false;
-  const modalState: ModalState = {
-    interface: isToDo ? "toDo" : "note",
-  };
-  localStorage.setItem("modalState", JSON.stringify(modalState));
-  requestAnimationFrame(() => {
-    changeOverlayInterface();
+const switchOverlayInterface = (): Promise<void> => {
+  return new Promise((resolve) => {
+    const isToDo = switchBtn?.checked || false;
+    const modalState = isToDo ? "toDo" : "note";
+    setModalState(modalState);
+    requestAnimationFrame(() => {
+      const modalHeadingElement =
+        document.querySelector<HTMLHeadingElement>(".modal-heading");
+      const modalNoteElement =
+        document.querySelector<HTMLParagraphElement>(".modal-note");
+      if (modalHeadingElement && modalNoteElement) {
+        if (modalState === "note") {
+          modalHeadingElement.textContent = "New note";
+          modalNoteElement.textContent = "Add note";
+        } else if (modalState === "toDo") {
+          modalHeadingElement.textContent = "New toDo list";
+          modalNoteElement.textContent = "Add toDo's";
+        }
+      } else return;
+      renderUI(modalState);
+      resolve();
+    });
   });
 };
 switchBtn?.addEventListener("click", () => {
