@@ -1,152 +1,92 @@
 import type { TempNote, TempToDo } from "../types/storageTypes.js";
 import { Category, Note } from "./classes.js";
 
-type Listener<T> = (value: T) => void;
-
-const KEYS = {
+export const StorageKeys = {
   NOTES: "notesArr",
   CATEGORIES: "categoryArr",
+  TEMP_NOTE: "tempNoteValue",
+  TEMP_TODO: "tempToDoValue",
 } as const;
 
-type Key = (typeof KEYS)[keyof typeof KEYS];
+type StorageKey = keyof StorageData;
 
-const cache: Record<Key, unknown> = {
-  [KEYS.NOTES]: null,
-  [KEYS.CATEGORIES]: null,
+interface StorageData {
+  [StorageKeys.NOTES]: Note[];
+  [StorageKeys.CATEGORIES]: Category[];
+  [StorageKeys.TEMP_NOTE]: TempNote | null;
+  [StorageKeys.TEMP_TODO]: TempToDo | null;
+}
+
+const defaultValues: StorageData = {
+  [StorageKeys.NOTES]: [],
+  [StorageKeys.CATEGORIES]: [],
+  [StorageKeys.TEMP_NOTE]: null,
+  [StorageKeys.TEMP_TODO]: null,
 };
 
-function safeParse<T>(raw: string | null, fallback: T): T {
+const cache: Partial<StorageData> = {};
+const timers: Record<string, ReturnType<typeof setTimeout>> = {};
+
+function getValue<K extends StorageKey>(key: K): StorageData[K] {
+  if (cache[key] !== undefined) {
+    return cache[key] as StorageData[K];
+  }
+  const raw = localStorage.getItem(key);
+  if (!raw) return defaultValues[key];
   try {
-    return raw ? JSON.parse(raw) : fallback;
-  } catch (err) {
-    console.warn("storageService: parse error, using fallback", err);
-    return fallback;
+    const parsed = JSON.parse(raw) as StorageData[K];
+    cache[key] = parsed;
+    return parsed;
+  } catch {
+    return defaultValues[key];
   }
 }
-
-function getValue<T>(key: Key, fallback: T): T {
-  if (cache[key] === null) {
-    cache[key] = safeParse(localStorage.getItem(key), fallback);
-  }
-  return cache[key] as T;
-}
-
-function setValue<T>(key: Key, value: T, delay = 100): void {
+function setValue<K extends StorageKey>(
+  key: K,
+  value: StorageData[K],
+  delay = 100,
+) {
   cache[key] = value;
-
-  const timers = ((window as any).___storage_timers ||= {} as Record<
-    Key,
-    number
-  >);
-  if (timers[key]) clearTimeout(timers[key]);
-
+  if (timers[key]) {
+    clearTimeout(timers[key]);
+  }
   timers[key] = setTimeout(() => {
     try {
       localStorage.setItem(key, JSON.stringify(value));
-      notifyListeners(key, value);
     } catch (err) {
-      console.error(`storageService: failed to save key "${key}"`, err);
+      console.error(`Error while saving "${key}"`, err);
     }
     delete timers[key];
   }, delay);
 }
 
-function notifyListeners<T>(key: Key, value: T): void {
-  const listeners = ((window as any).___storage_listeners ||= {} as Record<
-    Key,
-    Listener<any>[]
-  >);
-  const cbs = listeners[key] || [];
-  cbs.forEach((cb: any) => {
-    try {
-      cb(value);
-    } catch (e) {
-      console.error("listener error", e);
-    }
-  });
+function removeValue<K extends StorageKey>(key: K): void {
+  delete cache[key];
+  if (timers[key]) {
+    clearTimeout(timers[key]);
+    delete timers[key];
+  }
+  try {
+    localStorage.removeItem(key);
+  } catch (err) {
+    console.error(`Error while removing "${key}" from localStorage`, err);
+  }
 }
 
-function getNotes(): Note[] {
-  return getValue(KEYS.NOTES, [] as Note[]);
-}
-
-function saveNotes(notes: Note[]): void {
-  setValue(KEYS.NOTES, notes);
-}
-
-function updateNotes(updater: (prev: Note[]) => Note[]): Note[] {
-  const prev = getNotes();
-  const next = updater(prev);
-  saveNotes(next);
-  return next;
-}
-
-function getCategories(): Category[] {
-  return getValue(KEYS.CATEGORIES, [] as Category[]);
-}
-
-function saveCategories(categories: Category[]): void {
-  setValue(KEYS.CATEGORIES, categories);
+function updateNotes(updater: (currentNotes: Note[]) => Note[]): Note[] {
+  const currentNotes = getValue(StorageKeys.NOTES);
+  const newNotes = updater(currentNotes);
+  setValue(StorageKeys.NOTES, newNotes);
+  return newNotes;
 }
 
 function updateCategories(
-  updater: (prev: Category[]) => Category[],
+  updater: (currentCategories: Category[]) => Category[],
 ): Category[] {
-  const prev = getCategories();
-  const next = updater(prev);
-  saveCategories(next);
-  return next;
+  const currentCategories = getValue(StorageKeys.CATEGORIES);
+  const newCategories = updater(currentCategories);
+  setValue(StorageKeys.CATEGORIES, newCategories);
+  return newCategories;
 }
 
-function getTempNote(): TempNote | null {
-  try {
-    const json = localStorage.getItem("tempNoteValue");
-    if (json) {
-      return JSON.parse(json) as TempNote;
-    } else return null;
-  } catch (error) {
-    return null;
-  }
-}
-
-function saveTempNote(data: TempNote): void {
-  localStorage.setItem("tempNoteValue", JSON.stringify(data));
-}
-
-function clearTempNote(): void {
-  localStorage.removeItem("tempNoteValue");
-}
-
-function getTempToDo(): TempToDo | null {
-  try {
-    const json = localStorage.getItem("tempToDoValue");
-    if (json) {
-      return JSON.parse(json) as TempToDo;
-    } else return null;
-  } catch {
-    return null;
-  }
-}
-
-function saveTempToDo(data: TempToDo): void {
-  localStorage.setItem("tempToDoValue", JSON.stringify(data));
-}
-
-function clearTempToDo(): void {
-  localStorage.removeItem("tempToDoValue");
-}
-
-export {
-  clearTempNote,
-  clearTempToDo,
-  getCategories,
-  getNotes,
-  getTempNote,
-  getTempToDo,
-  saveCategories,
-  saveNotes,
-  saveTempNote,
-  saveTempToDo,
-  updateCategories,
-  updateNotes,
-};
+export { getValue, removeValue, setValue, updateCategories, updateNotes };

@@ -11,10 +11,10 @@ import { openOverlay } from "../ui-components/renderModalUI.js";
 import { createNewNote, Note } from "../utils/classes.js";
 import { isActive } from "../utils/events.js";
 import {
-  clearTempNote,
-  getNotes,
-  getTempNote,
-  saveNotes,
+  getValue,
+  removeValue,
+  setValue,
+  StorageKeys,
   updateNotes,
 } from "../utils/storageService.js";
 import { noteItemTemplate, toDoItemTemplate } from "../utils/templates.js";
@@ -36,7 +36,7 @@ const noteToBeRendered = (
   dataCompleted?: Array<string>,
 ): void => {
   if (type !== "note") return;
-  const notesArr: NoteArray = getNotes();
+  const notesArr: NoteArray = getValue(StorageKeys.NOTES);
   const notesContainer =
     document.querySelector<HTMLDivElement>(".notes-container");
   if (!notesContainer) return;
@@ -52,7 +52,7 @@ const noteToBeRendered = (
   noteItem.setAttribute("data-id", String(newNote.id));
   noteItem.innerHTML = noteItemTemplate(newNote);
   notesArr.push(newNote);
-  saveNotes(notesArr);
+  setValue(StorageKeys.NOTES, notesArr);
   notesContainer.appendChild(noteItem);
   noteItemHandler(noteItem, newNote);
 };
@@ -76,7 +76,7 @@ const noteItemHandler = (noteItem: RenderedItem, note: Note): void => {
     const noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
     const noteTextArea = document.querySelector<HTMLTextAreaElement>(".note");
     if (!noteTitle || !noteTextArea) return;
-    const tempNoteValue = getTempNote();
+    const tempNoteValue = getValue(StorageKeys.TEMP_NOTE);
     const savedNoteId = parsedId;
     if (tempNoteValue && savedNoteId) {
       noteTitle.value = tempNoteValue.title;
@@ -91,11 +91,10 @@ const noteItemHandler = (noteItem: RenderedItem, note: Note): void => {
   function deleteNote(event: Event): void {
     event.stopPropagation();
     const parsedId = checkId(noteItem);
-    console.log(parsedId);
     if (parsedId === null) return;
     updateNotes((prev) => prev.filter((note) => note.id !== parsedId));
     clearSavedNoteId();
-    clearTempNote();
+    removeValue(StorageKeys.TEMP_NOTE);
     noteItem.remove();
   }
   noteItemBtn?.removeEventListener("click", deleteNote);
@@ -122,12 +121,11 @@ const reloadNoteList = (updatedArray?: NoteArray): void => {
   const notesContainer =
     document.querySelector<HTMLDivElement>(".notes-container");
   if (!notesContainer) return;
-  const notesArr: NoteArray = updatedArray || getNotes();
+  const notesArr: NoteArray = updatedArray || getValue(StorageKeys.NOTES);
   const activeCategory = getActiveCategory();
   const activeCategoryItems: NoteArray = notesArr.filter(
     (notes) => notes.category === activeCategory,
   );
-  console.log("reloaded Note List");
   notesContainer.innerHTML = "";
   for (let i = 0; i < activeCategoryItems.length; i++) {
     const note = activeCategoryItems[i];

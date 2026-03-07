@@ -1,7 +1,5 @@
 # Note App Project
 
-**Work in Progress**
-
 ![Status: WIP](https://img.shields.io/badge/status-WIP-orange.svg)
 
 A note-taking desktop application built with Typescript.

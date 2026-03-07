@@ -9,7 +9,8 @@ import type { CategoryArray } from "../types/storageTypes.js";
 import { Category, createNewCategory } from "../utils/classes.js";
 import { isActive, showToast, truncate } from "../utils/events.js";
 import {
-  getCategories,
+  getValue,
+  StorageKeys,
   updateCategories,
   updateNotes,
 } from "../utils/storageService.js";
@@ -47,7 +48,7 @@ const getCategoryId = (categoryItem: RenderedItem): number => {
 const categoryToBeRendered = (categoryName: string): void => {
   const categoryList = document.querySelector<HTMLDivElement>(".category-list");
   if (!categoryList) return;
-  const categoryArr: CategoryArray = getCategories();
+  const categoryArr: CategoryArray = getValue(StorageKeys.CATEGORIES);
   if (categoryArr.find((category) => category.name === categoryName)) {
     showToast("Category already exists. Please enter new name");
     return;
@@ -85,7 +86,7 @@ const categoryItemHandler = (categoryItem: RenderedItem): void => {
       item.classList.remove("active");
     });
     clearSavedNoteId();
-    const categoryArr: CategoryArray = getCategories();
+    const categoryArr: CategoryArray = getValue(StorageKeys.CATEGORIES);
     const id = getCategoryId(categoryItem);
     const category = categoryArr.find((c) => c.id === id);
     if (!category) {
@@ -100,7 +101,7 @@ const categoryItemHandler = (categoryItem: RenderedItem): void => {
 
   function deleteCategory(event: Event): void {
     event.stopPropagation();
-    const categoryArr = getCategories();
+    const categoryArr = getValue(StorageKeys.CATEGORIES);
     const id: string | null = categoryItem.getAttribute("category-id");
     const index = categoryArr.findIndex((c) => String(c.id) === id);
     if (id === null || index === -1) return;
@@ -132,7 +133,8 @@ const categoryItemHandler = (categoryItem: RenderedItem): void => {
 
 const reloadCategoryList = (categories: CategoryArray): void => {
   const categoryList = document.querySelector<HTMLDivElement>(".category-list");
-  const categoryArr: CategoryArray = categories || getCategories();
+  const categoryArr: CategoryArray =
+    categories || getValue(StorageKeys.CATEGORIES);
   const activeCategory = getActiveCategory();
   if (!categoryArr.length || !categoryList) return;
   categoryList.innerHTML = "";

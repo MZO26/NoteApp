@@ -1,6 +1,6 @@
 import { autoSaveTempNote, autoSaveTempToDo } from "../utils/autoSave.js";
 import { Note } from "../utils/classes.js";
-import { getTempNote, getTempToDo } from "../utils/storageService.js";
+import { getValue, StorageKeys } from "../utils/storageService.js";
 import {
   createTaskItem,
   getToDoInterfaceElements,
@@ -123,7 +123,7 @@ const renderNoteUI = (): void => {
     noteTitle = titleElement;
     noteContent = noteElement;
   }
-  const tempNoteValue = getTempNote();
+  const tempNoteValue = getValue(StorageKeys.TEMP_NOTE);
   if (tempNoteValue) {
     noteTitle.value = tempNoteValue.title;
     noteContent.value = tempNoteValue.data[0] || "";
@@ -157,7 +157,7 @@ const renderToDoUI = () => {
       currentToDo.replaceWith(todoDiv);
     }
   }
-  const tempToDoValue = getTempToDo();
+  const tempToDoValue = getValue(StorageKeys.TEMP_TODO);
   if (tempToDoValue) {
     title.value = tempToDoValue.title;
     reloadToDoList(

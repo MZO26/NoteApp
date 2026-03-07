@@ -8,7 +8,7 @@ import {
 } from "../states/sharedStates.js";
 import { openOverlay } from "../ui-components/renderModalUI.js";
 import { inputListener } from "../utils/events.js";
-import { clearTempNote, clearTempToDo } from "../utils/storageService.js";
+import { removeValue, StorageKeys } from "../utils/storageService.js";
 import { switchOverlayInterface } from "./modalHandlers.js";
 
 const filterInput = document.querySelector<HTMLInputElement>(".search-input")!;
@@ -32,8 +32,8 @@ openInfoBtn?.addEventListener("click", (): void => {
 
 const addNewNote = async () => {
   clearSavedNoteId();
-  clearTempNote();
-  clearTempToDo();
+  removeValue(StorageKeys.TEMP_NOTE);
+  removeValue(StorageKeys.TEMP_TODO);
   setModalState("note");
   if (switchBtn) switchBtn.checked = false;
   await switchOverlayInterface();

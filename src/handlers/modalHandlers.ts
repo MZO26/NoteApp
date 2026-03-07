@@ -13,9 +13,9 @@ import { cancelAutoSave } from "../utils/autoSave.js";
 import { Note } from "../utils/classes.js";
 import { showToast } from "../utils/events.js";
 import {
-  clearTempNote,
-  clearTempToDo,
-  getNotes,
+  getValue,
+  removeValue,
+  StorageKeys,
   updateNotes,
 } from "../utils/storageService.js";
 
@@ -149,7 +149,7 @@ const handleNoteSave = (
   } else {
     updateExistingNote(savedNoteId, notesArr, selectedCategory, formData);
   }
-  clearTempNote();
+  removeValue(StorageKeys.TEMP_NOTE);
 };
 
 const handleToDoSave = (
@@ -170,14 +170,13 @@ const handleToDoSave = (
   } else {
     updateExistingToDo(savedNoteId, notesArr, selectedCategory, formData);
   }
-  clearTempToDo();
+  removeValue(StorageKeys.TEMP_TODO);
 };
 
 const saveButton = (): void => {
   cancelAutoSave();
-  const notesArr: NoteArray = getNotes();
+  const notesArr: NoteArray = getValue(StorageKeys.NOTES);
   const savedNoteId = getSavedNoteId();
-  console.log("current savedNoteId: ", savedNoteId);
   const activeCategory = getActiveCategory();
   const modalState = getModalState();
   const select = document.querySelector<HTMLSelectElement>(".category-select");
@@ -191,8 +190,8 @@ const saveButton = (): void => {
     console.log("savedNoteId: ", savedNoteId);
     handleNoteSave(savedNoteId, notesArr, selectedCategory);
   }
-  clearTempNote();
-  clearTempToDo();
+  removeValue(StorageKeys.TEMP_NOTE);
+  removeValue(StorageKeys.TEMP_TODO);
 };
 
 saveBtn.addEventListener("click", () => {
@@ -219,8 +218,8 @@ const deleteButton = (): void => {
       content.innerHTML = "";
     }
   }
-  clearTempNote();
-  clearTempToDo();
+  removeValue(StorageKeys.TEMP_NOTE);
+  removeValue(StorageKeys.TEMP_TODO);
 };
 deleteBtn.addEventListener("click", deleteButton);
 
@@ -236,8 +235,8 @@ const closeModal = (): void => {
     }
   }, 300);
   clearSavedNoteId();
-  clearTempNote();
-  clearTempToDo();
+  removeValue(StorageKeys.TEMP_NOTE);
+  removeValue(StorageKeys.TEMP_TODO);
 };
 closeBtn.addEventListener("click", closeModal);
 

@@ -6,10 +6,10 @@ import { openOverlay, reloadToDoList } from "../ui-components/renderModalUI.js";
 import { createNewNote, Note } from "../utils/classes.js";
 import { isActive } from "../utils/events.js";
 import {
-  clearTempToDo,
-  getNotes,
-  getTempToDo,
-  saveNotes,
+  getValue,
+  removeValue,
+  setValue,
+  StorageKeys,
   updateNotes,
 } from "../utils/storageService.js";
 import { toDoItemTemplate } from "../utils/templates.js";
@@ -23,7 +23,7 @@ const toDoToBeRendered = (
   completedTasks: Array<string>,
 ): void => {
   if (type !== "toDo") return;
-  const notesArr: NoteArray = getNotes();
+  const notesArr: NoteArray = getValue(StorageKeys.NOTES);
   const notesContainer =
     document.querySelector<HTMLDivElement>(".notes-container");
   if (!notesContainer) return;
@@ -39,7 +39,7 @@ const toDoToBeRendered = (
   toDoItem.setAttribute("data-id", String(newToDo.id));
   toDoItem.innerHTML = toDoItemTemplate(newToDo, completedTasks);
   notesArr.push(newToDo);
-  saveNotes(notesArr);
+  setValue(StorageKeys.NOTES, notesArr);
   notesContainer.appendChild(toDoItem);
   toDoItemHandler(toDoItem, newToDo);
 };
@@ -64,7 +64,7 @@ const toDoItemHandler = (toDoItem: RenderedItem, newToDo: Note): void => {
     const toDoTitle =
       document.querySelector<HTMLTextAreaElement>(".todo-title");
     const taskList = document.querySelector<HTMLUListElement>(".task-list");
-    const tempToDoValue = getTempToDo();
+    const tempToDoValue = getValue(StorageKeys.TEMP_TODO);
     if (!notesContainer || !toDoTitle || !taskList) return;
     const savedNoteId = parsedId;
     if (tempToDoValue && tempToDoValue.id === savedNoteId) {
@@ -100,7 +100,6 @@ const toDoItemHandler = (toDoItem: RenderedItem, newToDo: Note): void => {
   function deleteToDo(event: Event): void {
     event.stopPropagation();
     const parsedId = checkId(toDoItem);
-    console.log("todo id: ", parsedId);
     if (parsedId === null) return;
     updateNotes((prev) => prev.filter((note) => note.id !== parsedId));
     const container = document.querySelector<HTMLDivElement>(".todo-container");
@@ -115,7 +114,7 @@ const toDoItemHandler = (toDoItem: RenderedItem, newToDo: Note): void => {
     toDoItemBtn?.removeEventListener("click", deleteToDo);
     toDoItem.removeEventListener("click", viewToDo);
     toDoItem.remove();
-    clearTempToDo();
+    removeValue(StorageKeys.TEMP_TODO);
   }
   toDoItemBtn?.addEventListener("click", deleteToDo);
   toDoItem.addEventListener("click", viewToDo);

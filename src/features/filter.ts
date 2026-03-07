@@ -3,7 +3,7 @@ import type { RenderedItem } from "../types/featureTypes.js";
 import type { NoteArray } from "../types/storageTypes.js";
 import { Note } from "../utils/classes.js";
 import { isActive } from "../utils/events.js";
-import { getNotes } from "../utils/storageService.js";
+import { getValue, StorageKeys } from "../utils/storageService.js";
 import { checkId, reloadNoteList } from "./notes.js";
 
 const searchInput = document.querySelector<HTMLInputElement>(".search-input")!;
@@ -21,7 +21,7 @@ const findTargetNote = (): {
 } => {
   const value: string = searchInput.value.toLowerCase();
   if (!cachedNotes.length) {
-    cachedNotes = getNotes();
+    cachedNotes = getValue(StorageKeys.NOTES);
   }
   const result: Note | undefined = cachedNotes.find((item) =>
     item.title.toLowerCase().includes(value),
@@ -85,7 +85,6 @@ const filter = (): void => {
     const categoryItems = cachedNotes.filter(
       (notes) => notes.category === activeCategory,
     );
-    console.log(categoryItems, cachedNotes);
     reloadNoteList(categoryItems);
   } else {
     removeActiveExceptResult(result);

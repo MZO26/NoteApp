@@ -1,5 +1,5 @@
 import { getSavedNoteId } from "../states/sharedStates.js";
-import { saveTempNote, saveTempToDo } from "./storageService.js";
+import { setValue, StorageKeys } from "./storageService.js";
 
 let noteTimeout: ReturnType<typeof setTimeout> | undefined;
 let toDoTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -8,11 +8,9 @@ const cancelAutoSave = (): void => {
   if (noteTimeout) {
     clearTimeout(noteTimeout);
     noteTimeout = undefined;
-    console.log("autosave cancelled");
   } else if (toDoTimeout) {
     clearTimeout(toDoTimeout);
     toDoTimeout = undefined;
-    console.log("autosave cancelled");
   }
 };
 
@@ -24,11 +22,15 @@ const autoSaveTempNote = (): void => {
     const savedNoteId = getSavedNoteId();
     console.log("autosaved for id: ", savedNoteId);
     if (!noteTitle || !noteTextArea || savedNoteId === null) return;
-    saveTempNote({
-      id: savedNoteId,
-      title: noteTitle.value,
-      data: noteTextArea.value ? [noteTextArea.value] : [],
-    });
+    setValue(
+      StorageKeys.TEMP_NOTE,
+      {
+        id: savedNoteId,
+        title: noteTitle.value,
+        data: noteTextArea.value ? [noteTextArea.value] : [],
+      },
+      0,
+    );
   }, 500);
 };
 
@@ -52,12 +54,16 @@ const autoSaveTempToDo = (): void => {
       }
       toDoData.push(span.textContent);
     }
-    saveTempToDo({
-      id: savedNoteId,
-      title: titleValue,
-      data: toDoData,
-      dataCompleted: completedTasks,
-    });
+    setValue(
+      StorageKeys.TEMP_TODO,
+      {
+        id: savedNoteId,
+        title: titleValue,
+        data: toDoData,
+        dataCompleted: completedTasks,
+      },
+      0,
+    );
   }, 500);
 };
 
