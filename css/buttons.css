@@ -216,7 +216,6 @@ input:hover {
   border: 1px solid var(--btn-border);
   z-index: 10;
   background-color: var(--btn-border);
-  color: red;
 }
 
 .todo-btn {
@@ -259,11 +258,9 @@ input:hover {
 
 .deleteNoteItem-btn[data-status="success"] {
   background-color: var(--btn-border);
-  color: red;
 }
 .deleteCategoryItem-btn[data-status="success"] {
   background-color: var(--btn-border);
-  color: red;
 }
 
 @media screen and (max-width: 480px) {

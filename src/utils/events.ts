@@ -1,10 +1,5 @@
 import type { RenderedItem } from "../types/featureTypes.js";
-
-const truncate = (str: string, max = 10): string => {
-  if (str.length > max) {
-    return str.slice(0, max) + "...";
-  } else return str;
-};
+import { truncate } from "./helpers.js";
 
 const showToast = (value: string, duration = 1500): void => {
   const container = document.querySelector<HTMLDivElement>(".toast-container");
@@ -58,8 +53,8 @@ function isActive(item: RenderedItem, parentElement?: Element): void {
   item.classList.add("active");
   if (item._listener) document.removeEventListener("click", item._listener);
   item._listener = (e: Event) => {
-    const target = e.target as Element | null;
-    if (parentElement && parentElement.contains(target) && e.target != item) {
+    const target = e.target as HTMLDivElement | null;
+    if (parentElement && parentElement.contains(target) && e.target !== item) {
       item.classList.remove("active");
       if (item._listener) {
         document.removeEventListener("click", item._listener);
@@ -67,16 +62,14 @@ function isActive(item: RenderedItem, parentElement?: Element): void {
       item._listener = null;
     }
   };
-  if (item._listener) {
-    setTimeout(
-      () =>
-        document.addEventListener(
-          "click",
-          item._listener as (event: Event) => void,
-        ),
-      0,
-    );
-  }
+  setTimeout(
+    () =>
+      document.addEventListener(
+        "click",
+        item._listener as (event: Event) => void,
+      ),
+    0,
+  );
 }
 
-export { inputListener, isActive, showToast, truncate };
+export { inputListener, isActive, showToast };

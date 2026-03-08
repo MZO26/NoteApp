@@ -1,4 +1,4 @@
-import { getSavedNoteId } from "../states/sharedStates.js";
+import { getSavedItemId } from "../states/sharedStates.js";
 import { setValue, StorageKeys } from "./storageService.js";
 
 let noteTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -19,13 +19,13 @@ const autoSaveTempNote = (): void => {
   noteTimeout = setTimeout(() => {
     const noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
     const noteTextArea = document.querySelector<HTMLTextAreaElement>(".note");
-    const savedNoteId = getSavedNoteId();
-    console.log("autosaved for id: ", savedNoteId);
-    if (!noteTitle || !noteTextArea || savedNoteId === null) return;
+    const savedItemId = getSavedItemId();
+    console.log("autosaved for id: ", savedItemId);
+    if (!noteTitle || !noteTextArea || savedItemId === null) return;
     setValue(
       StorageKeys.TEMP_NOTE,
       {
-        id: savedNoteId,
+        id: savedItemId,
         title: noteTitle.value,
         data: noteTextArea.value ? [noteTextArea.value] : [],
       },
@@ -40,27 +40,24 @@ const autoSaveTempToDo = (): void => {
     const toDoTitle =
       document.querySelector<HTMLTextAreaElement>(".todo-title");
     const taskList = document.querySelector<HTMLDivElement>(".task-list");
-    const savedNoteId = getSavedNoteId();
-    console.log("autosaved for id: ", savedNoteId);
-    if (!toDoTitle || !taskList || savedNoteId === null) return;
-    const toDoList = taskList.querySelectorAll<HTMLSpanElement>("li span");
-    const titleValue = toDoTitle.value || "";
-    const toDoData: string[] = [];
-    const completedTasks: string[] = [];
-    for (const span of toDoList) {
-      if (!span.textContent) continue;
-      if (span.classList.contains("task-completed")) {
-        completedTasks.push(span.textContent);
-      }
-      toDoData.push(span.textContent);
-    }
+    const savedItemId = getSavedItemId();
+    console.log("autosaved for id: ", savedItemId);
+    if (!toDoTitle || !taskList || savedItemId === null) return;
+    const spans = Array.from(
+      taskList.querySelectorAll<HTMLSpanElement>(".task-list li span"),
+    );
+    const data = spans.map((span) => {
+      return {
+        content: span.textContent || "",
+        completed: span.classList.contains("task-completed"),
+      };
+    });
     setValue(
       StorageKeys.TEMP_TODO,
       {
-        id: savedNoteId,
-        title: titleValue,
-        data: toDoData,
-        dataCompleted: completedTasks,
+        id: savedItemId,
+        title: toDoTitle.value,
+        data,
       },
       0,
     );

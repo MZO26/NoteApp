@@ -1,5 +1,5 @@
 import { getActiveCategory } from "../states/sharedStates.js";
-import { dateTemplate } from "./templates.js";
+import { dateTemplate } from "../ui/itemUI.js";
 
 export interface CategoryInterface {
   id: number;
@@ -20,29 +20,35 @@ class Category implements CategoryInterface {
 
 export interface NoteInterface {
   id: number;
-  type: string;
+  type: "note";
   category: string;
   data: Array<string>;
-  dataCompleted?: Array<string>;
+  title: string;
+  formattedDate: string;
+}
+
+export interface ToDoInterface {
+  id: number;
+  type: "toDo";
+  category: string;
+  data: Array<{ content: string; completed: boolean }>;
   title: string;
   formattedDate: string;
 }
 
 class Note implements NoteInterface {
   id: number;
-  type: string;
+  type: "note";
   category: string;
   data: Array<string>;
-  dataCompleted?: Array<string>;
   title: string;
   formattedDate: string;
   constructor(
     id: number,
-    type: string,
+    type: "note",
     category: string,
     title: string,
     data: Array<string>,
-    dataCompleted: Array<string> | undefined,
     formattedDate: string,
   ) {
     this.id = id;
@@ -50,9 +56,30 @@ class Note implements NoteInterface {
     this.category = category;
     this.title = title;
     this.data = data;
-    if (dataCompleted) {
-      this.dataCompleted = dataCompleted;
-    }
+    this.formattedDate = formattedDate;
+  }
+}
+
+class ToDo implements ToDoInterface {
+  id: number;
+  type: "toDo";
+  category: string;
+  data: Array<{ content: string; completed: boolean }>;
+  title: string;
+  formattedDate: string;
+  constructor(
+    id: number,
+    type: "toDo",
+    category: string,
+    title: string,
+    data: Array<{ content: string; completed: boolean }>,
+    formattedDate: string,
+  ) {
+    this.id = id;
+    this.type = type;
+    this.category = category;
+    this.title = title;
+    this.data = data;
     this.formattedDate = formattedDate;
   }
 }
@@ -63,13 +90,29 @@ const createNewCategory: (categoryName: string) => Category = (
   return new Category(Date.now() + Math.random(), categoryName, false);
 };
 
+const createNewToDo: (
+  type: "toDo",
+  category: string,
+  title: string,
+  data: Array<{ content: string; completed: boolean }>,
+) => ToDo = (type, category, title, data) => {
+  const activeCategory = getActiveCategory();
+  return new ToDo(
+    Date.now() + Math.random(),
+    type,
+    category || activeCategory,
+    title,
+    data,
+    dateTemplate(),
+  );
+};
+
 const createNewNote: (
-  type: string,
-  category: string | null,
+  type: "note",
+  category: string,
   title: string,
   data: Array<string>,
-  dataCompleted?: Array<string>,
-) => Note = (type, category, title, data, dataCompleted) => {
+) => Note = (type, category, title, data) => {
   const activeCategory = getActiveCategory();
   return new Note(
     Date.now() + Math.random(),
@@ -77,9 +120,15 @@ const createNewNote: (
     category || activeCategory,
     title,
     data,
-    dataCompleted,
     dateTemplate(),
   );
 };
 
-export { Category, createNewCategory, createNewNote, Note };
+export {
+  Category,
+  createNewCategory,
+  createNewNote,
+  createNewToDo,
+  Note,
+  ToDo,
+};

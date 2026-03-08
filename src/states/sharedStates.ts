@@ -19,9 +19,9 @@ function setActiveCategory(categoryName: string): void {
   }
 }
 
-function getSavedNoteId(): number | null {
+function getSavedItemId(): number | null {
   try {
-    const idString = sessionStorage.getItem("savedNoteId");
+    const idString = sessionStorage.getItem("savedItemId");
     if (!idString) return null;
     const id = Number(idString);
     return Number.isNaN(id) ? null : id;
@@ -30,21 +30,21 @@ function getSavedNoteId(): number | null {
   }
 }
 
-function setSavedNoteId(id: number | null) {
+function setSavedItemId(id: number | null) {
   try {
     if (id === null) {
-      clearSavedNoteId();
+      clearSavedItemId();
       return;
     }
-    sessionStorage.setItem("savedNoteId", String(id));
+    sessionStorage.setItem("savedItemId", String(id));
   } catch {
     return;
   }
 }
 
-function clearSavedNoteId(): void {
+function clearSavedItemId(): void {
   try {
-    sessionStorage.removeItem("savedNoteId");
+    sessionStorage.removeItem("savedItemId");
   } catch {
     return;
   }
@@ -86,13 +86,13 @@ function setMode(newMode: string): void {
 }
 
 export {
-  clearSavedNoteId,
+  clearSavedItemId,
   getActiveCategory,
   getModalState,
   getMode,
-  getSavedNoteId,
+  getSavedItemId,
   setActiveCategory,
   setModalState,
   setMode,
-  setSavedNoteId,
+  setSavedItemId,
 };

@@ -1,6 +1,6 @@
 NOTICE
 
-This product includes open source software components.
+This project includes open source components.
 
 Bootstrap Icons
 ---------------

@@ -1,23 +1,16 @@
-import { noteToBeRendered, reloadNoteList } from "../features/notes.js";
-import { toDoToBeRendered } from "../features/toDo.js";
+import { handleNoteSave } from "../features/noteItems/saveNotes.js";
+import { handleToDoSave } from "../features/todoItems/saveTodo.js";
 import {
-  clearSavedNoteId,
+  clearSavedItemId,
   getActiveCategory,
   getModalState,
-  getSavedNoteId,
+  getSavedItemId,
   setModalState,
 } from "../states/sharedStates.js";
-import type { CategoryArray, NoteArray } from "../types/storageTypes.js";
-import { renderUI } from "../ui-components/renderModalUI.js";
+import type { CategoryArray, ItemArray } from "../types/storageTypes.js";
+import { renderUI } from "../ui/renderModalUI.js";
 import { cancelAutoSave } from "../utils/autoSave.js";
-import { Note } from "../utils/classes.js";
-import { showToast } from "../utils/events.js";
-import {
-  getValue,
-  removeValue,
-  StorageKeys,
-  updateNotes,
-} from "../utils/storageService.js";
+import { getValue, removeValue, StorageKeys } from "../utils/storageService.js";
 
 const closeBtn = document.querySelector<HTMLButtonElement>(".closeModal-btn")!;
 const saveBtn = document.querySelector<HTMLButtonElement>(".add-btn")!;
@@ -46,137 +39,10 @@ const updateCategorySelect = (categoryArr: CategoryArray): void => {
   });
 };
 
-const getNoteFormData = () => {
-  const titleElement = document.querySelector<HTMLTextAreaElement>(".title");
-  const noteElement = document.querySelector<HTMLTextAreaElement>(".note");
-  if (!titleElement || !noteElement) return;
-  const titleValue = titleElement.value.trim();
-  const noteValue = noteElement.value.trim();
-  const noteDataToArr: string[] = noteValue ? [noteValue] : [];
-  return { titleValue, noteDataToArr };
-};
-
-const getToDoFormData = () => {
-  const spans = Array.from(
-    document.querySelectorAll<HTMLSpanElement>(".task-list li span"),
-  );
-  if (!spans) return;
-  const completedTasks: string[] = spans
-    .filter((span) => span.classList.contains("task-completed"))
-    .map((span) => span.textContent || "");
-  const allTasks: string[] = spans.map((span) => {
-    return span.textContent || "";
-  });
-  const title = document.querySelector<HTMLTextAreaElement>(".todo-title");
-  const titleValue = title?.value.trim() || "";
-  return { completedTasks, allTasks, titleValue };
-};
-
-const syncNoteState = (
-  savedNoteId: number,
-  updatedItem: Note,
-  notesArr: NoteArray,
-): NoteArray => {
-  updateNotes((prev) =>
-    prev.map((note) => (note.id === savedNoteId ? updatedItem : note)),
-  );
-  const updatedNotesArray = notesArr.map((note) =>
-    note.id === savedNoteId ? updatedItem : note,
-  );
-  return updatedNotesArray;
-};
-
-const updateExistingNote = (
-  savedNoteId: number,
-  notesArr: NoteArray,
-  selectedCategory: string,
-  formData: ReturnType<typeof getNoteFormData>,
-) => {
-  if (!formData) return;
-  const savedItem: Note | undefined = notesArr.find(
-    (n) => n.id === savedNoteId,
-  );
-  if (savedItem && savedItem.type === "note") {
-    const updatedItem = {
-      ...savedItem,
-      title: formData.titleValue,
-      data: formData.noteDataToArr,
-      category: selectedCategory,
-    };
-    const updatedArray = syncNoteState(savedNoteId, updatedItem, notesArr);
-    showToast("Note was saved");
-    reloadNoteList(updatedArray);
-  }
-};
-
-const updateExistingToDo = (
-  savedNoteId: number,
-  notesArr: NoteArray,
-  selectedCategory: string,
-  formData: ReturnType<typeof getToDoFormData>,
-): void => {
-  if (!formData) return;
-  const savedItem = notesArr.find((note) => note.id === savedNoteId);
-  if (savedItem && savedItem.type === "toDo") {
-    const updatedItem = {
-      ...savedItem,
-      title: formData.titleValue,
-      data: formData.allTasks,
-      dataCompleted: formData.completedTasks,
-      category: selectedCategory,
-    };
-    const updatedArray = syncNoteState(savedNoteId, updatedItem, notesArr);
-    showToast("ToDo-list was saved");
-    reloadNoteList(updatedArray);
-  }
-};
-
-const handleNoteSave = (
-  savedNoteId: number | null,
-  notesArr: NoteArray,
-  selectedCategory: string,
-): void => {
-  const formData = getNoteFormData();
-  if (!formData) return;
-  if (savedNoteId === null) {
-    noteToBeRendered(
-      "note",
-      selectedCategory,
-      formData.titleValue,
-      formData.noteDataToArr,
-      undefined,
-    );
-  } else {
-    updateExistingNote(savedNoteId, notesArr, selectedCategory, formData);
-  }
-  removeValue(StorageKeys.TEMP_NOTE);
-};
-
-const handleToDoSave = (
-  savedNoteId: number | null,
-  notesArr: NoteArray,
-  selectedCategory: string,
-): void => {
-  const formData = getToDoFormData();
-  if (!formData) return;
-  if (savedNoteId === null) {
-    toDoToBeRendered(
-      "toDo",
-      selectedCategory,
-      formData.titleValue,
-      formData.allTasks,
-      formData.completedTasks,
-    );
-  } else {
-    updateExistingToDo(savedNoteId, notesArr, selectedCategory, formData);
-  }
-  removeValue(StorageKeys.TEMP_TODO);
-};
-
 const saveButton = (): void => {
   cancelAutoSave();
-  const notesArr: NoteArray = getValue(StorageKeys.NOTES);
-  const savedNoteId = getSavedNoteId();
+  const itemArr: ItemArray = getValue(StorageKeys.ITEMS);
+  const savedItemId = getSavedItemId();
   const activeCategory = getActiveCategory();
   const modalState = getModalState();
   const select = document.querySelector<HTMLSelectElement>(".category-select");
@@ -184,11 +50,9 @@ const saveButton = (): void => {
     ? select.options[select.selectedIndex]?.textContent
     : activeCategory;
   if (modalState === "toDo" && selectedCategory) {
-    console.log("savedNoteId: ", savedNoteId);
-    handleToDoSave(savedNoteId, notesArr, selectedCategory);
+    handleToDoSave(savedItemId, itemArr, selectedCategory);
   } else if (modalState === "note" && selectedCategory) {
-    console.log("savedNoteId: ", savedNoteId);
-    handleNoteSave(savedNoteId, notesArr, selectedCategory);
+    handleNoteSave(savedItemId, itemArr, selectedCategory);
   }
   removeValue(StorageKeys.TEMP_NOTE);
   removeValue(StorageKeys.TEMP_TODO);
@@ -221,6 +85,7 @@ const deleteButton = (): void => {
   removeValue(StorageKeys.TEMP_NOTE);
   removeValue(StorageKeys.TEMP_TODO);
 };
+
 deleteBtn.addEventListener("click", deleteButton);
 
 const closeModal = (): void => {
@@ -234,10 +99,11 @@ const closeModal = (): void => {
       switchBtnVisibility.classList.remove("hidden");
     }
   }, 300);
-  clearSavedNoteId();
+  clearSavedItemId();
   removeValue(StorageKeys.TEMP_NOTE);
   removeValue(StorageKeys.TEMP_TODO);
 };
+
 closeBtn.addEventListener("click", closeModal);
 
 const switchOverlayInterface = (): Promise<void> => {
@@ -264,6 +130,7 @@ const switchOverlayInterface = (): Promise<void> => {
     });
   });
 };
+
 switchBtn?.addEventListener("click", () => {
   switchOverlayInterface();
 });

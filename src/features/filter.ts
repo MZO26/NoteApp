@@ -1,64 +1,74 @@
 import { setActiveCategory } from "../states/sharedStates.js";
-import type { RenderedItem } from "../types/featureTypes.js";
-import type { NoteArray } from "../types/storageTypes.js";
-import { Note } from "../utils/classes.js";
+import type { Item, RenderedItem } from "../types/featureTypes.js";
+import type { ItemArray } from "../types/storageTypes.js";
+import { reloadItemList } from "../ui/itemRenderer.js";
+import type { Category } from "../utils/classes.js";
 import { isActive } from "../utils/events.js";
+import { checkId } from "../utils/helpers.js";
 import { getValue, StorageKeys } from "../utils/storageService.js";
-import { checkId, reloadNoteList } from "./notes.js";
+import { reloadCategoryList } from "./categories.js";
+
+type SearchResult = {
+  cachedItems: ItemArray;
+  result: Item | undefined;
+};
 
 const searchInput = document.querySelector<HTMLInputElement>(".search-input")!;
-let cachedNotes: NoteArray = [];
+let cachedItems: ItemArray = [];
 let searchTimeout: NodeJS.Timeout;
-let activeCategory: string | null = null;
+let activeCategory: Category;
 searchInput.addEventListener("input", () => {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(filter, 200);
 });
 
-const findTargetNote = (): {
-  cachedNotes: Note[];
-  result: Note | undefined;
-} => {
+const findTargetItem = (): SearchResult => {
   const value: string = searchInput.value.toLowerCase();
-  if (!cachedNotes.length) {
-    cachedNotes = getValue(StorageKeys.NOTES);
+  if (!cachedItems.length) {
+    reloadCategoryList();
+    cachedItems = getValue(StorageKeys.ITEMS);
   }
-  const result: Note | undefined = cachedNotes.find((item) =>
+  const result: Item | undefined = cachedItems.find((item) =>
     item.title.toLowerCase().includes(value),
   );
-  return { cachedNotes, result };
+  return { cachedItems, result };
 };
 
-const findTargetCategory = (result: Note): string | null => {
-  const categoryList = document.querySelector(".category-list");
-  if (!categoryList) return null;
-  const targetCategory = Array.from(categoryList.querySelectorAll("div")).find(
-    (div) => div.textContent?.trim().includes(result.category),
+const findTargetCategory = (result: Item): Category | undefined => {
+  const category: Category | undefined = getValue(StorageKeys.CATEGORIES).find(
+    (c) => c.name === result.category,
   );
-  if (targetCategory) {
+  if (!category) return;
+  const categoryList = document.querySelector(".category-list");
+  if (!categoryList) return;
+  const targetCategoryElement = Array.from(
+    categoryList.querySelectorAll("div"),
+  ).find((div) => div.textContent.trim() === category.name);
+  if (targetCategoryElement) {
     document.querySelectorAll(".categoryItem").forEach((item) => {
       item.classList.remove("active");
     });
-    isActive(targetCategory);
-    setActiveCategory(result.category);
-    return result.category;
-  } else return null;
+    if (!category) return;
+    isActive(targetCategoryElement);
+    setActiveCategory(category.name);
+    return category;
+  } else return;
 };
 
-const scrollToTargetNote = (result: Note) => {
-  const notesContainer =
-    document.querySelector<HTMLDivElement>(".notes-container");
-  if (!notesContainer) return;
-  const targetNote = notesContainer.querySelector<HTMLDivElement>(
+const scrollToTargetNote = (result: Item) => {
+  const itemContainer =
+    document.querySelector<HTMLDivElement>(".item-container");
+  if (!itemContainer) return;
+  const targetNote = itemContainer.querySelector<HTMLDivElement>(
     `div[data-id="${result.id}"]`,
   ) as RenderedItem | null;
   if (targetNote) {
     targetNote.scrollIntoView({ behavior: "smooth" });
-    isActive(targetNote);
+    isActive(targetNote, itemContainer);
   }
 };
 
-const removeActiveExceptResult = (result: Note) => {
+const removeActiveExceptResult = (result: Item) => {
   const activeItems = document.querySelectorAll(
     ".noteItem.active, .toDoItem.active",
   ) as NodeListOf<RenderedItem>;
@@ -73,19 +83,19 @@ const filter = (): void => {
   const dropdown = document.querySelector<HTMLDivElement>(".dropdown");
   if (!dropdown || !searchInput.value || searchInput.value.length < 2) return;
   const start = performance.now();
-  const { cachedNotes, result } = findTargetNote();
+  const { cachedItems, result } = findTargetItem();
   if (!result) {
     dropdown.innerHTML = "No matching title found";
     dropdown.style.display = "block";
     return;
   }
   const targetCategory = findTargetCategory(result);
-  if (targetCategory !== activeCategory) {
+  if (targetCategory && targetCategory !== activeCategory) {
     activeCategory = targetCategory;
-    const categoryItems = cachedNotes.filter(
-      (notes) => notes.category === activeCategory,
+    const categoryItems = cachedItems.filter(
+      (item) => item.category === activeCategory.name,
     );
-    reloadNoteList(categoryItems);
+    reloadItemList(categoryItems);
   } else {
     removeActiveExceptResult(result);
   }

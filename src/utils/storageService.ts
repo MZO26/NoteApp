@@ -1,8 +1,8 @@
 import type { TempNote, TempToDo } from "../types/storageTypes.js";
-import { Category, Note } from "./classes.js";
+import { Category, Note, ToDo } from "./classes.js";
 
-export const StorageKeys = {
-  NOTES: "notesArr",
+const StorageKeys = {
+  ITEMS: "itemArr",
   CATEGORIES: "categoryArr",
   TEMP_NOTE: "tempNoteValue",
   TEMP_TODO: "tempToDoValue",
@@ -11,14 +11,14 @@ export const StorageKeys = {
 type StorageKey = keyof StorageData;
 
 interface StorageData {
-  [StorageKeys.NOTES]: Note[];
+  [StorageKeys.ITEMS]: (Note | ToDo)[];
   [StorageKeys.CATEGORIES]: Category[];
   [StorageKeys.TEMP_NOTE]: TempNote | null;
   [StorageKeys.TEMP_TODO]: TempToDo | null;
 }
 
 const defaultValues: StorageData = {
-  [StorageKeys.NOTES]: [],
+  [StorageKeys.ITEMS]: [],
   [StorageKeys.CATEGORIES]: [],
   [StorageKeys.TEMP_NOTE]: null,
   [StorageKeys.TEMP_TODO]: null,
@@ -41,6 +41,7 @@ function getValue<K extends StorageKey>(key: K): StorageData[K] {
     return defaultValues[key];
   }
 }
+
 function setValue<K extends StorageKey>(
   key: K,
   value: StorageData[K],
@@ -73,20 +74,14 @@ function removeValue<K extends StorageKey>(key: K): void {
   }
 }
 
-function updateNotes(updater: (currentNotes: Note[]) => Note[]): Note[] {
-  const currentNotes = getValue(StorageKeys.NOTES);
-  const newNotes = updater(currentNotes);
-  setValue(StorageKeys.NOTES, newNotes);
-  return newNotes;
+function updateStorage<K extends keyof StorageData>(
+  key: K,
+  updater: (currentData: StorageData[K]) => StorageData[K],
+): StorageData[K] {
+  const currentData = getValue(key);
+  const newData = updater(currentData);
+  setValue(key, newData);
+  return newData;
 }
 
-function updateCategories(
-  updater: (currentCategories: Category[]) => Category[],
-): Category[] {
-  const currentCategories = getValue(StorageKeys.CATEGORIES);
-  const newCategories = updater(currentCategories);
-  setValue(StorageKeys.CATEGORIES, newCategories);
-  return newCategories;
-}
-
-export { getValue, removeValue, setValue, updateCategories, updateNotes };
+export { getValue, removeValue, setValue, StorageKeys, updateStorage };

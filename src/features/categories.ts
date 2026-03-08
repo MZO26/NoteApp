@@ -1,24 +1,24 @@
 import { updateCategorySelect } from "../handlers/modalHandlers.js";
 import {
-  clearSavedNoteId,
+  clearSavedItemId,
   getActiveCategory,
   setActiveCategory,
 } from "../states/sharedStates.js";
 import type { RenderedItem } from "../types/featureTypes.js";
 import type { CategoryArray } from "../types/storageTypes.js";
-import { Category, createNewCategory } from "../utils/classes.js";
-import { isActive, showToast, truncate } from "../utils/events.js";
-import {
-  getValue,
-  StorageKeys,
-  updateCategories,
-  updateNotes,
-} from "../utils/storageService.js";
+import { reloadItemList } from "../ui/itemRenderer.js";
 import {
   categoryItemTemplate,
   defaultCategoryItemTemplate,
-} from "../utils/templates.js";
-import { reloadNoteList } from "./notes.js";
+} from "../ui/itemUI.js";
+import { Category, createNewCategory } from "../utils/classes.js";
+import { isActive, showToast } from "../utils/events.js";
+import { truncate } from "../utils/helpers.js";
+import {
+  getValue,
+  StorageKeys,
+  updateStorage,
+} from "../utils/storageService.js";
 
 const defaultCategory = "Without Category";
 
@@ -61,7 +61,7 @@ const categoryToBeRendered = (categoryName: string): void => {
     newCategory.isDefault = true;
   const categoryItem = createCategoryItem(newCategory);
   const updatedCategories = [...categoryArr, newCategory];
-  updateCategories(() => updatedCategories);
+  updateStorage(StorageKeys.CATEGORIES, () => updatedCategories);
   categoryList.appendChild(categoryItem);
   if (!newCategory.isDefault) {
     const displayTitle = truncate(newCategory.name);
@@ -85,7 +85,7 @@ const categoryItemHandler = (categoryItem: RenderedItem): void => {
     document.querySelectorAll(".categoryItem").forEach((item) => {
       item.classList.remove("active");
     });
-    clearSavedNoteId();
+    clearSavedItemId();
     const categoryArr: CategoryArray = getValue(StorageKeys.CATEGORIES);
     const id = getCategoryId(categoryItem);
     const category = categoryArr.find((c) => c.id === id);
@@ -95,7 +95,7 @@ const categoryItemHandler = (categoryItem: RenderedItem): void => {
       setActiveCategory(category.name);
     }
     isActive(categoryItem);
-    reloadNoteList();
+    reloadItemList();
     updateCategorySelect(categoryArr);
   }
 
@@ -107,16 +107,16 @@ const categoryItemHandler = (categoryItem: RenderedItem): void => {
     if (id === null || index === -1) return;
     const toBeDeleted = categoryArr[index];
     if (!toBeDeleted) return;
-    updateNotes((prev) => {
-      return prev.map((note) => {
-        if (String(note.category) === toBeDeleted.name) {
-          return { ...note, category: defaultCategory };
+    updateStorage(StorageKeys.ITEMS, (currentItems) => {
+      return currentItems.map((item) => {
+        if (String(item.category) === toBeDeleted.name) {
+          return { ...item, category: defaultCategory };
         }
-        return note;
+        return item;
       });
     });
     const newCategoryArr = categoryArr.filter((_, i) => i !== index);
-    updateCategories(() => newCategoryArr);
+    updateStorage(StorageKeys.CATEGORIES, () => newCategoryArr);
     categoryItem.removeEventListener("click", selectCategory);
     categoryItemBtn?.removeEventListener("click", deleteCategory);
     categoryItem.remove();
@@ -131,7 +131,7 @@ const categoryItemHandler = (categoryItem: RenderedItem): void => {
   categoryItem.addEventListener("click", selectCategory);
 };
 
-const reloadCategoryList = (categories: CategoryArray): void => {
+const reloadCategoryList = (categories?: CategoryArray): void => {
   const categoryList = document.querySelector<HTMLDivElement>(".category-list");
   const categoryArr: CategoryArray =
     categories || getValue(StorageKeys.CATEGORIES);
@@ -144,7 +144,7 @@ const reloadCategoryList = (categories: CategoryArray): void => {
     const categoryItem = createCategoryItem(category);
     if (activeCategory === category.name) {
       isActive(categoryItem);
-      reloadNoteList();
+      reloadItemList();
     }
     categoryList.appendChild(categoryItem);
     categoryItemHandler(categoryItem);

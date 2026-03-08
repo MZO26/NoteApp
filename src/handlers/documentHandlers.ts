@@ -1,12 +1,12 @@
 import { categoryToBeRendered } from "../features/categories.js";
 import { filter } from "../features/filter.js";
 import {
-  clearSavedNoteId,
+  clearSavedItemId,
   getMode,
   setModalState,
   setMode,
 } from "../states/sharedStates.js";
-import { openOverlay } from "../ui-components/renderModalUI.js";
+import { openOverlay } from "../ui/renderModalUI.js";
 import { inputListener } from "../utils/events.js";
 import { removeValue, StorageKeys } from "../utils/storageService.js";
 import { switchOverlayInterface } from "./modalHandlers.js";
@@ -31,7 +31,7 @@ openInfoBtn?.addEventListener("click", (): void => {
 });
 
 const addNewNote = async () => {
-  clearSavedNoteId();
+  clearSavedItemId();
   removeValue(StorageKeys.TEMP_NOTE);
   removeValue(StorageKeys.TEMP_TODO);
   setModalState("note");
@@ -40,6 +40,7 @@ const addNewNote = async () => {
   openOverlay(null);
   if (switchBtnVisibility) switchBtnVisibility.classList.remove("hidden");
 };
+
 showBtn.addEventListener("click", addNewNote);
 
 const collapseCategories = (): void => {
@@ -52,6 +53,7 @@ const collapseCategories = (): void => {
     }
   }
 };
+
 toggleBtn.addEventListener("click", collapseCategories);
 
 const applyMode = (): void => {
@@ -75,6 +77,7 @@ const toggleDarkMode = (): void => {
     setMode("light");
   }
 };
+
 darkModeBtn.addEventListener("click", toggleDarkMode);
 
 const categoryInputButton = async (): Promise<void> => {
@@ -90,8 +93,9 @@ const categoryInputButton = async (): Promise<void> => {
   input.replaceWith(categoryBtn);
   if (value) categoryToBeRendered(value);
 };
-categoryBtn?.addEventListener("click", (e: MouseEvent) => {
-  e.stopPropagation();
+
+categoryBtn?.addEventListener("click", (event: MouseEvent) => {
+  event.stopPropagation();
   categoryInputButton();
 });
 
