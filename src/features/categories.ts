@@ -11,9 +11,10 @@ import {
   categoryItemTemplate,
   defaultCategoryItemTemplate,
 } from "../ui/itemUI.js";
-import { Category, createNewCategory } from "../utils/classes.js";
+import { Category } from "../utils/classes.js";
 import { isActive, showToast } from "../utils/events.js";
 import { truncate } from "../utils/helpers.js";
+import { createNewCategory } from "../utils/models.js";
 import {
   getValue,
   StorageKeys,

@@ -4,7 +4,8 @@
   "description": "Minimal Notetaking / ToDo App",
   "main": "dist/main.js",
   "scripts": {
-    "compile": "npx tsc"
+    "compile": "npx tsc",
+    "test": "vitest run"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,7 @@
   "homepage": "https://github.com/MZO26/NoteApp#readme",
   "devDependencies": {
     "@types/node": "^24.10.0",
+    "jsdom": "^28.1.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   }

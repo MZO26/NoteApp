@@ -8,9 +8,10 @@
     // See also https://aka.ms/tsconfig/module
     "module": "esnext",
     "target": "esnext",
+    "moduleResolution": "bundler",
     // For nodejs:
     "lib": ["esnext", "DOM", "DOM.Iterable"],
-    "types": ["node"],
+    "types": ["node", "vitest/globals"],
     // and npm install -D @types/node
 
     // Other Outputs

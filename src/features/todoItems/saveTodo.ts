@@ -1,8 +1,8 @@
 import type { Item } from "../../types/featureTypes.js";
 import type { ItemArray } from "../../types/storageTypes.js";
 import { reloadItemList, renderItem } from "../../ui/itemRenderer.js";
-import { createNewToDo } from "../../utils/classes.js";
 import { showToast } from "../../utils/events.js";
+import { createNewToDo } from "../../utils/models.js";
 import { syncItemState } from "../../utils/stateUtils.js";
 import { removeValue, StorageKeys } from "../../utils/storageService.js";
 import { getToDoFormData } from "./todoUtils.js";

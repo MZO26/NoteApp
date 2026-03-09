@@ -81,11 +81,14 @@ const removeActiveExceptResult = (result: Item) => {
 
 const filter = (): void => {
   const dropdown = document.querySelector<HTMLDivElement>(".dropdown");
-  if (!dropdown || !searchInput.value || searchInput.value.length < 2) return;
+  if (!dropdown || !searchInput.value) {
+    if (dropdown) dropdown.style.display = "none";
+    return;
+  }
   const start = performance.now();
   const { cachedItems, result } = findTargetItem();
   if (!result) {
-    dropdown.innerHTML = "No matching title found";
+    dropdown.textContent = "No matching title found";
     dropdown.style.display = "block";
     return;
   }

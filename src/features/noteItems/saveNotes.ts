@@ -1,8 +1,8 @@
 import type { Item } from "../../types/featureTypes.js";
 import type { ItemArray } from "../../types/storageTypes.js";
 import { reloadItemList, renderItem } from "../../ui/itemRenderer.js";
-import { createNewNote } from "../../utils/classes.js";
 import { showToast } from "../../utils/events.js";
+import { createNewNote } from "../../utils/models.js";
 import { syncItemState } from "../../utils/stateUtils.js";
 import { removeValue, StorageKeys } from "../../utils/storageService.js";
 import { getNoteFormData } from "./noteUtils.js";

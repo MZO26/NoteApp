@@ -20,7 +20,6 @@ function toDoItemHandler(toDoItem: RenderedItem, newToDo: ToDo): void {
     setModalState("toDo");
     const parsedId = checkId(toDoItem);
     setSavedItemId(parsedId);
-    console.log("toDoId: ", parsedId);
     const switchBtn =
       document.querySelector<HTMLInputElement>(".switch-checkbox");
     if (switchBtn) {

@@ -20,7 +20,6 @@ const autoSaveTempNote = (): void => {
     const noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
     const noteTextArea = document.querySelector<HTMLTextAreaElement>(".note");
     const savedItemId = getSavedItemId();
-    console.log("autosaved for id: ", savedItemId);
     if (!noteTitle || !noteTextArea || savedItemId === null) return;
     setValue(
       StorageKeys.TEMP_NOTE,
@@ -41,7 +40,6 @@ const autoSaveTempToDo = (): void => {
       document.querySelector<HTMLTextAreaElement>(".todo-title");
     const taskList = document.querySelector<HTMLDivElement>(".task-list");
     const savedItemId = getSavedItemId();
-    console.log("autosaved for id: ", savedItemId);
     if (!toDoTitle || !taskList || savedItemId === null) return;
     const spans = Array.from(
       taskList.querySelectorAll<HTMLSpanElement>(".task-list li span"),

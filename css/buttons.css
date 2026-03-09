@@ -23,7 +23,6 @@ button:hover,
 select:hover,
 input:hover {
   background-color: var(--btn-hover);
-  transition: 0.1s ease-in-out;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: box-shadow 0.3s ease-in-out;
 }

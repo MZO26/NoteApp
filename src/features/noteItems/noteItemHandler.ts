@@ -23,7 +23,6 @@ function noteItemHandler(noteItem: RenderedItem, note: Note): void {
     setModalState("note");
     const parsedId = checkId(noteItem);
     setSavedItemId(parsedId);
-    console.log("noteId: ", parsedId);
     const switchBtn =
       document.querySelector<HTMLInputElement>(".switch-checkbox");
     if (switchBtn) {
