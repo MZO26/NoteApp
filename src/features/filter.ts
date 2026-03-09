@@ -63,7 +63,11 @@ const scrollToTargetNote = (result: Item) => {
     `div[data-id="${result.id}"]`,
   ) as RenderedItem | null;
   if (targetNote) {
-    targetNote.scrollIntoView({ behavior: "smooth" });
+    targetNote.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+      inline: "nearest",
+    });
     isActive(targetNote, itemContainer);
   }
 };

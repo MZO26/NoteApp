@@ -13,6 +13,21 @@ import {
   updateStorage,
 } from "../../utils/storageService.js";
 
+const checkIfCompleted = (taskList: HTMLUListElement) => {
+  const taskCheckboxes =
+    taskList.querySelectorAll<HTMLInputElement>(".task-checkbox");
+  for (const checkbox of taskCheckboxes) {
+    const element = checkbox;
+    const listContainer = element.closest("li");
+    const span = listContainer?.querySelector<HTMLSpanElement>("span");
+    const hasTaskCompletedClass = span?.classList.contains("task-completed");
+
+    if (!element.checked && hasTaskCompletedClass) {
+      element.checked = true;
+    }
+  }
+};
+
 function toDoItemHandler(toDoItem: RenderedItem, newToDo: ToDo): void {
   const toDoItemBtn = toDoItem.querySelector<HTMLButtonElement>("button");
 
@@ -42,18 +57,8 @@ function toDoItemHandler(toDoItem: RenderedItem, newToDo: ToDo): void {
       toDoTitle.value = newToDo.title;
       reloadToDoList(taskList, newToDo.data);
     }
-    const taskCheckboxes =
-      taskList.querySelectorAll<HTMLInputElement>(".task-checkbox");
-    for (const checkbox of taskCheckboxes) {
-      const element = checkbox as HTMLInputElement;
-      const listContainer = element.closest("li");
-      const span = listContainer?.querySelector<HTMLSpanElement>("span");
-      const hasTaskCompletedClass = span?.classList.contains("task-completed");
+    checkIfCompleted(taskList);
 
-      if (!element.checked && hasTaskCompletedClass) {
-        element.checked = true;
-      }
-    }
     isActive(toDoItem, itemContainer);
   }
 
