@@ -4,8 +4,9 @@
   "description": "Minimal Notetaking / ToDo App",
   "main": "dist/main.js",
   "scripts": {
-    "compile": "npx tsc",
-    "test": "vitest run"
+    "typecheck": "npx tsc --noEmit",
+    "test": "vitest run",
+    "dev": "vite"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
     "@types/node": "^24.10.0",
     "jsdom": "^28.1.0",
     "typescript": "^5.9.3",
+    "vite": "^7.3.1",
     "vitest": "^4.0.18"
   }
 }

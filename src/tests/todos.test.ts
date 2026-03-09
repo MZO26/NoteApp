@@ -14,6 +14,11 @@ import {
   StorageKeys,
 } from "../utils/storageService.js";
 
+vi.mock("../handlers/modalHandlers.js", () => ({
+  switchOverlayInterface: vi.fn(),
+  updateCategorySelect: vi.fn(),
+}));
+
 vi.mock("../ui/itemRenderer.js", () => ({
   renderItem: vi.fn(),
   reloadItemList: vi.fn(),

@@ -71,11 +71,11 @@ const categoryToBeRendered = (categoryName: string): void => {
   setActiveCategory(newCategory.name);
   updateCategorySelect(updatedCategories);
   categoryItemHandler(categoryItem);
-  setTimeout(() => {
-    if (newCategory.isDefault) {
-      categoryItem.click();
-    }
-  }, 50);
+  if (newCategory.isDefault) {
+    setActiveCategory(newCategory.name);
+    isActive(categoryItem);
+    reloadItemList();
+  }
 };
 
 const categoryItemHandler = (categoryItem: RenderedItem): void => {
@@ -152,4 +152,9 @@ const reloadCategoryList = (categories?: CategoryArray): void => {
   }
 };
 
-export { categoryItemHandler, categoryToBeRendered, reloadCategoryList };
+export {
+  categoryItemHandler,
+  categoryToBeRendered,
+  defaultCategory,
+  reloadCategoryList,
+};

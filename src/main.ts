@@ -1,5 +1,6 @@
 import {
   categoryToBeRendered,
+  defaultCategory,
   reloadCategoryList,
 } from "./features/categories.js";
 import { applyMode } from "./handlers/documentHandlers.js";
@@ -11,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const categoryArr: CategoryArray = getValue(StorageKeys.CATEGORIES);
   reloadCategoryList(categoryArr);
   if (categoryArr.length === 0) {
-    categoryToBeRendered("Without Category");
+    categoryToBeRendered(defaultCategory);
   }
   updateCategorySelect(categoryArr);
   applyMode();

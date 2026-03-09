@@ -1,12 +1,12 @@
+import { defaultCategory } from "../features/categories";
+
 function getActiveCategory(): string {
   try {
     const raw = localStorage.getItem("activeCategoryState");
-    const state = raw
-      ? JSON.parse(raw)
-      : { activeCategory: "Without Category" };
+    const state = raw ? JSON.parse(raw) : { activeCategory: defaultCategory };
     return state.activeCategory;
   } catch {
-    return "Without Category";
+    return defaultCategory;
   }
 }
 
