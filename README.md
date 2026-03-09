@@ -18,12 +18,20 @@ The application is perfect for users who want quick access to their notes / to-d
 - Uses Bootstrap Icons for UI enhancements
 - Data saved locally (localStorage/sessionStorage)
 
+## Tech Stack
+
+- Bundler: [Vite](https://vitejs.dev/)
+- Language: [TypeScript](https://www.typescriptlang.org/)
+- Testing: [Vitest](https://www.vitest.dev/)
+
 ## Prerequisites
 
-- Node.js and npm
-- VS Code (recommended for Live Server extension: https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)
+- Node.js (v18 or higher is recommended for Vite)
+- npm (or your preferred package manager like Yarn/pnpm)
 
-## Installation
+## Getting started
+
+Follow these steps to set up the project locally:
 
 1. Ensure [Node.js](https://nodejs.org/) is installed on your machine.
 
@@ -33,13 +41,9 @@ The application is perfect for users who want quick access to their notes / to-d
 
 4. Install dependencies: Install the project dependencies with: `npm install`
 
-5. Compile TypeScript: `npm run compile` (or `tsc` if using tsconfig.json directly)
+5. Start the development server: `npm run dev`
 
-6. Start live server
-
-**Note:** Always run the TypeScript compile command before starting the server, as Live Server serves compiled JavaScript files.
-
-7. Replace `https://github.com/MZO26/NoteApp.git` with your repository URL and adjust scripts if customized.
+6. Run tests: `npm run test`
 
 ## License
 
