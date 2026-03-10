@@ -27,7 +27,7 @@ const renderItem = (item: Item): void => {
 
 const createItemForReload = (item: Item): RenderedItem => {
   const renderedItem = document.createElement("div");
-  renderedItem.setAttribute("data-id", String(item.id));
+  renderedItem.setAttribute("data-id", item.id);
   renderedItem.className = `${item.type}Item`;
   switch (item.type) {
     case "note":
@@ -48,7 +48,7 @@ const createNewToDoItem = (
   itemArr: ItemArray,
 ): void => {
   itemDiv.className = "toDoItem";
-  itemDiv.setAttribute("data-id", String(newToDo.id));
+  itemDiv.setAttribute("data-id", newToDo.id);
   itemDiv.innerHTML = toDoItemTemplate(newToDo);
   itemArr.push(newToDo);
   toDoItemHandler(itemDiv, newToDo);
@@ -60,18 +60,21 @@ const createNewNoteItem = (
   itemArr: ItemArray,
 ): void => {
   itemDiv.className = "noteItem";
-  itemDiv.setAttribute("data-id", String(newNote.id));
+  itemDiv.setAttribute("data-id", newNote.id);
   itemDiv.innerHTML = noteItemTemplate(newNote);
   itemArr.push(newNote);
   noteItemHandler(itemDiv, newNote);
 };
 
-const reloadItemList = (updatedArray?: ItemArray): void => {
+const reloadItemList = (
+  updatedArray?: ItemArray,
+  selectedCategory?: string,
+): void => {
   const itemContainer =
     document.querySelector<HTMLDivElement>(".item-container");
   if (!itemContainer) return;
   const itemArr: ItemArray = updatedArray || getValue(StorageKeys.ITEMS);
-  const activeCategory = getActiveCategory();
+  const activeCategory = selectedCategory || getActiveCategory();
   const activeCategoryItems: ItemArray = itemArr.filter(
     (items) => items.category === activeCategory,
   );

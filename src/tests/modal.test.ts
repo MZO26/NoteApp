@@ -1,4 +1,11 @@
+import { v4 } from "uuid";
 import { removeValue, StorageKeys } from "../utils/storageService.js";
+
+vi.mock("uuid", () => {
+  return {
+    v4: vi.fn(() => "fake-test-uuid-1234"),
+  };
+});
 
 const nextFrame = async () => {
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
@@ -44,7 +51,7 @@ describe("showModal-btn (addNewNote)", () => {
     expect(document.querySelector(".modal")!.classList).toContain("show");
   });
 
-  it("sets switch-checkbox to false (Note mode)", async () => {
+  it("sets switch-checkbox to false (Note mode)", { repeats: 4 }, async () => {
     const switchBtn =
       document.querySelector<HTMLInputElement>(".switch-checkbox")!;
     switchBtn.checked = true;
@@ -88,7 +95,7 @@ describe("showModal-btn (addNewNote)", () => {
   });
 
   it("removes savedItemId from sessionStorage (clearSavedItemId)", async () => {
-    sessionStorage.setItem("savedItemId", "42");
+    sessionStorage.setItem("savedItemId", v4());
 
     document.querySelector<HTMLButtonElement>(".showModal-btn")!.click();
     await nextFrame();

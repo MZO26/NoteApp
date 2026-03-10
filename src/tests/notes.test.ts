@@ -1,3 +1,4 @@
+import { v4 } from "uuid";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getNoteFormData } from "../features/noteItems/noteUtils.js";
 import { handleNoteSave } from "../features/noteItems/saveNotes.js";
@@ -10,6 +11,12 @@ import {
   StorageKeys,
 } from "../utils/storageService.js";
 
+vi.mock("uuid", () => {
+  return {
+    v4: vi.fn(() => "fake-test-uuid-1234"),
+  };
+});
+
 vi.mock("../handlers/modalHandlers.js", () => ({
   switchOverlayInterface: vi.fn(),
   updateCategorySelect: vi.fn(),
@@ -20,9 +27,24 @@ vi.mock("../ui/itemRenderer.js", () => ({
   reloadItemList: vi.fn(),
 }));
 
+vi.mock("../features/categories.js", () => ({
+  reloadCategoryList: vi.fn(),
+  defaultCategory: "Without Category",
+  categoryItemHandler: vi.fn(),
+  categoryToBeRendered: vi.fn(),
+}));
+
 vi.mock("../utils/events.js", () => ({
   showToast: vi.fn(),
-  isActive: vi.fn(),
+}));
+
+vi.mock("../states/sharedStates.js", () => ({
+  setActiveCategory: vi.fn(),
+  getActiveCategory: vi.fn(() => "Work"),
+  getSavedItemId: vi.fn(() => null),
+  getModalState: vi.fn(() => "toDo"),
+  clearSavedItemId: vi.fn(),
+  setSavedItemId: vi.fn(),
 }));
 
 vi.mock("../utils/classes.js", async (importOriginal) => {
@@ -34,15 +56,9 @@ vi.mock("../utils/classes.js", async (importOriginal) => {
       category: string,
       title: string,
       data: string[],
-    ) => new actual.Note(12345, type, category, title, data, "09.03.2026"),
+    ) => new actual.Note(v4(), type, category, title, data, "09.03.2026"),
   };
 });
-
-vi.mock("../utils/stateUtils.js", () => ({
-  syncItemState: vi.fn((id: number, updatedItem: Note, arr: ItemArray) =>
-    arr.map((item) => (item.id === id ? updatedItem : item)),
-  ),
-}));
 
 describe("getNoteFormData", () => {
   beforeEach(() => {
@@ -93,21 +109,33 @@ describe("handleNoteSave", () => {
       <textarea class="title">Test Note</textarea>
       <textarea class="note">Test Content</textarea>
     `;
-    afterEach(() => {
-      vi.useRealTimers();
-    });
+  });
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
-  it("creates a new Note when savedItemId is null", async () => {
-    const { renderItem } = await import("../ui/itemRenderer.js");
+  it(
+    "creates a new Note when savedItemId is null",
+    { repeats: 4 },
+    async () => {
+      const { renderItem } = await import("../ui/itemRenderer.js");
+      const { reloadCategoryList } = await import("../features/categories.js");
+      const { showToast } = await import("../utils/events.js");
 
-    handleNoteSave(null, [], "Work");
-
-    expect(renderItem).toHaveBeenCalledOnce();
-  });
+      handleNoteSave(null, [], "Work");
+      expect(renderItem).toHaveBeenCalledOnce();
+      expect(showToast).toHaveBeenCalledWith("New note was created");
+      vi.runAllTimers();
+      expect(reloadCategoryList).toHaveBeenCalled();
+    },
+  );
 
   it("removes TEMP_NOTE after saving", () => {
-    setValue(StorageKeys.TEMP_NOTE, { id: 1, title: "Old", data: [] });
+    setValue(StorageKeys.TEMP_NOTE, {
+      id: "fake-test-uuid-1234",
+      title: "Old",
+      data: [],
+    });
     vi.advanceTimersByTime(200);
 
     handleNoteSave(null, [], "Work");
@@ -115,28 +143,33 @@ describe("handleNoteSave", () => {
     expect(getValue(StorageKeys.TEMP_NOTE)).toBeNull();
   });
 
-  it("updates an existing Note when savedItemId exists", async () => {
-    const { reloadItemList } = await import("../ui/itemRenderer.js");
-    const { showToast } = await import("../utils/events.js");
+  it(
+    "updates an existing Note when savedItemId exists",
+    { repeats: 4 },
+    async () => {
+      const { reloadCategoryList } = await import("../features/categories.js");
+      const { showToast } = await import("../utils/events.js");
 
-    const existingNote = new Note(
-      99,
-      "note",
-      "Work",
-      "Old Title",
-      ["Old Content"],
-      "01.01.2025",
-    );
-    const itemArr: ItemArray = [existingNote];
+      const existingNote = new Note(
+        "fake-test-uuid-1234",
+        "note",
+        "Work",
+        "Old Title",
+        ["Old Content"],
+        "01.01.2025",
+      );
+      const itemArr: ItemArray = [existingNote];
 
-    document.body.innerHTML = `
+      document.body.innerHTML = `
       <textarea class="title">New Title</textarea>
       <textarea class="note">New Content</textarea>
     `;
 
-    handleNoteSave(99, itemArr, "Work");
-
-    expect(showToast).toHaveBeenCalledWith("Note was saved");
-    expect(reloadItemList).toHaveBeenCalled();
-  });
+      handleNoteSave("fake-test-uuid-1234", itemArr, "Work");
+      expect(typeof existingNote.id).toBe("string");
+      expect(showToast).toHaveBeenCalledWith("Note was saved");
+      vi.runAllTimers();
+      expect(reloadCategoryList).toHaveBeenCalled();
+    },
+  );
 });

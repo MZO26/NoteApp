@@ -6,10 +6,13 @@ import {
   setModalState,
   setMode,
 } from "../states/sharedStates.js";
-import { openOverlay } from "../ui/renderModalUI.js";
+import { openModal } from "../ui/renderModalUI.js";
 import { inputListener } from "../utils/events.js";
-import { removeValue, StorageKeys } from "../utils/storageService.js";
-import { switchOverlayInterface } from "./modalHandlers.js";
+import { getValue, removeValue, StorageKeys } from "../utils/storageService.js";
+import {
+  switchOverlayInterface,
+  updateCategorySelect,
+} from "./modalHandlers.js";
 
 const filterInput = document.querySelector<HTMLInputElement>(".search-input")!;
 const switchBtn = document.querySelector<HTMLInputElement>(".switch-checkbox");
@@ -37,7 +40,8 @@ const addNewNote = async () => {
   setModalState("note");
   if (switchBtn) switchBtn.checked = false;
   await switchOverlayInterface();
-  openOverlay(null);
+  openModal(null);
+  updateCategorySelect(getValue(StorageKeys.CATEGORIES));
   if (switchBtnVisibility) switchBtnVisibility.classList.remove("hidden");
 };
 

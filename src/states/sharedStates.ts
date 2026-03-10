@@ -1,3 +1,4 @@
+import { validate } from "uuid";
 import { defaultCategory } from "../features/categories";
 
 function getActiveCategory(): string {
@@ -19,24 +20,23 @@ function setActiveCategory(categoryName: string): void {
   }
 }
 
-function getSavedItemId(): number | null {
+function getSavedItemId(): string | null {
   try {
     const idString = sessionStorage.getItem("savedItemId");
     if (!idString) return null;
-    const id = Number(idString);
-    return Number.isNaN(id) ? null : id;
+    return !validate(idString) ? null : idString;
   } catch {
     return null;
   }
 }
 
-function setSavedItemId(id: number | null) {
+function setSavedItemId(id: string | null) {
   try {
     if (id === null) {
       clearSavedItemId();
       return;
     }
-    sessionStorage.setItem("savedItemId", String(id));
+    sessionStorage.setItem("savedItemId", id);
   } catch {
     return;
   }

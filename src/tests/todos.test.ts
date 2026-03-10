@@ -1,3 +1,4 @@
+import { v4 } from "uuid";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { handleToDoSave } from "../features/todoItems/saveTodo.js";
 import {
@@ -14,6 +15,12 @@ import {
   StorageKeys,
 } from "../utils/storageService.js";
 
+vi.mock("uuid", () => {
+  return {
+    v4: vi.fn(() => "fake-test-uuid-1234"),
+  };
+});
+
 vi.mock("../handlers/modalHandlers.js", () => ({
   switchOverlayInterface: vi.fn(),
   updateCategorySelect: vi.fn(),
@@ -24,8 +31,24 @@ vi.mock("../ui/itemRenderer.js", () => ({
   reloadItemList: vi.fn(),
 }));
 
+vi.mock("../features/categories.js", () => ({
+  reloadCategoryList: vi.fn(),
+  defaultCategory: "Without Category",
+  categoryItemHandler: vi.fn(),
+  categoryToBeRendered: vi.fn(),
+}));
+
 vi.mock("../utils/events.js", () => ({
   showToast: vi.fn(),
+}));
+
+vi.mock("../states/sharedStates.js", () => ({
+  setActiveCategory: vi.fn(),
+  getActiveCategory: vi.fn(() => "Work"),
+  getSavedItemId: vi.fn(() => null),
+  getModalState: vi.fn(() => "toDo"),
+  clearSavedItemId: vi.fn(),
+  setSavedItemId: vi.fn(),
 }));
 
 vi.mock("../utils/classes.js", async (importOriginal) => {
@@ -37,15 +60,9 @@ vi.mock("../utils/classes.js", async (importOriginal) => {
       category: string,
       title: string,
       data: { content: string; completed: boolean }[],
-    ) => new actual.ToDo(12345, type, category, title, data, "09.03.2026"),
+    ) => new actual.ToDo(v4(), type, category, title, data, "09.03.2026"),
   };
 });
-
-vi.mock("../utils/stateUtils.js", () => ({
-  syncItemState: vi.fn((id: number, updatedItem: ToDo, arr: ItemArray) =>
-    arr.map((item) => (item.id === id ? updatedItem : item)),
-  ),
-}));
 
 describe("getToDoFormData", () => {
   beforeEach(() => {
@@ -160,9 +177,9 @@ describe("handleToDoSave", () => {
         <li><span class="task-completed">Eggs</span></li>
       </ul>
     `;
-    afterEach(() => {
-      vi.useRealTimers();
-    });
+  });
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it(
@@ -170,15 +187,24 @@ describe("handleToDoSave", () => {
     { repeats: 4 },
     async () => {
       const { renderItem } = await import("../ui/itemRenderer.js");
+      const { reloadCategoryList } = await import("../features/categories.js");
+      const { showToast } = await import("../utils/events.js");
 
       handleToDoSave(null, [], "Work");
 
       expect(renderItem).toHaveBeenCalledOnce();
+      expect(showToast).toHaveBeenCalledWith("New ToDo-list was created");
+      vi.runAllTimers();
+      expect(reloadCategoryList).toHaveBeenCalled();
     },
   );
 
   it("removes TEMP_TODO after saving", () => {
-    setValue(StorageKeys.TEMP_TODO, { id: 1, title: "Old", data: [] });
+    setValue(StorageKeys.TEMP_TODO, {
+      id: v4(),
+      title: "Old",
+      data: [],
+    });
     vi.advanceTimersByTime(200);
 
     handleToDoSave(null, [], "Work");
@@ -190,11 +216,11 @@ describe("handleToDoSave", () => {
     "updates an existing ToDo when savedItemId exists",
     { repeats: 4 },
     async () => {
-      const { reloadItemList } = await import("../ui/itemRenderer.js");
+      const { reloadCategoryList } = await import("../features/categories.js");
       const { showToast } = await import("../utils/events.js");
 
       const existingToDo = new ToDo(
-        99,
+        v4(),
         "toDo",
         "Work",
         "Old Title",
@@ -202,10 +228,11 @@ describe("handleToDoSave", () => {
         "01.01.2025",
       );
       const itemArr: ItemArray = [existingToDo];
-      handleToDoSave(99, itemArr, "Work");
 
+      handleToDoSave(existingToDo.id, itemArr, "Work");
       expect(showToast).toHaveBeenCalledWith("ToDo-list was saved");
-      expect(reloadItemList).toHaveBeenCalled();
+      vi.runAllTimers();
+      expect(reloadCategoryList).toHaveBeenCalled();
     },
   );
 });

@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Category, Note } from "../utils/classes.js";
 import { removeValue, setValue, StorageKeys } from "../utils/storageService.js";
@@ -32,7 +33,7 @@ function setupFilterDOM() {
 }
 
 function findItemByTitle(
-  items: { id: number; title: string; category: string }[],
+  items: { id: string; title: string; category: string }[],
   query: string,
 ) {
   return items.find((item) =>
@@ -41,7 +42,7 @@ function findItemByTitle(
 }
 
 function filterItemsByCategory(
-  items: { id: number; title: string; category: string }[],
+  items: { id: string; title: string; category: string }[],
   categoryName: string,
 ) {
   return items.filter((item) => item.category === categoryName);
@@ -49,33 +50,33 @@ function filterItemsByCategory(
 
 describe("Filter", () => {
   const items = [
-    { id: 1, title: "Einkaufsliste", category: "Personal" },
-    { id: 2, title: "Meeting Notes", category: "Work" },
-    { id: 3, title: "Projekt Ideen", category: "Work" },
-    { id: 4, title: "Tagebuch", category: "Personal" },
+    { id: uuidv4(), title: "Einkaufsliste", category: "Personal" },
+    { id: uuidv4(), title: "Meeting Notes", category: "Work" },
+    { id: uuidv4(), title: "Projekt Ideen", category: "Work" },
+    { id: uuidv4(), title: "Tagebuch", category: "Personal" },
   ];
 
   it("finds an item by title", () => {
     const result = findItemByTitle(items, "meeting");
-    expect(result?.id).toBe(2);
+    expect(typeof result?.id).toBe("string");
   });
 
   it("finds an item with uppercase letters", () => {
     const result = findItemByTitle(items, "TAGEBUCH");
-    expect(result?.id).toBe(4);
+    expect(typeof result?.id).toBe("string");
   });
 
   it("finds an item by a substring", () => {
     const result = findItemByTitle(items, "ideen");
-    expect(result?.id).toBe(3);
+    expect(typeof result?.id).toBe("string");
   });
 });
 
 describe("Category Filter", () => {
   const items = [
-    { id: 1, title: "Note A", category: "Work" },
-    { id: 2, title: "Note B", category: "Personal" },
-    { id: 3, title: "Note C", category: "Work" },
+    { id: uuidv4(), title: "Note A", category: "Work" },
+    { id: uuidv4(), title: "Note B", category: "Personal" },
+    { id: uuidv4(), title: "Note C", category: "Work" },
   ];
 
   it("filters items by category", () => {
@@ -110,21 +111,34 @@ describe("Dropdown and Search-Input", () => {
     removeValue(StorageKeys.CATEGORIES);
     setupFilterDOM();
 
-    afterEach(() => {
-      vi.useRealTimers();
-    });
-
     const notes = [
-      new Note(1, "note", "Work", "Meeting Notes", ["Content"], "09.03.2026"),
-      new Note(2, "note", "Personal", "Diary", ["Content"], "09.03.2026"),
+      new Note(
+        uuidv4(),
+        "note",
+        "Work",
+        "Meeting Notes",
+        ["Content"],
+        "09.03.2026",
+      ),
+      new Note(
+        uuidv4(),
+        "note",
+        "Personal",
+        "Diary",
+        ["Content"],
+        "09.03.2026",
+      ),
     ];
     const categories = [
-      new Category(10, "Work", false),
-      new Category(11, "Personal", false),
+      new Category(uuidv4(), "Work", false),
+      new Category(uuidv4(), "Personal", false),
     ];
     setValue(StorageKeys.ITEMS, notes);
     setValue(StorageKeys.CATEGORIES, categories);
     vi.advanceTimersByTime(200);
+  });
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("shows 'No matching title found' when no results are found", async () => {

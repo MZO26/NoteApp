@@ -1,7 +1,10 @@
-import { switchOverlayInterface } from "../../handlers/modalHandlers.js";
+import {
+  switchOverlayInterface,
+  updateCategorySelect,
+} from "../../handlers/modalHandlers.js";
 import { setModalState, setSavedItemId } from "../../states/sharedStates.js";
 import type { AddToDoButton, RenderedItem } from "../../types/featureTypes.js";
-import { openOverlay } from "../../ui/renderModalUI.js";
+import { openModal } from "../../ui/renderModalUI.js";
 import { reloadToDoList } from "../../ui/renderTodoList.js";
 import { ToDo } from "../../utils/classes.js";
 import { isActive } from "../../utils/events.js";
@@ -39,8 +42,10 @@ function toDoItemHandler(toDoItem: RenderedItem, newToDo: ToDo): void {
       document.querySelector<HTMLInputElement>(".switch-checkbox");
     if (switchBtn) {
       switchBtn.checked = true;
+      switchBtn.dispatchEvent(new Event("change"));
     }
-    openOverlay(parsedId);
+    updateCategorySelect(getValue(StorageKeys.CATEGORIES));
+    openModal(parsedId);
     await switchOverlayInterface();
     const itemContainer =
       document.querySelector<HTMLDivElement>(".item-container");

@@ -102,7 +102,7 @@ const filter = (): void => {
     const categoryItems = cachedItems.filter(
       (item) => item.category === activeCategory.name,
     );
-    reloadItemList(categoryItems);
+    reloadItemList(categoryItems, activeCategory.name);
   } else {
     removeActiveExceptResult(result);
   }

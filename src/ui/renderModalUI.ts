@@ -7,11 +7,11 @@ const overlay = document.querySelector<HTMLDivElement>(".overlay");
 const modal = document.querySelector<HTMLDivElement>(".modal");
 const switchBtnVisibility = document.querySelector<HTMLLabelElement>(".switch");
 
-const openOverlay = (savedItemId: number | null): void => {
+const openModal = (savedItemId: string | null): void => {
+  const items: HTMLCollection | undefined =
+    document.querySelector<HTMLDivElement>(".item-container")?.children;
   overlay?.classList.add("show");
   modal?.classList.add("show");
-  const notes: HTMLCollection | undefined =
-    document.querySelector<HTMLDivElement>(".item-container")?.children;
   if (
     savedItemId &&
     switchBtnVisibility &&
@@ -19,8 +19,8 @@ const openOverlay = (savedItemId: number | null): void => {
   ) {
     switchBtnVisibility.classList.add("hidden");
   }
-  if (notes) {
-    Array.from(notes).forEach((element) => {
+  if (items) {
+    Array.from(items).forEach((element) => {
       if (element.classList.contains("active"))
         element.classList.remove("active");
     });
@@ -108,4 +108,4 @@ const renderUI = (modalState: string): void => {
   }
 };
 
-export { openOverlay, renderUI };
+export { openModal, renderUI };

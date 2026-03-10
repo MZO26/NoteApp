@@ -1,14 +1,16 @@
+import { setActiveCategory } from "../../states/sharedStates.js";
 import type { Item } from "../../types/featureTypes.js";
 import type { ItemArray } from "../../types/storageTypes.js";
-import { reloadItemList, renderItem } from "../../ui/itemRenderer.js";
+import { renderItem } from "../../ui/itemRenderer.js";
 import { showToast } from "../../utils/events.js";
 import { createNewNote } from "../../utils/models.js";
 import { syncItemState } from "../../utils/stateUtils.js";
 import { removeValue, StorageKeys } from "../../utils/storageService.js";
+import { reloadCategoryList } from "../categories.js";
 import { getNoteFormData } from "./noteUtils.js";
 
 const handleNoteSave = (
-  savedItemId: number | null,
+  savedItemId: string | null,
   itemArr: ItemArray,
   selectedCategory: string,
 ): void => {
@@ -22,18 +24,24 @@ const handleNoteSave = (
       formData.noteDataToArr,
     );
     renderItem(newNote);
+    showToast("New note was created");
   } else {
     updateExistingNote(savedItemId, itemArr, selectedCategory, formData);
   }
+  setActiveCategory(selectedCategory);
   removeValue(StorageKeys.TEMP_NOTE);
+  setTimeout(() => {
+    reloadCategoryList();
+  }, 0);
 };
 
 const updateExistingNote = (
-  savedItemId: number,
+  savedItemId: string,
   itemArr: ItemArray,
   selectedCategory: string,
   formData: ReturnType<typeof getNoteFormData>,
 ) => {
+  console.log("selectedCategory in updateExistingNote:", selectedCategory);
   if (!formData) return;
   const savedItem: Item | undefined = itemArr.find(
     (item) => item.id === savedItemId,
@@ -45,9 +53,8 @@ const updateExistingNote = (
       data: formData.noteDataToArr,
       category: selectedCategory,
     };
-    const updatedArray = syncItemState(savedItemId, updatedItem, itemArr);
+    syncItemState(savedItemId, updatedItem);
     showToast("Note was saved");
-    reloadItemList(updatedArray);
   }
 };
 

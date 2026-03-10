@@ -1,14 +1,16 @@
+import { setActiveCategory } from "../../states/sharedStates.js";
 import type { Item } from "../../types/featureTypes.js";
 import type { ItemArray } from "../../types/storageTypes.js";
-import { reloadItemList, renderItem } from "../../ui/itemRenderer.js";
+import { renderItem } from "../../ui/itemRenderer.js";
 import { showToast } from "../../utils/events.js";
 import { createNewToDo } from "../../utils/models.js";
 import { syncItemState } from "../../utils/stateUtils.js";
 import { removeValue, StorageKeys } from "../../utils/storageService.js";
+import { reloadCategoryList } from "../categories.js";
 import { getToDoFormData } from "./todoUtils.js";
 
 const handleToDoSave = (
-  savedItemId: number | null,
+  savedItemId: string | null,
   itemArr: ItemArray,
   selectedCategory: string,
 ): void => {
@@ -22,14 +24,19 @@ const handleToDoSave = (
       formData.data,
     );
     renderItem(newToDo);
+    showToast("New ToDo-list was created");
   } else {
     updateExistingToDo(savedItemId, itemArr, selectedCategory, formData);
   }
+  setActiveCategory(selectedCategory);
   removeValue(StorageKeys.TEMP_TODO);
+  setTimeout(() => {
+    reloadCategoryList();
+  }, 0);
 };
 
 const updateExistingToDo = (
-  savedItemId: number,
+  savedItemId: string,
   itemArr: ItemArray,
   selectedCategory: string,
   formData: ReturnType<typeof getToDoFormData>,
@@ -45,9 +52,8 @@ const updateExistingToDo = (
       data: formData.data,
       category: selectedCategory,
     };
-    const updatedArray = syncItemState(savedItemId, updatedItem, itemArr);
+    syncItemState(savedItemId, updatedItem);
     showToast("ToDo-list was saved");
-    reloadItemList(updatedArray);
   }
 };
 

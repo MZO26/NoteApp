@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   categoryToBeRendered,
@@ -35,7 +36,7 @@ vi.mock("../utils/classes.js", async (importOriginal) => {
   return {
     ...actual,
     createNewCategory: (name: string) =>
-      new actual.Category(Date.now(), name, false),
+      new actual.Category(uuidv4(), name, false),
   };
 });
 
@@ -119,8 +120,8 @@ describe("reloadCategoryList", () => {
 
   it("renders all categories in the list", () => {
     const categories: Category[] = [
-      new Category(1, "Work", false),
-      new Category(2, "Personal", false),
+      new Category(uuidv4(), "Work", false),
+      new Category(uuidv4(), "Personal", false),
     ];
 
     reloadCategoryList(categories);
@@ -132,7 +133,9 @@ describe("reloadCategoryList", () => {
   it("reads categories from storage when no array is provided", () => {
     vi.useFakeTimers();
     try {
-      setValue(StorageKeys.CATEGORIES, [new Category(1, "FromStorage", false)]);
+      setValue(StorageKeys.CATEGORIES, [
+        new Category(uuidv4(), "FromStorage", false),
+      ]);
       vi.advanceTimersByTime(200);
       reloadCategoryList();
 
@@ -144,7 +147,7 @@ describe("reloadCategoryList", () => {
   });
 
   it("marks the active category with 'active' class", () => {
-    const categories: Category[] = [new Category(1, "Work", false)];
+    const categories: Category[] = [new Category(uuidv4(), "Work", false)];
     reloadCategoryList(categories);
 
     const categoryList = document.querySelector(".category-list")!;

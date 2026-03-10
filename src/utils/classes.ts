@@ -1,14 +1,14 @@
 export interface CategoryInterface {
-  id: number;
+  id: string;
   name: string;
   isDefault?: boolean;
 }
 
 class Category implements CategoryInterface {
-  id: number;
+  id: string;
   name: string;
   isDefault?: boolean;
-  constructor(id: number, name: string, isDefault?: boolean) {
+  constructor(id: string, name: string, isDefault?: boolean) {
     this.id = id;
     this.name = name;
     this.isDefault = isDefault || false;
@@ -16,7 +16,7 @@ class Category implements CategoryInterface {
 }
 
 export interface NoteInterface {
-  id: number;
+  id: string;
   type: "note";
   category: string;
   data: Array<string>;
@@ -25,7 +25,7 @@ export interface NoteInterface {
 }
 
 export interface ToDoInterface {
-  id: number;
+  id: string;
   type: "toDo";
   category: string;
   data: Array<{ content: string; completed: boolean }>;
@@ -34,14 +34,14 @@ export interface ToDoInterface {
 }
 
 class Note implements NoteInterface {
-  id: number;
+  id: string;
   type: "note";
   category: string;
   data: Array<string>;
   title: string;
   formattedDate: string;
   constructor(
-    id: number,
+    id: string,
     type: "note",
     category: string,
     title: string,
@@ -58,14 +58,14 @@ class Note implements NoteInterface {
 }
 
 class ToDo implements ToDoInterface {
-  id: number;
+  id: string;
   type: "toDo";
   category: string;
   data: Array<{ content: string; completed: boolean }>;
   title: string;
   formattedDate: string;
   constructor(
-    id: number,
+    id: string,
     type: "toDo",
     category: string,
     title: string,

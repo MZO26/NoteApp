@@ -4,7 +4,6 @@ import {
   reloadCategoryList,
 } from "./features/categories.js";
 import { applyMode } from "./handlers/documentHandlers.js";
-import { updateCategorySelect } from "./handlers/modalHandlers.js";
 import type { CategoryArray } from "./types/storageTypes.js";
 import { getValue, StorageKeys } from "./utils/storageService.js";
 
@@ -14,6 +13,5 @@ document.addEventListener("DOMContentLoaded", () => {
   if (categoryArr.length === 0) {
     categoryToBeRendered(defaultCategory);
   }
-  updateCategorySelect(categoryArr);
   applyMode();
 });

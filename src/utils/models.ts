@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import { getActiveCategory } from "../states/sharedStates.js";
 import { dateTemplate } from "../ui/itemUI.js";
 import { Category, Note, ToDo } from "./classes.js";
@@ -5,7 +6,7 @@ import { Category, Note, ToDo } from "./classes.js";
 const createNewCategory: (categoryName: string) => Category = (
   categoryName,
 ) => {
-  return new Category(Date.now() + Math.random(), categoryName, false);
+  return new Category(uuidv4(), categoryName, false);
 };
 
 const createNewToDo: (
@@ -16,7 +17,7 @@ const createNewToDo: (
 ) => ToDo = (type, category, title, data) => {
   const activeCategory = getActiveCategory();
   return new ToDo(
-    Date.now() + Math.random(),
+    uuidv4(),
     type,
     category || activeCategory,
     title,
@@ -33,7 +34,7 @@ const createNewNote: (
 ) => Note = (type, category, title, data) => {
   const activeCategory = getActiveCategory();
   return new Note(
-    Date.now() + Math.random(),
+    uuidv4(),
     type,
     category || activeCategory,
     title,

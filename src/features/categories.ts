@@ -36,12 +36,12 @@ const createCategoryItem = (category: Category): RenderedItem => {
   return categoryItem;
 };
 
-const getCategoryId = (categoryItem: RenderedItem): number => {
-  let id: number;
+const getCategoryId = (categoryItem: RenderedItem): string | null => {
+  let id: string | null = null;
   if (categoryItem.getAttribute("default-category-id")) {
-    id = Number(categoryItem.getAttribute("default-category-id"));
+    id = categoryItem.getAttribute("default-category-id");
   } else {
-    id = Number(categoryItem.getAttribute("category-id"));
+    id = categoryItem.getAttribute("category-id");
   }
   return id;
 };
@@ -68,13 +68,11 @@ const categoryToBeRendered = (categoryName: string): void => {
     const displayTitle = truncate(newCategory.name);
     showToast(`Added "${displayTitle}"`);
   }
-  setActiveCategory(newCategory.name);
   updateCategorySelect(updatedCategories);
   categoryItemHandler(categoryItem);
   if (newCategory.isDefault) {
     setActiveCategory(newCategory.name);
     isActive(categoryItem);
-    reloadItemList();
   }
 };
 
@@ -104,13 +102,13 @@ const categoryItemHandler = (categoryItem: RenderedItem): void => {
     event.stopPropagation();
     const categoryArr = getValue(StorageKeys.CATEGORIES);
     const id: string | null = categoryItem.getAttribute("category-id");
-    const index = categoryArr.findIndex((c) => String(c.id) === id);
+    const index = categoryArr.findIndex((c) => c.id === id);
     if (id === null || index === -1) return;
     const toBeDeleted = categoryArr[index];
     if (!toBeDeleted) return;
     updateStorage(StorageKeys.ITEMS, (currentItems) => {
       return currentItems.map((item) => {
-        if (String(item.category) === toBeDeleted.name) {
+        if (item.category === toBeDeleted.name) {
           return { ...item, category: defaultCategory };
         }
         return item;
@@ -145,7 +143,8 @@ const reloadCategoryList = (categories?: CategoryArray): void => {
     const categoryItem = createCategoryItem(category);
     if (activeCategory === category.name) {
       isActive(categoryItem);
-      reloadItemList();
+      reloadItemList(undefined, activeCategory);
+      console.log("Active category on reload:", activeCategory);
     }
     categoryList.appendChild(categoryItem);
     categoryItemHandler(categoryItem);

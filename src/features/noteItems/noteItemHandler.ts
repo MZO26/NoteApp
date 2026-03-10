@@ -1,11 +1,14 @@
-import { switchOverlayInterface } from "../../handlers/modalHandlers.js";
+import {
+  switchOverlayInterface,
+  updateCategorySelect,
+} from "../../handlers/modalHandlers.js";
 import {
   clearSavedItemId,
   setModalState,
   setSavedItemId,
 } from "../../states/sharedStates.js";
 import type { RenderedItem } from "../../types/featureTypes.js";
-import { openOverlay } from "../../ui/renderModalUI.js";
+import { openModal } from "../../ui/renderModalUI.js";
 import { type Note } from "../../utils/classes.js";
 import { isActive } from "../../utils/events.js";
 import { checkId } from "../../utils/helpers.js";
@@ -29,7 +32,8 @@ function noteItemHandler(noteItem: RenderedItem, note: Note): void {
       switchBtn.checked = false;
       switchBtn.dispatchEvent(new Event("change"));
     }
-    openOverlay(parsedId);
+    updateCategorySelect(getValue(StorageKeys.CATEGORIES));
+    openModal(parsedId);
     await switchOverlayInterface();
     const noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
     const noteTextArea = document.querySelector<HTMLTextAreaElement>(".note");

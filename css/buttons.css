@@ -145,13 +145,14 @@ input:hover {
 }
 
 .switch {
+  visibility: visible;
   margin-top: 28px;
   display: inline-block;
 }
 
 .hidden {
-  display: none;
   pointer-events: none;
+  display: none;
 }
 
 .switch-checkbox {

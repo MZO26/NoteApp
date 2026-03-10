@@ -7,7 +7,7 @@ import {
 import { StorageKeys, getValue, removeValue } from "../utils/storageService.js";
 
 vi.mock("../states/sharedStates.js", () => ({
-  getSavedItemId: () => 999,
+  getSavedItemId: () => "fake-test-uuid-1234",
 }));
 
 const createTextarea = (
@@ -50,7 +50,7 @@ describe("autoSave", () => {
 
       const saved = getValue(StorageKeys.TEMP_NOTE);
       expect(saved).not.toBeNull();
-      expect(saved!.id).toBe(999);
+      expect(saved!.id).toBe("fake-test-uuid-1234");
       expect(saved!.title).toBe("titleValue");
       expect(saved!.data).toEqual(["note content"]);
     });
@@ -86,7 +86,7 @@ describe("autoSave", () => {
 
       const saved = getValue(StorageKeys.TEMP_TODO);
       expect(saved).not.toBeNull();
-      expect(saved!.id).toBe(999);
+      expect(saved!.id).toBe("fake-test-uuid-1234");
       expect(saved!.title).toBe("Shopping List");
       expect(saved!.data).toHaveLength(2);
       expect(saved!.data[0]).toEqual({ content: "Milk", completed: false });
