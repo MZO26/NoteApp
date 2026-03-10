@@ -1,6 +1,8 @@
+import { getElementOrNull } from "../../utils/helpers";
+
 const getNoteFormData = () => {
-  const titleElement = document.querySelector<HTMLTextAreaElement>(".title");
-  const noteElement = document.querySelector<HTMLTextAreaElement>(".note");
+  const titleElement = getElementOrNull<HTMLTextAreaElement>(".title");
+  const noteElement = getElementOrNull<HTMLTextAreaElement>(".note");
   if (!titleElement || !noteElement) return;
   const titleValue = titleElement.value.trim();
   const noteValue = noteElement.value.trim();

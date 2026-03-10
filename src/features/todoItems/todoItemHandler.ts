@@ -2,13 +2,17 @@ import {
   switchOverlayInterface,
   updateCategorySelect,
 } from "../../handlers/modalHandlers.js";
-import { setModalState, setSavedItemId } from "../../states/sharedStates.js";
+import {
+  clearSavedItemId,
+  setModalState,
+  setSavedItemId,
+} from "../../states/sharedStates.js";
 import type { AddToDoButton, RenderedItem } from "../../types/featureTypes.js";
 import { openModal } from "../../ui/renderModalUI.js";
 import { reloadToDoList } from "../../ui/renderTodoList.js";
 import { ToDo } from "../../utils/classes.js";
 import { isActive } from "../../utils/events.js";
-import { checkId } from "../../utils/helpers.js";
+import { checkId, getElement } from "../../utils/helpers.js";
 import {
   getValue,
   removeValue,
@@ -38,22 +42,18 @@ function toDoItemHandler(toDoItem: RenderedItem, newToDo: ToDo): void {
     setModalState("toDo");
     const parsedId = checkId(toDoItem);
     setSavedItemId(parsedId);
-    const switchBtn =
-      document.querySelector<HTMLInputElement>(".switch-checkbox");
+    const switchBtn = getElement<HTMLInputElement>(".switch-checkbox");
     if (switchBtn) {
       switchBtn.checked = true;
       switchBtn.dispatchEvent(new Event("change"));
     }
     updateCategorySelect(getValue(StorageKeys.CATEGORIES));
     openModal(parsedId);
-    await switchOverlayInterface();
-    const itemContainer =
-      document.querySelector<HTMLDivElement>(".item-container");
-    const toDoTitle =
-      document.querySelector<HTMLTextAreaElement>(".todo-title");
-    const taskList = document.querySelector<HTMLUListElement>(".task-list");
+    await switchOverlayInterface(switchBtn);
+    const itemContainer = getElement<HTMLDivElement>(".item-container");
+    const toDoTitle = getElement<HTMLTextAreaElement>(".todo-title");
+    const taskList = getElement<HTMLUListElement>(".task-list");
     const tempToDoValue = getValue(StorageKeys.TEMP_TODO);
-    if (!itemContainer || !toDoTitle || !taskList) return;
     const savedItemId = parsedId;
     if (tempToDoValue && tempToDoValue.id === savedItemId) {
       toDoTitle.value = tempToDoValue.title || "";
@@ -74,21 +74,22 @@ function toDoItemHandler(toDoItem: RenderedItem, newToDo: ToDo): void {
     updateStorage(StorageKeys.ITEMS, (currentItems) =>
       currentItems.filter((item) => item.id !== parsedId),
     );
-    const container = document.querySelector<HTMLDivElement>(".todo-container");
-    if (container) {
-      const addBtn: AddToDoButton | null =
-        container.querySelector<HTMLButtonElement>(".todo-btn");
-      if (addBtn && addBtn._addHandlerRef) {
-        addBtn.removeEventListener("click", addBtn._addHandlerRef);
-        delete addBtn._addHandlerRef;
-      }
+    const container = getElement<HTMLDivElement>(".todo-container");
+    const addBtn: AddToDoButton | null =
+      container.querySelector<HTMLButtonElement>(".todo-btn");
+    if (addBtn && addBtn._addHandlerRef) {
+      addBtn.removeEventListener("click", addBtn._addHandlerRef);
+      delete addBtn._addHandlerRef;
     }
-    toDoItemBtn?.removeEventListener("click", deleteToDo);
-    toDoItem.removeEventListener("click", viewToDo);
-    toDoItem.remove();
+    clearSavedItemId();
     removeValue(StorageKeys.TEMP_TODO);
+    toDoItem.remove();
   }
-  toDoItemBtn?.addEventListener("click", deleteToDo);
+  if (toDoItemBtn) {
+    toDoItemBtn.removeEventListener("click", deleteToDo);
+    toDoItemBtn.addEventListener("click", deleteToDo);
+  }
+  toDoItem.removeEventListener("click", viewToDo);
   toDoItem.addEventListener("click", viewToDo);
 }
 

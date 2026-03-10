@@ -11,7 +11,7 @@ import type { RenderedItem } from "../../types/featureTypes.js";
 import { openModal } from "../../ui/renderModalUI.js";
 import { type Note } from "../../utils/classes.js";
 import { isActive } from "../../utils/events.js";
-import { checkId } from "../../utils/helpers.js";
+import { checkId, getElement } from "../../utils/helpers.js";
 import {
   getValue,
   removeValue,
@@ -26,20 +26,15 @@ function noteItemHandler(noteItem: RenderedItem, note: Note): void {
     setModalState("note");
     const parsedId = checkId(noteItem);
     setSavedItemId(parsedId);
-    const switchBtn =
-      document.querySelector<HTMLInputElement>(".switch-checkbox");
-    if (switchBtn) {
-      switchBtn.checked = false;
-      switchBtn.dispatchEvent(new Event("change"));
-    }
+    const switchBtn = getElement<HTMLInputElement>(".switch-checkbox");
+    switchBtn.checked = false;
+    switchBtn.dispatchEvent(new Event("change"));
     updateCategorySelect(getValue(StorageKeys.CATEGORIES));
     openModal(parsedId);
-    await switchOverlayInterface();
-    const noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
-    const noteTextArea = document.querySelector<HTMLTextAreaElement>(".note");
-    const itemContainer =
-      document.querySelector<HTMLDivElement>(".item-container");
-    if (!itemContainer || !noteTitle || !noteTextArea) return;
+    await switchOverlayInterface(switchBtn);
+    const noteTitle = getElement<HTMLTextAreaElement>(".title");
+    const noteTextArea = getElement<HTMLTextAreaElement>(".note");
+    const itemContainer = getElement<HTMLDivElement>(".item-container");
     const tempNoteValue = getValue(StorageKeys.TEMP_NOTE);
     const savedItemId = parsedId;
     if (tempNoteValue && savedItemId) {
@@ -63,10 +58,12 @@ function noteItemHandler(noteItem: RenderedItem, note: Note): void {
     removeValue(StorageKeys.TEMP_NOTE);
     noteItem.remove();
   }
-  noteItemBtn?.removeEventListener("click", deleteNote);
+  if (noteItemBtn) {
+    noteItemBtn.removeEventListener("click", deleteNote);
+    noteItemBtn.addEventListener("click", deleteNote);
+  }
   noteItem.removeEventListener("click", viewNote);
   noteItem.addEventListener("click", viewNote);
-  noteItemBtn?.addEventListener("click", deleteNote);
 }
 
 export { noteItemHandler };

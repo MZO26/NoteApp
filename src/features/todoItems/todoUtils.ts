@@ -2,14 +2,15 @@ import type {
   TaskItems,
   ToDoInterfaceElements,
 } from "../../types/featureTypes.js";
+import { getElementOrNull } from "../../utils/helpers.js";
 
 const getToDoFormData = () => {
-  const title = document.querySelector<HTMLTextAreaElement>(".todo-title");
-  const titleValue = title?.value.trim() || "";
+  const title = getElementOrNull<HTMLTextAreaElement>(".todo-title");
   const spans = Array.from(
     document.querySelectorAll<HTMLSpanElement>(".task-list li span"),
   );
-  if (!spans.length) return;
+  if (!title) return;
+  const titleValue = title.value.trim() || "";
   const taskData = spans.map((span) => {
     return {
       content: span.textContent || "",
@@ -93,4 +94,3 @@ const createTaskItem = (taskText: string): TaskItems => {
 };
 
 export { createTaskItem, getToDoFormData, getToDoInterfaceElements };
-

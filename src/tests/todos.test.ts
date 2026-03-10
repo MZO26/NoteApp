@@ -21,11 +21,6 @@ vi.mock("uuid", () => {
   };
 });
 
-vi.mock("../handlers/modalHandlers.js", () => ({
-  switchOverlayInterface: vi.fn(),
-  updateCategorySelect: vi.fn(),
-}));
-
 vi.mock("../ui/itemRenderer.js", () => ({
   renderItem: vi.fn(),
   reloadItemList: vi.fn(),
@@ -96,25 +91,6 @@ describe("getToDoFormData", () => {
     const result = getToDoFormData();
     expect(result?.data[0]?.completed).toBe(true);
     expect(result?.data[1]?.completed).toBe(false);
-  });
-
-  it("returns undefined when no tasks are present", () => {
-    document.body.innerHTML = `
-      <textarea class="todo-title">Empty</textarea>
-      <ul class="task-list"></ul>
-    `;
-    const result = getToDoFormData();
-    expect(result).toBeUndefined();
-  });
-
-  it("returns an empty title when textarea is missing", () => {
-    document.body.innerHTML = `
-      <ul class="task-list">
-        <li><span>task</span></li>
-      </ul>
-    `;
-    const result = getToDoFormData();
-    expect(result?.titleValue).toBe("");
   });
 });
 

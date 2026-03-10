@@ -13,7 +13,7 @@ import {
 } from "../ui/itemUI.js";
 import { Category } from "../utils/classes.js";
 import { isActive, showToast } from "../utils/events.js";
-import { truncate } from "../utils/helpers.js";
+import { getElement, truncate } from "../utils/helpers.js";
 import { createNewCategory } from "../utils/models.js";
 import {
   getValue,
@@ -47,8 +47,7 @@ const getCategoryId = (categoryItem: RenderedItem): string | null => {
 };
 
 const categoryToBeRendered = (categoryName: string): void => {
-  const categoryList = document.querySelector<HTMLDivElement>(".category-list");
-  if (!categoryList) return;
+  const categoryList = getElement<HTMLDivElement>(".category-list");
   const categoryArr: CategoryArray = getValue(StorageKeys.CATEGORIES);
   if (categoryArr.find((category) => category.name === categoryName)) {
     showToast("Category already exists. Please enter new name");
@@ -124,14 +123,14 @@ const categoryItemHandler = (categoryItem: RenderedItem): void => {
     reloadCategoryList(newCategoryArr);
   }
 
-  if (!categoryItem.getAttribute("default-category-id")) {
-    categoryItemBtn?.addEventListener("click", deleteCategory);
+  if (!categoryItem.getAttribute("default-category-id") && categoryItemBtn) {
+    categoryItemBtn.addEventListener("click", deleteCategory);
   }
   categoryItem.addEventListener("click", selectCategory);
 };
 
 const reloadCategoryList = (categories?: CategoryArray): void => {
-  const categoryList = document.querySelector<HTMLDivElement>(".category-list");
+  const categoryList = getElement<HTMLDivElement>(".category-list");
   const categoryArr: CategoryArray =
     categories || getValue(StorageKeys.CATEGORIES);
   const activeCategory = getActiveCategory();

@@ -1,22 +1,18 @@
 import { getToDoInterfaceElements } from "../features/todoItems/todoUtils.js";
 import { autoSaveTempNote, autoSaveTempToDo } from "../utils/autoSave.js";
+import { getElement, getElementOrNull } from "../utils/helpers.js";
 import { getValue, StorageKeys } from "../utils/storageService.js";
 import { addToDo, reloadToDoList } from "./renderTodoList.js";
 
-const overlay = document.querySelector<HTMLDivElement>(".overlay");
-const modal = document.querySelector<HTMLDivElement>(".modal");
-const switchBtnVisibility = document.querySelector<HTMLLabelElement>(".switch");
-
 const openModal = (savedItemId: string | null): void => {
+  const overlay = getElement<HTMLDivElement>(".overlay");
+  const modal = getElement<HTMLDivElement>(".modal");
+  const switchBtnVisibility = getElement<HTMLLabelElement>(".switch");
   const items: HTMLCollection | undefined =
-    document.querySelector<HTMLDivElement>(".item-container")?.children;
-  overlay?.classList.add("show");
-  modal?.classList.add("show");
-  if (
-    savedItemId &&
-    switchBtnVisibility &&
-    !switchBtnVisibility.classList.contains("hidden")
-  ) {
+    getElement<HTMLDivElement>(".item-container").children;
+  overlay.classList.add("show");
+  modal.classList.add("show");
+  if (savedItemId && !switchBtnVisibility.classList.contains("hidden")) {
     switchBtnVisibility.classList.add("hidden");
   }
   if (items) {
@@ -28,14 +24,14 @@ const openModal = (savedItemId: string | null): void => {
 };
 
 const renderNoteUI = (): void => {
-  let noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
-  let noteContent = document.querySelector<HTMLTextAreaElement>(".note");
+  let noteTitle = getElementOrNull<HTMLTextAreaElement>(".title");
+  let noteContent = getElementOrNull<HTMLTextAreaElement>(".note");
 
   if (!noteTitle || !noteContent) {
     const currentToDoTitle =
-      document.querySelector<HTMLTextAreaElement>(".todo-title");
+      getElementOrNull<HTMLTextAreaElement>(".todo-title");
     const currentToDo =
-      document.querySelector<HTMLTextAreaElement>(".todo-container");
+      getElementOrNull<HTMLTextAreaElement>(".todo-container");
     if (!currentToDoTitle || !currentToDo) return;
     const titleElement = document.createElement("textarea");
     const noteElement = document.createElement("textarea");
@@ -65,8 +61,8 @@ const renderNoteUI = (): void => {
 };
 
 const renderToDoUI = () => {
-  const currentTitle = document.querySelector<HTMLTextAreaElement>(".title");
-  const currentNote = document.querySelector<HTMLTextAreaElement>(".note");
+  const currentTitle = getElementOrNull<HTMLTextAreaElement>(".title");
+  const currentNote = getElementOrNull<HTMLTextAreaElement>(".note");
   const { todoDiv, addBtn, taskList, input, title } =
     getToDoInterfaceElements();
   if (currentTitle && currentNote) {
@@ -74,9 +70,9 @@ const renderToDoUI = () => {
     currentNote.replaceWith(todoDiv);
   } else {
     const currentToDoTitle =
-      document.querySelector<HTMLTextAreaElement>(".todo-title");
+      getElementOrNull<HTMLTextAreaElement>(".todo-title");
     const currentToDo =
-      document.querySelector<HTMLTextAreaElement>(".todo-container");
+      getElementOrNull<HTMLTextAreaElement>(".todo-container");
     if (currentToDoTitle && currentToDo) {
       currentToDoTitle.replaceWith(title);
       currentToDo.replaceWith(todoDiv);

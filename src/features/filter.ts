@@ -4,7 +4,7 @@ import type { ItemArray } from "../types/storageTypes.js";
 import { reloadItemList } from "../ui/itemRenderer.js";
 import type { Category } from "../utils/classes.js";
 import { isActive } from "../utils/events.js";
-import { checkId } from "../utils/helpers.js";
+import { checkId, getElement } from "../utils/helpers.js";
 import { getValue, StorageKeys } from "../utils/storageService.js";
 import { reloadCategoryList } from "./categories.js";
 
@@ -13,17 +13,16 @@ type SearchResult = {
   result: Item | undefined;
 };
 
-const searchInput = document.querySelector<HTMLInputElement>(".search-input")!;
 let cachedItems: ItemArray = [];
-let searchTimeout: NodeJS.Timeout;
 let activeCategory: Category;
-searchInput.addEventListener("input", () => {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(filter, 200);
-});
+
+const getSearchInput = (): HTMLInputElement => {
+  const searchInput = getElement<HTMLInputElement>(".search-input");
+  return searchInput;
+};
 
 const findTargetItem = (): SearchResult => {
-  const value: string = searchInput.value.toLowerCase();
+  const value: string = getSearchInput().value.toLowerCase();
   if (!cachedItems.length) {
     reloadCategoryList();
     cachedItems = getValue(StorageKeys.ITEMS);
@@ -39,8 +38,7 @@ const findTargetCategory = (result: Item): Category | undefined => {
     (c) => c.name === result.category,
   );
   if (!category) return;
-  const categoryList = document.querySelector(".category-list");
-  if (!categoryList) return;
+  const categoryList = getElement<HTMLDivElement>(".category-list");
   const targetCategoryElement = Array.from(
     categoryList.querySelectorAll("div"),
   ).find((div) => div.textContent.trim() === category.name);
@@ -48,7 +46,6 @@ const findTargetCategory = (result: Item): Category | undefined => {
     document.querySelectorAll(".categoryItem").forEach((item) => {
       item.classList.remove("active");
     });
-    if (!category) return;
     isActive(targetCategoryElement);
     setActiveCategory(category.name);
     return category;
@@ -56,9 +53,7 @@ const findTargetCategory = (result: Item): Category | undefined => {
 };
 
 const scrollToTargetNote = (result: Item) => {
-  const itemContainer =
-    document.querySelector<HTMLDivElement>(".item-container");
-  if (!itemContainer) return;
+  const itemContainer = getElement<HTMLDivElement>(".item-container");
   const targetNote = itemContainer.querySelector<HTMLDivElement>(
     `div[data-id="${result.id}"]`,
   ) as RenderedItem | null;
@@ -84,8 +79,9 @@ const removeActiveExceptResult = (result: Item) => {
 };
 
 const filter = (): void => {
-  const dropdown = document.querySelector<HTMLDivElement>(".dropdown");
-  if (!dropdown || !searchInput.value) {
+  const dropdown = getElement<HTMLDivElement>(".dropdown");
+  const searchInput = getSearchInput();
+  if (!searchInput.value) {
     if (dropdown) dropdown.style.display = "none";
     return;
   }
@@ -112,14 +108,5 @@ const filter = (): void => {
   dropdown.style.display = "block";
   scrollToTargetNote(result);
 };
-
-searchInput.addEventListener("input", filter);
-
-document.addEventListener("click", (e: Event): void => {
-  const target = e.target as Element | null;
-  const dropdown = document.querySelector<HTMLDivElement>(".dropdown");
-  if (target && dropdown && !target.closest(".input-wrapper"))
-    dropdown.style.display = "none";
-});
 
 export { filter };

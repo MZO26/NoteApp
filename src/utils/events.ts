@@ -1,8 +1,8 @@
 import type { RenderedItem } from "../types/featureTypes.js";
-import { truncate } from "./helpers.js";
+import { getElement, truncate } from "./helpers.js";
 
 const showToast = (value: string, duration = 1500): void => {
-  const container = document.querySelector<HTMLDivElement>(".toast-container");
+  const container = getElement<HTMLDivElement>(".toast-container");
   if (!container) return;
   const toast = document.createElement("div");
   toast.className = "toast";

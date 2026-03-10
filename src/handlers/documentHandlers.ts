@@ -8,48 +8,73 @@ import {
 } from "../states/sharedStates.js";
 import { openModal } from "../ui/renderModalUI.js";
 import { inputListener } from "../utils/events.js";
+import { getElement, getElementOrNull } from "../utils/helpers.js";
 import { getValue, removeValue, StorageKeys } from "../utils/storageService.js";
 import {
   switchOverlayInterface,
   updateCategorySelect,
 } from "./modalHandlers.js";
 
-const filterInput = document.querySelector<HTMLInputElement>(".search-input")!;
-const switchBtn = document.querySelector<HTMLInputElement>(".switch-checkbox");
-const darkModeBtn =
-  document.querySelector<HTMLButtonElement>(".dark-mode-btn")!;
-const toggleBtn = document.querySelector<HTMLButtonElement>(".toggle-btn")!;
-const categoryBtn = document.querySelector<HTMLButtonElement>(".category-btn");
-const showBtn = document.querySelector<HTMLButtonElement>(".showModal-btn")!;
-const openInfoBtn = document.querySelector<HTMLButtonElement>(".info-btn");
-const sidebarOverlay =
-  document.querySelector<HTMLDivElement>(".sidebar-overlay");
-const switchBtnVisibility = document.querySelector<HTMLLabelElement>(".switch");
+const registerDocumentHandlers = (): void => {
+  const filterInput = getElement<HTMLInputElement>(".search-input");
+  const switchBtn = getElement<HTMLInputElement>(".switch-checkbox");
+  const darkModeBtn = getElement<HTMLButtonElement>(".dark-mode-btn");
+  const toggleBtn = getElement<HTMLButtonElement>(".toggle-btn");
+  const categoryBtn = getElementOrNull<HTMLButtonElement>(".category-btn");
+  const showBtn = getElement<HTMLButtonElement>(".showModal-btn");
+  const openInfoBtn = getElementOrNull<HTMLButtonElement>(".info-btn");
+  const sidebarOverlay = getElementOrNull<HTMLDivElement>(".sidebar-overlay");
+  const switchBtnVisibility = getElement<HTMLLabelElement>(".switch");
 
-filterInput.addEventListener("click", filter);
+  let searchTimeout: NodeJS.Timeout;
+  filterInput.addEventListener("input", () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(filter, 200);
+  });
+  filterInput.addEventListener("click", filter);
+  document.addEventListener("click", (e: Event): void => {
+    const target = e.target as Element | null;
+    const dropdown = document.querySelector<HTMLDivElement>(".dropdown");
+    if (target && dropdown && !target.closest(".input-wrapper"))
+      dropdown.style.display = "none";
+  });
 
-openInfoBtn?.addEventListener("click", (): void => {
-  sidebarOverlay?.classList.toggle("visible");
-  sidebarOverlay?.classList.toggle("hidden");
-});
+  toggleBtn.addEventListener("click", collapseCategories);
+  darkModeBtn.addEventListener("click", toggleDarkMode);
+  showBtn.addEventListener("click", () =>
+    addNewNote(switchBtn, switchBtnVisibility),
+  );
+  if (openInfoBtn) {
+    openInfoBtn.addEventListener("click", (): void => {
+      sidebarOverlay?.classList.toggle("visible");
+      sidebarOverlay?.classList.toggle("hidden");
+    });
+  }
+  if (categoryBtn) {
+    categoryBtn.addEventListener("click", (event: MouseEvent) => {
+      event.stopPropagation();
+      categoryInputButton();
+    });
+  }
+};
 
-const addNewNote = async () => {
+const addNewNote = async (
+  switchBtn: HTMLInputElement,
+  switchBtnVisibility: HTMLLabelElement,
+) => {
   clearSavedItemId();
   removeValue(StorageKeys.TEMP_NOTE);
   removeValue(StorageKeys.TEMP_TODO);
   setModalState("note");
   if (switchBtn) switchBtn.checked = false;
-  await switchOverlayInterface();
+  await switchOverlayInterface(switchBtn);
   openModal(null);
   updateCategorySelect(getValue(StorageKeys.CATEGORIES));
   if (switchBtnVisibility) switchBtnVisibility.classList.remove("hidden");
 };
 
-showBtn.addEventListener("click", addNewNote);
-
 const collapseCategories = (): void => {
-  const categoryList = document.querySelector<HTMLDivElement>(".category-list");
-  if (!categoryList) return;
+  const categoryList = getElement<HTMLDivElement>(".category-list");
   categoryList.classList.toggle("collapsed");
   if (categoryList.hasChildNodes()) {
     for (const children of categoryList.children) {
@@ -57,8 +82,6 @@ const collapseCategories = (): void => {
     }
   }
 };
-
-toggleBtn.addEventListener("click", collapseCategories);
 
 const applyMode = (): void => {
   const mode = getMode();
@@ -82,11 +105,8 @@ const toggleDarkMode = (): void => {
   }
 };
 
-darkModeBtn.addEventListener("click", toggleDarkMode);
-
 const categoryInputButton = async (): Promise<void> => {
-  const categoryBtn =
-    document.querySelector<HTMLButtonElement>(".category-btn");
+  const categoryBtn = getElementOrNull<HTMLButtonElement>(".category-btn");
   if (!categoryBtn) return;
   const input = document.createElement("input");
   input.type = "text";
@@ -98,9 +118,4 @@ const categoryInputButton = async (): Promise<void> => {
   if (value) categoryToBeRendered(value);
 };
 
-categoryBtn?.addEventListener("click", (event: MouseEvent) => {
-  event.stopPropagation();
-  categoryInputButton();
-});
-
-export { applyMode };
+export { applyMode, registerDocumentHandlers };

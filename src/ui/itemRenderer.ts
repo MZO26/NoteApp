@@ -4,13 +4,12 @@ import { getActiveCategory } from "../states/sharedStates.js";
 import type { Item, RenderedItem } from "../types/featureTypes.js";
 import type { ItemArray } from "../types/storageTypes.js";
 import { Note, ToDo } from "../utils/classes.js";
+import { getElement } from "../utils/helpers.js";
 import { StorageKeys, getValue, setValue } from "../utils/storageService.js";
 import { noteItemTemplate, toDoItemTemplate } from "./itemUI.js";
 
 const renderItem = (item: Item): void => {
-  const itemContainer =
-    document.querySelector<HTMLDivElement>(".item-container");
-  if (!itemContainer) return;
+  const itemContainer = getElement<HTMLDivElement>(".item-container");
   const itemArr: ItemArray = getValue(StorageKeys.ITEMS);
   const itemDiv = document.createElement("div");
   switch (item.type) {
@@ -70,9 +69,7 @@ const reloadItemList = (
   updatedArray?: ItemArray,
   selectedCategory?: string,
 ): void => {
-  const itemContainer =
-    document.querySelector<HTMLDivElement>(".item-container");
-  if (!itemContainer) return;
+  const itemContainer = getElement<HTMLDivElement>(".item-container");
   const itemArr: ItemArray = updatedArray || getValue(StorageKeys.ITEMS);
   const activeCategory = selectedCategory || getActiveCategory();
   const activeCategoryItems: ItemArray = itemArr.filter(

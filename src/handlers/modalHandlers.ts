@@ -10,21 +10,34 @@ import {
 import type { CategoryArray, ItemArray } from "../types/storageTypes.js";
 import { renderUI } from "../ui/renderModalUI.js";
 import { cancelAutoSave } from "../utils/autoSave.js";
-import { truncate } from "../utils/helpers.js";
+import { getElement, getElementOrNull, truncate } from "../utils/helpers.js";
 import { getValue, removeValue, StorageKeys } from "../utils/storageService.js";
 
-const closeBtn = document.querySelector<HTMLButtonElement>(".closeModal-btn")!;
-const saveBtn = document.querySelector<HTMLButtonElement>(".add-btn")!;
-const deleteBtn = document.querySelector<HTMLButtonElement>(".delete-btn")!;
-const switchBtn = document.querySelector<HTMLInputElement>(".switch-checkbox");
-const overlay = document.querySelector<HTMLDivElement>(".overlay");
-const modal = document.querySelector<HTMLDivElement>(".modal");
-const switchBtnVisibility = document.querySelector<HTMLLabelElement>(".switch");
+const registerModalHandlers = () => {
+  const closeBtn = getElement<HTMLButtonElement>(".closeModal-btn");
+  const saveBtn = getElement<HTMLButtonElement>(".add-btn");
+  const deleteBtn = getElement<HTMLButtonElement>(".delete-btn");
+  const switchBtn = getElement<HTMLInputElement>(".switch-checkbox");
+  const overlay = getElement<HTMLDivElement>(".overlay");
+  const modal = getElement<HTMLDivElement>(".modal");
+  const switchBtnVisibility = getElement<HTMLLabelElement>(".switch");
+
+  saveBtn.addEventListener("click", () => {
+    saveButton();
+    closeBtn.click();
+  });
+  deleteBtn.addEventListener("click", deleteButton);
+  closeBtn.addEventListener("click", () => {
+    closeModal(overlay, modal, switchBtnVisibility);
+  });
+  switchBtn.addEventListener("click", () => {
+    switchOverlayInterface(switchBtn);
+  });
+};
 
 const updateCategorySelect = (categoryArr: CategoryArray): void => {
-  const select = document.querySelector<HTMLSelectElement>(".category-select");
+  const select = getElement<HTMLSelectElement>(".category-select");
   const activeCategory = getActiveCategory();
-  if (!select) return;
   select.options.length = 0;
   categoryArr.forEach((category) => {
     const option = document.createElement("option");
@@ -42,8 +55,8 @@ const saveButton = (): void => {
   const itemArr: ItemArray = getValue(StorageKeys.ITEMS);
   const savedItemId = getSavedItemId();
   const modalState = getModalState();
-  const select = document.querySelector<HTMLSelectElement>(".category-select");
-  if (!select || !select.value) return;
+  const select = getElement<HTMLSelectElement>(".category-select");
+  if (!select.value) return;
   const categoryArr: CategoryArray = getValue(StorageKeys.CATEGORIES);
   const matchingCategory = categoryArr.find(
     (category) => category.id === select.value,
@@ -59,25 +72,20 @@ const saveButton = (): void => {
   removeValue(StorageKeys.TEMP_TODO);
 };
 
-saveBtn.addEventListener("click", () => {
-  saveButton();
-  closeBtn.click();
-});
-
 const deleteButton = (): void => {
   const isConfirmed = window.confirm("Clear all content?");
   if (!isConfirmed) return;
   const modalState = getModalState();
   if (modalState === "note") {
-    const title = document.querySelector<HTMLTextAreaElement>(".title");
-    const content = document.querySelector<HTMLTextAreaElement>(".note");
+    const title = getElementOrNull<HTMLTextAreaElement>(".title");
+    const content = getElementOrNull<HTMLTextAreaElement>(".note");
     if (title && content) {
       title.value = "";
       content.value = "";
     }
   } else if (modalState === "toDo") {
-    const title = document.querySelector<HTMLTextAreaElement>(".todo-title");
-    const content = document.querySelector<HTMLDivElement>(".task-list");
+    const title = getElementOrNull<HTMLTextAreaElement>(".todo-title");
+    const content = getElementOrNull<HTMLDivElement>(".task-list");
     if (title && content) {
       title.value = "";
       content.innerHTML = "";
@@ -87,13 +95,15 @@ const deleteButton = (): void => {
   removeValue(StorageKeys.TEMP_TODO);
 };
 
-deleteBtn.addEventListener("click", deleteButton);
-
-const closeModal = (): void => {
-  overlay?.classList.remove("show");
-  modal?.classList.remove("show");
-  if (switchBtnVisibility && switchBtnVisibility.classList.contains("hidden")) {
-    modal?.addEventListener(
+const closeModal = (
+  overlay: HTMLDivElement,
+  modal: HTMLDivElement,
+  switchBtnVisibility: HTMLLabelElement,
+): void => {
+  overlay.classList.remove("show");
+  modal.classList.remove("show");
+  if (switchBtnVisibility.classList.contains("hidden")) {
+    modal.addEventListener(
       "transitionend",
       () => {
         switchBtnVisibility.classList.remove("hidden");
@@ -106,20 +116,16 @@ const closeModal = (): void => {
   removeValue(StorageKeys.TEMP_TODO);
 };
 
-closeBtn.addEventListener("click", () => {
-  closeModal();
-});
-
-const switchOverlayInterface = (): Promise<void> => {
+const switchOverlayInterface = (switchBtn: HTMLInputElement): Promise<void> => {
   return new Promise((resolve) => {
-    const isToDo = switchBtn?.checked || false;
+    const isToDo = switchBtn.checked || false;
     const modalState = isToDo ? "toDo" : "note";
     setModalState(modalState);
     requestAnimationFrame(() => {
       const modalHeadingElement =
-        document.querySelector<HTMLHeadingElement>(".modal-heading");
+        getElementOrNull<HTMLHeadingElement>(".modal-heading");
       const modalNoteElement =
-        document.querySelector<HTMLParagraphElement>(".modal-note");
+        getElementOrNull<HTMLParagraphElement>(".modal-note");
       if (modalHeadingElement && modalNoteElement) {
         if (modalState === "note") {
           modalHeadingElement.textContent = "New note";
@@ -135,8 +141,4 @@ const switchOverlayInterface = (): Promise<void> => {
   });
 };
 
-switchBtn?.addEventListener("click", () => {
-  switchOverlayInterface();
-});
-
-export { switchOverlayInterface, updateCategorySelect };
+export { registerModalHandlers, switchOverlayInterface, updateCategorySelect };

@@ -32,10 +32,16 @@ describe("showModal-btn (addNewNote)", () => {
       <button class="closeModal-btn"></button>
       <button class="add-btn"></button>
       <button class="delete-btn"></button>
+      <div class="item-container"></div>
+      <div class="toast-container"></div>
     `;
     vi.resetModules();
-    await import("../handlers/modalHandlers.js");
-    await import("../handlers/documentHandlers.js");
+    const { registerDocumentHandlers } =
+      await import("../handlers/documentHandlers.js");
+    const { registerModalHandlers } =
+      await import("../handlers/modalHandlers.js");
+    registerDocumentHandlers();
+    registerModalHandlers();
     vi.clearAllMocks();
     localStorage.clear();
     sessionStorage.clear();

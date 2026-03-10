@@ -1,4 +1,5 @@
 import { getSavedItemId } from "../states/sharedStates.js";
+import { getElement } from "./helpers.js";
 import { setValue, StorageKeys } from "./storageService.js";
 
 let noteTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -17,10 +18,10 @@ const cancelAutoSave = (): void => {
 const autoSaveTempNote = (): void => {
   clearTimeout(noteTimeout);
   noteTimeout = setTimeout(() => {
-    const noteTitle = document.querySelector<HTMLTextAreaElement>(".title");
-    const noteTextArea = document.querySelector<HTMLTextAreaElement>(".note");
+    const noteTitle = getElement<HTMLTextAreaElement>(".title");
+    const noteTextArea = getElement<HTMLTextAreaElement>(".note");
     const savedItemId = getSavedItemId();
-    if (!noteTitle || !noteTextArea || savedItemId === null) return;
+    if (savedItemId === null) return;
     setValue(
       StorageKeys.TEMP_NOTE,
       {
@@ -36,11 +37,10 @@ const autoSaveTempNote = (): void => {
 const autoSaveTempToDo = (): void => {
   clearTimeout(toDoTimeout);
   toDoTimeout = setTimeout(() => {
-    const toDoTitle =
-      document.querySelector<HTMLTextAreaElement>(".todo-title");
-    const taskList = document.querySelector<HTMLDivElement>(".task-list");
+    const toDoTitle = getElement<HTMLTextAreaElement>(".todo-title");
+    const taskList = getElement<HTMLDivElement>(".task-list");
     const savedItemId = getSavedItemId();
-    if (!toDoTitle || !taskList || savedItemId === null) return;
+    if (savedItemId === null) return;
     const spans = Array.from(
       taskList.querySelectorAll<HTMLSpanElement>(".task-list li span"),
     );
