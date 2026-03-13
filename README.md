@@ -22,7 +22,7 @@ The application is perfect for users who want quick access to their notes / to-d
 
 - Bundler: [Vite](https://vitejs.dev/)
 - Language: [TypeScript](https://www.typescriptlang.org/)
-- Testing: [Vitest](https://www.vitest.dev/)
+- Testing: [Vitest](https://www.vitest.dev/) (Unit), [Cypress](https://cypress.io/) (E2E)
 
 ## Prerequisites
 
@@ -43,7 +43,9 @@ Follow these steps to set up the project locally:
 
 5. Start the development server: `npm run dev`
 
-6. Run tests: `npm run test`
+6. Run tests:
+   - Unit Tests: `npm run test`
+   - E2E Tests: `npm run cy:run`
 
 ## License
 
