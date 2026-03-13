@@ -2,7 +2,7 @@
 
 ![Status: WIP](https://img.shields.io/badge/status-WIP-orange.svg)
 
-https://github.com/MZO26/NoteApp/actions/workflows/pipeline.yaml/badge.svg
+![CI](https://github.com/MZO26/NoteApp/actions/workflows/pipeline.yaml/badge.svg)
 
 A note-taking desktop application built with Typescript.
 It offers the ability to create simple notes as well as to-do lists.

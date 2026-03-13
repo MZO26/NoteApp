@@ -34,7 +34,7 @@ describe("Notes", () => {
     });
   });
 
-  it.only("should edit and update note items", () => {
+  it("should edit and update note items", () => {
     notes.forEach((title) => {
       cy.createNote(title, "This note will be edited.");
     });

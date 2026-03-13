@@ -41,7 +41,7 @@ describe("Modal Functionality", () => {
     cy.get(".item-container").should("contain.text", "Test Note");
   });
 
-  it.only("should create a todo after switch of Overlay", () => {
+  it("should create a todo after switch of Overlay", () => {
     cy.openModal();
     cy.switchModalInterface("toDo");
     cy.switchModalInterface("note");

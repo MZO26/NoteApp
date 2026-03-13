@@ -37,7 +37,7 @@ const createCategoryItem = (category: Category): RenderedItem => {
 };
 
 const getCategoryId = (categoryItem: RenderedItem): string | null => {
-  let id: string | null = null;
+  let id: string | null;
   if (categoryItem.getAttribute("default-category-id")) {
     id = categoryItem.getAttribute("default-category-id");
   } else {

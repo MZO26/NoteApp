@@ -45,7 +45,7 @@ describe("Todos", () => {
     });
   });
 
-  it.only("should edit todo items", () => {
+  it("should edit todo items", () => {
     todos.forEach((todo) => {
       cy.createTodo(todo.title, todo.tasks);
     });
