@@ -4,17 +4,6 @@ export interface CategoryInterface {
   isDefault?: boolean;
 }
 
-class Category implements CategoryInterface {
-  id: string;
-  name: string;
-  isDefault?: boolean;
-  constructor(id: string, name: string, isDefault?: boolean) {
-    this.id = id;
-    this.name = name;
-    this.isDefault = isDefault || false;
-  }
-}
-
 export interface NoteInterface {
   id: string;
   type: "note";
@@ -31,6 +20,17 @@ export interface ToDoInterface {
   data: Array<{ content: string; completed: boolean }>;
   title: string;
   formattedDate: string;
+}
+
+class Category implements CategoryInterface {
+  id: string;
+  name: string;
+  isDefault?: boolean;
+  constructor(id: string, name: string, isDefault?: boolean) {
+    this.id = id;
+    this.name = name;
+    this.isDefault = isDefault || false;
+  }
 }
 
 class Note implements NoteInterface {

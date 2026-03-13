@@ -1,5 +1,5 @@
 import {
-  switchOverlayInterface,
+  switchModalInterface,
   updateCategorySelect,
 } from "../../handlers/modalHandlers.js";
 import {
@@ -31,7 +31,7 @@ function noteItemHandler(noteItem: RenderedItem, note: Note): void {
     switchBtn.dispatchEvent(new Event("change"));
     updateCategorySelect(getValue(StorageKeys.CATEGORIES));
     openModal(parsedId);
-    await switchOverlayInterface(switchBtn);
+    await switchModalInterface(switchBtn);
     const noteTitle = getElement<HTMLTextAreaElement>(".title");
     const noteTextArea = getElement<HTMLTextAreaElement>(".note");
     const itemContainer = getElement<HTMLDivElement>(".item-container");

@@ -37,7 +37,8 @@ function getValue<K extends StorageKey>(key: K): StorageData[K] {
     const parsed = JSON.parse(raw) as StorageData[K];
     cache[key] = parsed;
     return parsed;
-  } catch {
+  } catch (err) {
+    console.error(`Error parsing "${key}" from localStorage`, err);
     return defaultValues[key];
   }
 }
@@ -55,7 +56,7 @@ function setValue<K extends StorageKey>(
     try {
       localStorage.setItem(key, JSON.stringify(value));
     } catch (err) {
-      console.error(`Error while saving "${key}"`, err);
+      console.error(`Error while saving "${key}" to localStorage`, err);
     }
     delete timers[key];
   }, delay);

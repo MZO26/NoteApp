@@ -8,10 +8,10 @@ function truncate(str: string, max = 10): string {
 }
 
 function checkId(item: RenderedItem): string | null {
-  const rawId = item.getAttribute("data-id");
-  if (!rawId) return null;
-  if (!validate(rawId)) return null;
-  return rawId;
+  const id = item.getAttribute("data-id");
+  if (!id) return null;
+  if (!validate(id)) return null;
+  return id;
 }
 
 function getElement<T extends HTMLElement>(selector: string): T {

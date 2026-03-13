@@ -30,8 +30,7 @@ const renderNoteUI = (): void => {
   if (!noteTitle || !noteContent) {
     const currentToDoTitle =
       getElementOrNull<HTMLTextAreaElement>(".todo-title");
-    const currentToDo =
-      getElementOrNull<HTMLTextAreaElement>(".todo-container");
+    const currentToDo = getElementOrNull<HTMLDivElement>(".todo-container");
     if (!currentToDoTitle || !currentToDo) return;
     const titleElement = document.createElement("textarea");
     const noteElement = document.createElement("textarea");
@@ -71,8 +70,7 @@ const renderToDoUI = () => {
   } else {
     const currentToDoTitle =
       getElementOrNull<HTMLTextAreaElement>(".todo-title");
-    const currentToDo =
-      getElementOrNull<HTMLTextAreaElement>(".todo-container");
+    const currentToDo = getElementOrNull<HTMLDivElement>(".todo-container");
     if (currentToDoTitle && currentToDo) {
       currentToDoTitle.replaceWith(title);
       currentToDo.replaceWith(todoDiv);

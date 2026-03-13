@@ -1,5 +1,5 @@
 import {
-  switchOverlayInterface,
+  switchModalInterface,
   updateCategorySelect,
 } from "../../handlers/modalHandlers.js";
 import {
@@ -49,7 +49,7 @@ function toDoItemHandler(toDoItem: RenderedItem, newToDo: ToDo): void {
     }
     updateCategorySelect(getValue(StorageKeys.CATEGORIES));
     openModal(parsedId);
-    await switchOverlayInterface(switchBtn);
+    await switchModalInterface(switchBtn);
     const itemContainer = getElement<HTMLDivElement>(".item-container");
     const toDoTitle = getElement<HTMLTextAreaElement>(".todo-title");
     const taskList = getElement<HTMLUListElement>(".task-list");

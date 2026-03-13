@@ -14,14 +14,18 @@ import { getElement, getElementOrNull, truncate } from "../utils/helpers.js";
 import { getValue, removeValue, StorageKeys } from "../utils/storageService.js";
 
 const registerModalHandlers = () => {
+  // button elements for modal interactions
   const closeBtn = getElement<HTMLButtonElement>(".closeModal-btn");
   const saveBtn = getElement<HTMLButtonElement>(".add-btn");
   const deleteBtn = getElement<HTMLButtonElement>(".delete-btn");
   const switchBtn = getElement<HTMLInputElement>(".switch-checkbox");
+
+  // elements for modal and overlay manipulation
   const overlay = getElement<HTMLDivElement>(".overlay");
   const modal = getElement<HTMLDivElement>(".modal");
   const switchBtnVisibility = getElement<HTMLLabelElement>(".switch");
 
+  // event listeners for modal buttons
   saveBtn.addEventListener("click", () => {
     saveButton();
     closeBtn.click();
@@ -31,7 +35,7 @@ const registerModalHandlers = () => {
     closeModal(overlay, modal, switchBtnVisibility);
   });
   switchBtn.addEventListener("click", () => {
-    switchOverlayInterface(switchBtn);
+    switchModalInterface(switchBtn);
   });
 };
 
@@ -116,7 +120,7 @@ const closeModal = (
   removeValue(StorageKeys.TEMP_TODO);
 };
 
-const switchOverlayInterface = (switchBtn: HTMLInputElement): Promise<void> => {
+const switchModalInterface = (switchBtn: HTMLInputElement): Promise<void> => {
   return new Promise((resolve) => {
     const isToDo = switchBtn.checked || false;
     const modalState = isToDo ? "toDo" : "note";
@@ -141,4 +145,4 @@ const switchOverlayInterface = (switchBtn: HTMLInputElement): Promise<void> => {
   });
 };
 
-export { registerModalHandlers, switchOverlayInterface, updateCategorySelect };
+export { registerModalHandlers, switchModalInterface, updateCategorySelect };

@@ -475,7 +475,7 @@ h2 {
 /** noteItem / toDoItem styling end **/
 
 /** contact info styling start **/
-.sidebar-overlay {
+.contact-info {
   position: absolute;
   display: grid;
   right: 20px;
@@ -496,7 +496,7 @@ h2 {
   font-size: 16px;
 }
 
-.sidebar-overlay h3 {
+.contact-info h3 {
   padding: 0;
 }
 
@@ -506,7 +506,7 @@ h2 {
   pointer-events: none;
 }
 
-.sidebar-overlay.visible {
+.contact-info.visible {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;

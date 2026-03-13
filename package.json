@@ -6,7 +6,10 @@
   "scripts": {
     "typecheck": "npx tsc --noEmit",
     "test": "vitest run",
-    "dev": "vite"
+    "dev": "vite",
+    "build": "vite build",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run"
   },
   "repository": {
     "type": "git",
@@ -22,6 +25,7 @@
   "homepage": "https://github.com/MZO26/NoteApp#readme",
   "devDependencies": {
     "@types/node": "^24.10.0",
+    "cypress": "^15.11.0",
     "jsdom": "^28.1.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",

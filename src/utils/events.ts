@@ -1,7 +1,7 @@
 import type { RenderedItem } from "../types/featureTypes.js";
 import { getElement, truncate } from "./helpers.js";
 
-const showToast = (value: string, duration = 1500): void => {
+const showToast = (value: string, duration = 2000): void => {
   const container = getElement<HTMLDivElement>(".toast-container");
   if (!container) return;
   const toast = document.createElement("div");

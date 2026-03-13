@@ -6,7 +6,8 @@ function getActiveCategory(): string {
     const raw = localStorage.getItem("activeCategoryState");
     const state = raw ? JSON.parse(raw) : { activeCategory: defaultCategory };
     return state.activeCategory;
-  } catch {
+  } catch (err) {
+    console.error("Error retrieving active category:", err);
     return defaultCategory;
   }
 }
@@ -15,7 +16,8 @@ function setActiveCategory(categoryName: string): void {
   try {
     const state = { activeCategory: categoryName };
     localStorage.setItem("activeCategoryState", JSON.stringify(state));
-  } catch {
+  } catch (err) {
+    console.error("Error setting active category:", err);
     return;
   }
 }
@@ -25,7 +27,8 @@ function getSavedItemId(): string | null {
     const idString = sessionStorage.getItem("savedItemId");
     if (!idString) return null;
     return !validate(idString) ? null : idString;
-  } catch {
+  } catch (err) {
+    console.error("Error retrieving saved item ID:", err);
     return null;
   }
 }
@@ -37,7 +40,8 @@ function setSavedItemId(id: string | null) {
       return;
     }
     sessionStorage.setItem("savedItemId", id);
-  } catch {
+  } catch (err) {
+    console.error("Error setting saved item ID:", err);
     return;
   }
 }
@@ -45,7 +49,8 @@ function setSavedItemId(id: string | null) {
 function clearSavedItemId(): void {
   try {
     sessionStorage.removeItem("savedItemId");
-  } catch {
+  } catch (err) {
+    console.error("Error clearing saved item ID:", err);
     return;
   }
 }
@@ -54,7 +59,8 @@ function getModalState(): string {
   try {
     const raw = localStorage.getItem("modalState");
     return raw ? JSON.parse(raw).interface : "note";
-  } catch {
+  } catch (err) {
+    console.error("Error retrieving modal state:", err);
     return "note";
   }
 }
@@ -63,7 +69,8 @@ function setModalState(modalInterface: string): void {
   try {
     const state = { interface: modalInterface };
     localStorage.setItem("modalState", JSON.stringify(state));
-  } catch {
+  } catch (err) {
+    console.error("Error setting modal state:", err);
     return;
   }
 }
@@ -72,7 +79,8 @@ function getMode(): string {
   try {
     const mode = localStorage.getItem("mode");
     return mode ? mode : "dark";
-  } catch {
+  } catch (err) {
+    console.error("Error retrieving document mode:", err);
     return "dark";
   }
 }
@@ -80,7 +88,8 @@ function getMode(): string {
 function setMode(newMode: string): void {
   try {
     localStorage.setItem("mode", newMode);
-  } catch {
+  } catch (err) {
+    console.error("Error setting document mode:", err);
     return;
   }
 }
