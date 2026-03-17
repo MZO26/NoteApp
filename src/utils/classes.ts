@@ -13,15 +13,6 @@ export interface NoteInterface {
   formattedDate: string;
 }
 
-export interface ToDoInterface {
-  id: string;
-  type: "toDo";
-  category: string;
-  data: Array<{ content: string; completed: boolean }>;
-  title: string;
-  formattedDate: string;
-}
-
 class Category implements CategoryInterface {
   id: string;
   name: string;
@@ -57,28 +48,4 @@ class Note implements NoteInterface {
   }
 }
 
-class ToDo implements ToDoInterface {
-  id: string;
-  type: "toDo";
-  category: string;
-  data: Array<{ content: string; completed: boolean }>;
-  title: string;
-  formattedDate: string;
-  constructor(
-    id: string,
-    type: "toDo",
-    category: string,
-    title: string,
-    data: Array<{ content: string; completed: boolean }>,
-    formattedDate: string,
-  ) {
-    this.id = id;
-    this.type = type;
-    this.category = category;
-    this.title = title;
-    this.data = data;
-    this.formattedDate = formattedDate;
-  }
-}
-
-export { Category, Note, ToDo };
+export { Category, Note };
