@@ -23,6 +23,32 @@ const showToast = (value: string, duration = 2000): void => {
   }, duration);
 };
 
+const inputListener = (input: HTMLInputElement): Promise<string> => {
+  return new Promise((resolve) => {
+    const clickOutside = (e: MouseEvent) => {
+      if (!document.body.contains(input)) return;
+      if (e.target !== input) {
+        cleanup();
+        input.value = "";
+        resolve(input.value);
+      }
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        cleanup();
+        resolve(input.value);
+      }
+    };
+    const cleanup = (): void => {
+      document.removeEventListener("click", clickOutside);
+      input.removeEventListener("keydown", onKeyDown);
+    };
+    input.focus();
+    document.addEventListener("click", clickOutside);
+    input.addEventListener("keydown", onKeyDown);
+  });
+};
+
 function isActive(item: RenderedItem, parentElement?: Element): void {
   item.classList.add("active");
   if (item._listener) document.removeEventListener("click", item._listener);
@@ -46,4 +72,4 @@ function isActive(item: RenderedItem, parentElement?: Element): void {
   );
 }
 
-export { isActive, showToast };
+export { inputListener, isActive, showToast };

@@ -3,59 +3,58 @@ import type { Item } from "../../types/featureTypes.js";
 import type { ItemArray } from "../../types/storageTypes.js";
 import { renderItem } from "../../ui/itemRenderer.js";
 import { showToast } from "../../utils/events.js";
-import { createNewNote } from "../../utils/models.js";
+import { createNewToDo } from "../../utils/models.js";
 import { syncItemState } from "../../utils/stateUtils.js";
 import { removeValue, StorageKeys } from "../../utils/storageService.js";
 import { reloadCategoryList } from "../categories.js";
-import { getNoteFormData } from "./noteUtils.js";
+import { getToDoFormData } from "./todoUtils.js";
 
-const handleNoteSave = (
+const handleToDoSave = (
   savedItemId: string | null,
   itemArr: ItemArray,
   selectedCategory: string,
 ): void => {
-  const formData = getNoteFormData();
+  const formData = getToDoFormData();
   if (!formData) return;
   if (savedItemId === null) {
-    const newNote = createNewNote(
-      "note",
+    const newToDo = createNewToDo(
+      "toDo",
       selectedCategory,
       formData.titleValue,
-      formData.noteDataToArr,
+      formData.data,
     );
-    renderItem(newNote);
-    showToast("New note was created");
+    renderItem(newToDo);
+    showToast("New ToDo-list was created");
   } else {
-    updateExistingNote(savedItemId, itemArr, selectedCategory, formData);
+    updateExistingToDo(savedItemId, itemArr, selectedCategory, formData);
   }
   setActiveCategory(selectedCategory);
-  removeValue(StorageKeys.TEMP_NOTE);
+  removeValue(StorageKeys.TEMP_TODO);
   setTimeout(() => {
     reloadCategoryList();
   }, 0);
 };
 
-const updateExistingNote = (
+const updateExistingToDo = (
   savedItemId: string,
   itemArr: ItemArray,
   selectedCategory: string,
-  formData: ReturnType<typeof getNoteFormData>,
-) => {
-  console.log("selectedCategory in updateExistingNote:", selectedCategory);
+  formData: ReturnType<typeof getToDoFormData>,
+): void => {
   if (!formData) return;
   const savedItem: Item | undefined = itemArr.find(
     (item) => item.id === savedItemId,
   );
-  if (savedItem && savedItem.type === "note") {
+  if (savedItem && savedItem.type === "toDo") {
     const updatedItem = {
       ...savedItem,
       title: formData.titleValue,
-      data: formData.noteDataToArr,
+      data: formData.data,
       category: selectedCategory,
     };
     syncItemState(savedItemId, updatedItem);
-    showToast("Note was saved");
+    showToast("ToDo-list was saved");
   }
 };
 
-export { handleNoteSave };
+export { handleToDoSave };

@@ -2,17 +2,14 @@ button,
 select,
 input {
   cursor: pointer;
-  background: none;
-  color: var(--text-muted);
+  background: var(--btn-bg);
+  color: var(--btn-text);
   border: 1px solid var(--btn-outline);
   transition:
     background-color 0.1s ease,
     box-shadow 0.1s ease;
   font: inherit;
   font-size: 15px;
-  height: 30px;
-  width: 30px;
-  border-radius: 15px;
 }
 
 input:hover,
@@ -25,29 +22,56 @@ button:focus {
 button:hover,
 select:hover,
 input:hover {
-  background-color: var(--accent-hover);
+  background-color: var(--btn-hover);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: box-shadow 0.3s ease-in-out;
-}
-
-input:focus,
-input:hover {
-  cursor: auto;
-  background-color: var(--text-main);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  outline: none;
 }
 
 .button-collection-modal {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .button-collection {
-  margin: 1.5rem;
+  margin-top: 1.5rem;
   display: flex;
   align-items: center;
+}
+
+.category-btn,
+.category-input {
+  border-radius: 10px;
+  height: 40px;
+  padding: 6px 12px;
+  box-sizing: border-box;
+  text-align: left;
+  margin-left: 1.6rem;
+  background-color: var(--btn-bg);
+  color: var(--btn-text);
+  width: 177px;
+  border-radius: 5px;
+  box-sizing: border-box;
+  display: inline-block;
+  transition: padding 0.2s ease-in-out;
+}
+
+.category-input:hover {
+  background: var(--btn-hover);
+}
+
+.category-input::placeholder {
+  color: var(--text-muted);
+  transition: padding 0.2s ease-in-out;
+}
+
+.toggle-btn {
+  border-radius: 18px;
+  max-width: 35px;
+  max-height: 35px;
+  padding: 8px;
+  margin: 5px;
 }
 
 .input-wrapper {
@@ -74,13 +98,56 @@ input:hover {
   opacity: 1;
 }
 
+.dark-mode-btn {
+  border-radius: 20px;
+  width: 40px;
+  height: 40px;
+  padding: 11px;
+  margin-right: 20px;
+}
+
+.showModal-btn {
+  width: 150px;
+  height: 40px;
+  border-radius: 20px;
+  margin: 10px;
+}
+
 .closeModal-btn {
-  position: absolute;
-  top: 20px;
-  right: 10px;
-  width: 35px;
+  width: 100px;
   height: 35px;
   border-radius: 18px;
+  margin: 10px;
+}
+
+.contact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 5px;
+  height: 40px;
+  width: 40px;
+  border-radius: 20px;
+}
+
+.category-select {
+  width: 150px;
+  height: 35px;
+  border-radius: 10px;
+  margin: 10px;
+  background-color: var(--btn-bg);
+  color: var(--btn-text);
+}
+
+.category-select:hover {
+  background-color: var(--btn-hover);
+  transition: 0.1s ease-in-out;
+}
+
+.switch {
+  visibility: visible;
+  margin-top: 28px;
+  display: inline-block;
 }
 
 .hidden {
@@ -88,11 +155,122 @@ input:hover {
   display: none;
 }
 
-.settings-btn {
+.switch-checkbox {
+  display: none;
+}
+
+.switch-btn {
+  width: 50px;
+  height: 25px;
+  background-color: var(--btn-hover);
+  border: 2px solid var(--btn-border);
+  border-radius: 12px;
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+}
+
+.switch input:checked + .switch-btn {
+  background-color: var(--active-bg);
+}
+
+.switch-btn::after {
+  content: "";
+  width: 21px;
+  height: 21px;
+  background: var(--bg-dark);
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: 0.2s;
+}
+
+.switch input:checked + .switch-btn::after {
+  left: 27px;
+}
+
+.delete-btn,
+.task-delete-btn {
   display: flex;
+  align-items: center;
+  justify-content: center;
   height: 35px;
   width: 35px;
+  margin: 10px;
   border-radius: 18px;
+}
+
+.add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 55px;
+  height: 35px;
+  border-radius: 18px;
+}
+
+.task-delete-btn {
+  position: absolute;
+  right: 0;
+  border: 1px solid var(--btn-border);
+  z-index: 10;
+  background-color: var(--btn-border);
+}
+
+.todo-btn {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border: 1px solid var(--btn-outline);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font: inherit;
+}
+
+.todo-btn:hover {
+  background: var(--btn-hover);
+}
+.todo-btn:active {
+  transform: translateY(1px);
+}
+.todo-btn:focus {
+  outline: none;
+}
+
+.info-btn {
+  display: flex;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  height: 40px;
+  width: 40px;
+  border-radius: 25px;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.deleteNoteItem-btn[data-status="success"] {
+  background-color: var(--btn-border);
+}
+.deleteCategoryItem-btn[data-status="success"] {
+  background-color: var(--btn-border);
+}
+
+@media screen and (max-width: 480px) {
+  .button-collection {
+    margin: 0;
+  }
+  .deleteNoteItem-btn[data-status="success"] {
+    margin-top: -15px;
+  }
+  .deleteCategoryItem-btn[data-status="success"] {
+    margin-top: 10px;
+  }
 }

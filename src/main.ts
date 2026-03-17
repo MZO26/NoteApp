@@ -1,64 +1,23 @@
-import { initEditor } from "./features/editor.js";
-import { openModal } from "./ui/renderModalUI.js";
-import { getElement } from "./utils/helpers.js";
+import {
+  categoryToBeRendered,
+  defaultCategory,
+  reloadCategoryList,
+} from "./features/categories.js";
+import {
+  applyMode,
+  registerDocumentHandlers,
+} from "./handlers/documentHandlers.js";
+import { registerModalHandlers } from "./handlers/modalHandlers.js";
+import type { CategoryArray } from "./types/storageTypes.js";
+import { getValue, StorageKeys } from "./utils/storageService.js";
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const settingsBtn = getElement<HTMLButtonElement>(".settings-btn");
-  settingsBtn.addEventListener("click", () => {
-    openModal();
-  });
-  const darkModeBtn = getElement<HTMLButtonElement>(".dark-mode-btn");
-
-  darkModeBtn?.addEventListener("click", () => {
-    const currentTheme = document.documentElement.getAttribute("data-theme");
-
-    if (currentTheme === "dark") {
-      document.documentElement.removeAttribute("data-theme");
-    } else {
-      document.documentElement.setAttribute("data-theme", "dark");
-    }
-  });
-  try {
-    await initEditor();
-    console.log("Editor initialized successfully");
-  } catch (error) {
-    console.error("Error initializing editor:", error);
+document.addEventListener("DOMContentLoaded", () => {
+  registerDocumentHandlers();
+  registerModalHandlers();
+  const categoryArr: CategoryArray = getValue(StorageKeys.CATEGORIES);
+  reloadCategoryList(categoryArr);
+  if (categoryArr.length === 0) {
+    categoryToBeRendered(defaultCategory);
   }
-  function updateDateTime() {
-    const displayElement = document.getElementById("datetime-display");
-
-    if (displayElement) {
-      const now = new Date();
-
-      const dateOptions: Intl.DateTimeFormatOptions = {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      };
-      const dateString = now.toLocaleDateString("de-DE", dateOptions);
-      const timeOptions: Intl.DateTimeFormatOptions = {
-        hour: "2-digit",
-        minute: "2-digit",
-      };
-      const timeString = now.toLocaleTimeString("de-DE", timeOptions);
-      displayElement.textContent = `${dateString} - ${timeString}`;
-    }
-  }
-  updateDateTime();
-  const settingItems =
-    document.querySelectorAll<HTMLButtonElement>(".settings-nav-item");
-  const panels = document.querySelectorAll<HTMLDivElement>(".settings-panel");
-
-  settingItems.forEach((item) => {
-    item.addEventListener("click", () => {
-      const target = item.dataset["section"];
-
-      settingItems.forEach((i) => i.classList.remove("active"));
-      panels.forEach((p) => p.classList.remove("active"));
-
-      item.classList.add("active");
-      document.getElementById(target!)?.classList.add("active");
-    });
-  });
-  setInterval(updateDateTime, 60000);
+  applyMode();
 });

@@ -1,3 +1,5 @@
+import type { Note, ToDo } from "../utils/classes.js";
+
 type RenderedItem = HTMLDivElement & {
   _listener?: EventListener | null;
 };
@@ -5,6 +7,8 @@ type RenderedItem = HTMLDivElement & {
 type AddToDoButton = HTMLButtonElement & {
   _addHandlerRef?: EventListener | null;
 };
+
+type Item = Note | ToDo;
 
 type ToDoInterfaceElements = {
   todoDiv: HTMLDivElement;
@@ -21,4 +25,10 @@ type TaskItems = {
   taskDeleteBtn: HTMLButtonElement;
 };
 
-export type { AddToDoButton, RenderedItem, TaskItems, ToDoInterfaceElements };
+export type {
+  AddToDoButton,
+  Item,
+  RenderedItem,
+  TaskItems,
+  ToDoInterfaceElements,
+};
